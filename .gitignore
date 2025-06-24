@@ -1,83 +1,68 @@
 # ===============================
-# 全体共通の設定（エディタ・OSなど）
+# Dependencies
+# ===============================
+**/node_modules/
+**/venv/
+**/.venv/
+
+# ===============================
+# Environment
+# ===============================
+**/.env
+**/.env.*
+!**/.env.example
+
+# ===============================
+# Python
+# ===============================
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+
+# ===============================
+# Database
+# ===============================
+**/db-data/
+**/prisma/migrations/
+**/prisma/generated/
+**/*.sqlite
+**/*.db
+
+# ===============================
+# Build outputs
+# ===============================
+**/.next/
+**/build/
+**/dist/
+
+# ===============================
+# Firebase
+# ===============================
+**/serviceAccountKey.json
+
+# ===============================
+# TypeScript
+# ===============================
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# ===============================
+# IDE
 # ===============================
 .vscode/
-.idea/
+**/.vscode/
+
+# ===============================
+# OS generated
+# ===============================
 .DS_Store
+**/.DS_Store
+*.pem
 Thumbs.db
 
 # ===============================
-# 共通のログ・環境変数ファイル
+# Testing
 # ===============================
-*.log
-.env
-*.env
-
-# ===============================
-# フロントエンド用（Next.js, Yarn, etc）
-# ===============================
-
-# 依存関係・ビルド関連
-/front/node_modules/
-/front/.pnp
-/front/.next/
-/front/out/
-/front/build
-
-# yarn 関連
-/front/.yarn/*
-!/front/.yarn/patches
-!/front/.yarn/plugins
-!/front/.yarn/releases
-!/front/.yarn/versions
-/front/.tsbuildinfo
-/front/next-env.d.ts
-
-# テスト・ログ
-/front/coverage
-/front/npm-debug.log*
-/front/yarn-debug.log*
-/front/yarn-error.log*
-/front/.pnpm-debug.log*
-
-# env ファイル
-/front/.env*
-/front/.env.frontend
-
-# vercel
-/front/.vercel
-
-# misc
-/front/*.pem
-
-# ===============================
-# バックエンド用（Python, FastAPI, Prisma）
-# ===============================
-
-# Python キャッシュ
-/back/__pycache__/
-/back/*.py[cod]
-/back/*$py.class
-
-# 仮想環境
-/back/.venv/
-/back/env/
-/back/venv/
-
-# 環境変数ファイル
-/back/.env
-/back/.env.backend
-
-# ログ・DB
-/back/*.log
-/back/*.sqlite3
-
-# 型チェック
-/back/.mypy_cache/
-/back/.pyright/
-
-# Prisma
-/back/prisma/migrations/
-
-# OS
-/back/.DS_Store
+**/coverage/
+**/.coverage
+**/htmlcov/
