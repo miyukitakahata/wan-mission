@@ -7,14 +7,17 @@
 #     return {"message": "Hello from FastAPI!"}
 
 from fastapi import FastAPI
+from routers.user import user_router
 from prisma import Prisma
 
 app = FastAPI()
 db = Prisma()
 
+app.include_router(user_router)
+
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"message": "Hello from FastAPI!"}
 
 
