@@ -62,7 +62,7 @@ async def create_users(user_data: UserCreateRequest):
     # すでに登録済みのFirebase UIDか確認
     existing_user = await db.users.find_unique(where={"firebase_uid": user_data.firebase_uid})
     if existing_user:
-        await db.disconnect()
+        await db.disconnect()  # DBと繋がる
         raise HTTPException(status_code=409, detail="User already exists")
     
     # 新規登録

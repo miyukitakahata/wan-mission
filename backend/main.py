@@ -8,12 +8,15 @@
 
 from fastapi import FastAPI
 from routers.user import user_router
+from routers.care_settings import care_settings_router
 from prisma import Prisma
 
 app = FastAPI()
 db = Prisma()
 
 app.include_router(user_router)
+
+app.include_router(care_settings_router)
 
 
 @app.get("/")
