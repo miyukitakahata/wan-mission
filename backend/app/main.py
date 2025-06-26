@@ -9,6 +9,7 @@
 from fastapi import FastAPI
 from app.routers.user import user_router
 from app.routers.care_settings import care_settings_router
+from app.routers.care_logs import care_logs_router
 from prisma import Prisma
 
 app = FastAPI()
@@ -17,6 +18,8 @@ db = Prisma()
 app.include_router(user_router)
 
 app.include_router(care_settings_router)
+
+app.include_router(care_logs_router)
 
 
 @app.get("/")
