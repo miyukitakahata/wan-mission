@@ -1,25 +1,25 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Trophy, Star, Sparkles } from "lucide-react"
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Trophy, Star, Sparkles } from 'lucide-react';
 
 export default function GoalClearPage() {
-  const router = useRouter()
-  const [showAnimation, setShowAnimation] = useState(false)
+  const router = useRouter();
+  const [showAnimation, setShowAnimation] = useState(false);
 
   useEffect(() => {
-    setShowAnimation(true)
+    setShowAnimation(true);
 
     // 5秒後に自動でダッシュボードに戻る
     const timeout = setTimeout(() => {
-      router.push("/dashboard")
-    }, 5000)
+      router.push('/dashboard');
+    }, 5000);
 
-    return () => clearTimeout(timeout)
-  }, [router])
+    return () => clearTimeout(timeout);
+  }, [router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-yellow-50 to-orange-100 px-6 py-8">
@@ -43,7 +43,7 @@ export default function GoalClearPage() {
           )}
 
           <div
-            className={`transform transition-all duration-1000 ${showAnimation ? "scale-110 rotate-12" : "scale-100"}`}
+            className={`transform transition-all duration-1000 ${showAnimation ? 'scale-110 rotate-12' : 'scale-100'}`}
           >
             <Trophy className="h-24 w-24 text-yellow-500 mx-auto mb-4" />
           </div>
@@ -54,11 +54,16 @@ export default function GoalClearPage() {
             <div className="space-y-4">
               <div className="flex justify-center space-x-1 mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />
+                  <Star
+                    key={i}
+                    className="h-6 w-6 text-yellow-400 fill-current"
+                  />
                 ))}
               </div>
 
-              <h1 className="text-3xl font-bold text-orange-800 mb-2">🎉 目標クリア！ 🎉</h1>
+              <h1 className="text-3xl font-bold text-orange-800 mb-2">
+                🎉 目標クリア！ 🎉
+              </h1>
 
               <p className="text-lg text-gray-700 mb-4">
                 おめでとうございます！
@@ -76,7 +81,7 @@ export default function GoalClearPage() {
 
               <Button
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-full text-lg font-bold"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push('/dashboard')}
               >
                 続ける
               </Button>
@@ -87,5 +92,5 @@ export default function GoalClearPage() {
         <p className="text-sm text-gray-600 mt-4">5秒後に自動的に戻ります...</p>
       </div>
     </div>
-  )
+  );
 }

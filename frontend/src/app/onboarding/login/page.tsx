@@ -60,17 +60,26 @@ export default function OnboardingLoginPage() {
         </CardHeader>
         <CardContent className="pt-4">
           {/* ユーザータイプ選択 */}
-          <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+          <div className="relative mb-6 bg-gray-100 rounded-lg p-1 overflow-hidden">
+            <div
+              className={`absolute bottom-0 left-0 h-1 w-1/2 bg-black rounded transition-transform duration-300 ${
+                isNewUser ? 'translate-x-0' : 'translate-x-full'
+              }`}
+            />
             <Button
-              variant={isNewUser ? 'default' : 'ghost'}
-              className="flex-1 text-sm"
+              variant="ghost"
+              className={`flex-1 text-sm z-10 relative ${
+                isNewUser ? 'text-black font-bold' : 'text-muted-foreground'
+              }`}
               onClick={() => setIsNewUser(true)}
             >
               新規登録
             </Button>
             <Button
-              variant={!isNewUser ? 'default' : 'ghost'}
-              className="flex-1 text-sm"
+              variant="ghost"
+              className={`flex-1 text-sm z-10 relative ${
+                !isNewUser ? 'text-black font-bold' : 'text-muted-foreground'
+              }`}
               onClick={() => setIsNewUser(false)}
             >
               ログイン

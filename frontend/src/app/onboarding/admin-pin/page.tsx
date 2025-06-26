@@ -1,46 +1,46 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Shield, Eye, EyeOff, Lock } from "lucide-react"; // lucide-reactアイコン
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Shield, Eye, EyeOff, Lock } from 'lucide-react'; // lucide-reactアイコン
 
 export default function AdminPinPage() {
   // DB：care_settingのcare_passwordに対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
-  const [adminPin, setAdminPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
+  const [adminPin, setAdminPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false); // 確認用PINコードの表示／非表示を切り替えるための状態
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleSubmit = () => {
     if (!adminPin) {
-      setError("管理者PINを入力してください");
+      setError('管理者PINを入力してください');
       return;
     }
 
     if (adminPin.length !== 4) {
-      setError("PINは4桁で入力してください");
+      setError('PINは4桁で入力してください');
       return;
     }
 
     if (!/^\d{4}$/.test(adminPin)) {
-      setError("PINは数字のみで入力してください");
+      setError('PINは数字のみで入力してください');
       return;
     }
 
     if (adminPin !== confirmPin) {
-      setError("PINが一致しません");
+      setError('PINが一致しません');
       return;
     }
 
@@ -49,13 +49,13 @@ export default function AdminPinPage() {
       adminPin,
       createdAt: new Date().toISOString(),
     };
-    localStorage.setItem("adminSettings", JSON.stringify(adminSettings));
+    localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
 
     // お世話開始時間を記録
-    localStorage.setItem("lastCareTime", new Date().toISOString());
+    localStorage.setItem('lastCareTime', new Date().toISOString());
 
     // ローディング画面に遷移
-    router.push("/loading-screen");
+    router.push('/loading-screen');
   };
 
   const isFormComplete =
@@ -104,13 +104,13 @@ export default function AdminPinPage() {
               <div className="relative">
                 <Input
                   id="adminPin"
-                  type={showPin ? "text" : "password"}
+                  type={showPin ? 'text' : 'password'}
                   placeholder="••••"
                   value={adminPin}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
                     setAdminPin(value);
-                    setError("");
+                    setError('');
                   }}
                   className="text-base pr-10 text-center text-2xl tracking-widest"
                   maxLength={4}
@@ -123,7 +123,7 @@ export default function AdminPinPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPin(!showPin)}
-                  aria-label={showPin ? "PINを隠す" : "PINを表示"}
+                  aria-label={showPin ? 'PINを隠す' : 'PINを表示'}
                 >
                   {showPin ? (
                     <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -148,13 +148,13 @@ export default function AdminPinPage() {
               <div className="relative">
                 <Input
                   id="confirmPin"
-                  type={showConfirmPin ? "text" : "password"}
+                  type={showConfirmPin ? 'text' : 'password'}
                   placeholder="••••"
                   value={confirmPin}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
                     setConfirmPin(value);
-                    setError("");
+                    setError('');
                   }}
                   className="text-base pr-10 text-center text-2xl tracking-widest"
                   maxLength={4}
@@ -167,7 +167,7 @@ export default function AdminPinPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowConfirmPin(!showConfirmPin)}
-                  aria-label={showConfirmPin ? "PINを隠す" : "PINを表示"}
+                  aria-label={showConfirmPin ? 'PINを隠す' : 'PINを表示'}
                 >
                   {showConfirmPin ? (
                     <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -199,7 +199,7 @@ export default function AdminPinPage() {
                 <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
                   <p className="text-xs text-yellow-800">
-                    <strong>重要:</strong>{" "}
+                    <strong>重要:</strong>{' '}
                     このPINは忘れないようにメモしておいてください。
                     管理者画面での設定変更、ゲームリセット、統計確認などに必要です。
                   </p>
@@ -211,7 +211,7 @@ export default function AdminPinPage() {
         <CardFooter className="flex justify-between pb-6">
           <Button
             variant="outline"
-            onClick={() => router.push("/onboarding/third-step")}
+            onClick={() => router.push('/onboarding/third-step')}
             className="w-1/3 text-sm py-3"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

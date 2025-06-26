@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Heart,
   Footprints,
@@ -12,7 +12,7 @@ import {
   Coffee,
   Utensils,
   Star,
-} from "lucide-react";
+} from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function DashboardPage() {
   useEffect(() => {
     // ローカルストレージから完了済みミッションを読み込み// TODO_DBからデータを取得
     const savedMissions = JSON.parse(
-      localStorage.getItem("completedMissions") || "[]"
+      localStorage.getItem('completedMissions') || '[]'
     );
     setCompletedMissions(savedMissions);
   }, []);
@@ -29,34 +29,34 @@ export default function DashboardPage() {
   // 今日のお世話ミッション
   const missions = [
     {
-      id: "morning-food",
-      name: "朝ごはんをあげる",
+      id: 'morning-food',
+      name: '朝ごはんをあげる',
       icon: Coffee,
       completed: false,
     },
     {
-      id: "evening-food",
-      name: "夕ご飯をあげる",
+      id: 'evening-food',
+      name: '夕ご飯をあげる',
       icon: Utensils,
       completed: false,
     },
-    { id: "walk", name: "散歩に行く", icon: Footprints, completed: false },
+    { id: 'walk', name: '散歩に行く', icon: Footprints, completed: false },
   ];
 
   // わんちゃんのひとこと
   const dogMessages = [
-    "今日も一緒に遊ぼうね！",
-    "お腹すいたワン！",
-    "散歩に行きたいワン〜",
-    "ありがとうワン！",
-    "元気いっぱいだワン！",
-    "撫でてくれてありがとうワン♪",
-    "今日はいい天気だワン！",
-    "一緒にいると楽しいワン〜",
-    "お世話してくれて嬉しいワン！",
-    "遊ぼうワン！ワン！",
-    "大好きだワン♡",
-    "今度はどこに行くワン？",
+    '今日も一緒に遊ぼうね！',
+    'お腹すいたワン！',
+    '散歩に行きたいワン〜',
+    'ありがとうワン！',
+    '元気いっぱいだワン！',
+    '撫でてくれてありがとうワン♪',
+    '今日はいい天気だワン！',
+    '一緒にいると楽しいワン〜',
+    'お世話してくれて嬉しいワン！',
+    '遊ぼうワン！ワン！',
+    '大好きだワン♡',
+    '今度はどこに行くワン？',
   ];
 
   const [currentMessage, setCurrentMessage] = useState(dogMessages[0]);
@@ -67,8 +67,8 @@ export default function DashboardPage() {
   };
 
   const handleMissionComplete = (missionId: string) => {
-    if (missionId === "walk") {
-      router.push("/walk");
+    if (missionId === 'walk') {
+      router.push('/walk');
       return;
     }
 
@@ -85,7 +85,7 @@ export default function DashboardPage() {
           <Button
             variant="outline"
             className="flex flex-col items-center justify-center py-3 px-2 h-16"
-            onClick={() => router.push("/care-tasks")}
+            onClick={() => router.push('/care-tasks')}
           >
             <Heart className="h-5 w-5 mb-1" />
             <span className="text-xs">お世話</span>
@@ -93,7 +93,7 @@ export default function DashboardPage() {
           <Button
             variant="outline"
             className="flex flex-col items-center justify-center py-3 px-2 h-16"
-            onClick={() => router.push("/walk")}
+            onClick={() => router.push('/walk')}
           >
             <Footprints className="h-5 w-5 mb-1" />
             <span className="text-xs">お散歩</span>
@@ -101,7 +101,7 @@ export default function DashboardPage() {
           <Button
             variant="outline"
             className="flex flex-col items-center justify-center py-3 px-2 h-16"
-            onClick={() => router.push("/admin-login")}
+            onClick={() => router.push('/admin-login')}
           >
             <Settings className="h-5 w-5 mb-1" />
             <span className="text-xs">管理者</span>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
                       src="/images/cute-puppy.png"
                       alt="わんちゃん"
                       fill
-                      style={{ objectFit: "contain" }}
+                      style={{ objectFit: 'contain' }}
                       priority
                     />
                   </Button>
@@ -171,8 +171,8 @@ export default function DashboardPage() {
                       variant="ghost"
                       className={`w-full h-12 flex items-center justify-start text-left px-4 ${
                         isCompleted
-                          ? "bg-green-50 text-green-800"
-                          : "hover:bg-gray-50"
+                          ? 'bg-green-50 text-green-800'
+                          : 'hover:bg-gray-50'
                       }`}
                       onClick={() => handleMissionComplete(mission.id)}
                       disabled={isCompleted}

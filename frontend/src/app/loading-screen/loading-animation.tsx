@@ -1,31 +1,34 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react';
 
 interface LoadingAnimationProps {
-  size?: number
-  color?: string
+  size?: number;
+  color?: string;
 }
 
-export function LoadingAnimation({ size = 40, color = "#f97316" }: LoadingAnimationProps) {
-  const [rotation, setRotation] = useState(0)
+export function LoadingAnimation({
+  size = 40,
+  color = '#f97316',
+}: LoadingAnimationProps) {
+  const [rotation, setRotation] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setRotation((prev) => (prev + 15) % 360)
-    }, 50)
+      setRotation((prev) => (prev + 15) % 360);
+    }, 50);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   const pawPrints = Array(8)
     .fill(0)
     .map((_, i) => {
-      const angle = (i * 45 + rotation) % 360
-      const radian = (angle * Math.PI) / 180
-      const x = Math.cos(radian) * size
-      const y = Math.sin(radian) * size
-      const opacity = 0.3 + 0.7 * (1 - ((angle + 180) % 360) / 360)
+      const angle = (i * 45 + rotation) % 360;
+      const radian = (angle * Math.PI) / 180;
+      const x = Math.cos(radian) * size;
+      const y = Math.sin(radian) * size;
+      const opacity = 0.3 + 0.7 * (1 - ((angle + 180) % 360) / 360);
 
       return (
         <div
@@ -36,7 +39,13 @@ export function LoadingAnimation({ size = 40, color = "#f97316" }: LoadingAnimat
             opacity,
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
               fill={color}
@@ -59,12 +68,14 @@ export function LoadingAnimation({ size = 40, color = "#f97316" }: LoadingAnimat
             />
           </svg>
         </div>
-      )
-    })
+      );
+    });
 
   return (
     <div className="relative" style={{ width: size * 2.5, height: size * 2.5 }}>
-      <div className="absolute inset-0 flex items-center justify-center">{pawPrints}</div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        {pawPrints}
+      </div>
     </div>
-  )
+  );
 }

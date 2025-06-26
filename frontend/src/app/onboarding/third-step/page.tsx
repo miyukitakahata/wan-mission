@@ -1,74 +1,74 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   ArrowLeft,
   Calendar,
   Coffee,
   Utensils,
   Footprints,
-} from "lucide-react"; // lucide-reactアイコン
+} from 'lucide-react'; // lucide-reactアイコン
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 export default function CareSettingsPage() {
   // DB：care_settingテーブルに対応
   // あさごはん、夕ご飯時間修正必要
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [morningMealTime, setMorningMealTime] = useState("");
-  const [eveningMealTime, setEveningMealTime] = useState("");
-  const [walkTime, setWalkTime] = useState(""); // 開始日、終了日、朝ご飯、夜ごはん、散歩時間
-  const [error, setError] = useState("");
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [morningMealTime, setMorningMealTime] = useState('');
+  const [eveningMealTime, setEveningMealTime] = useState('');
+  const [walkTime, setWalkTime] = useState(''); // 開始日、終了日、朝ご飯、夜ごはん、散歩時間
+  const [error, setError] = useState('');
 
   // 今日の日付を取得（最小日付として使用）
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
 
   const handleSubmit = () => {
     if (!startDate) {
-      setError("お世話スタート日を選択してください");
+      setError('お世話スタート日を選択してください');
       return;
     }
 
     if (!endDate) {
-      setError("お世話終了日を選択してください");
+      setError('お世話終了日を選択してください');
       return;
     }
 
     if (new Date(startDate) > new Date(endDate)) {
-      setError("終了日はスタート日より後の日付を選択してください");
+      setError('終了日はスタート日より後の日付を選択してください');
       return;
     }
 
     if (!morningMealTime) {
-      setError("朝ごはんの時間を選択してください");
+      setError('朝ごはんの時間を選択してください');
       return;
     }
 
     if (!eveningMealTime) {
-      setError("夕ご飯の時間を選択してください");
+      setError('夕ご飯の時間を選択してください');
       return;
     }
 
     if (!walkTime) {
-      setError("お散歩時間を選択してください");
+      setError('お散歩時間を選択してください');
       return;
     }
 
@@ -80,13 +80,13 @@ export default function CareSettingsPage() {
       eveningMealTime,
       walkTime,
     };
-    localStorage.setItem("careSettings", JSON.stringify(careSettings));
+    localStorage.setItem('careSettings', JSON.stringify(careSettings));
 
     // お世話開始時間を記録
-    localStorage.setItem("lastCareTime", new Date().toISOString());
+    localStorage.setItem('lastCareTime', new Date().toISOString());
 
     // ローディング画面に遷移
-    router.push("/onboarding/admin-pin");
+    router.push('/onboarding/admin-pin');
   };
 
   const isFormComplete =
@@ -128,7 +128,7 @@ export default function CareSettingsPage() {
                   min={today}
                   onChange={(e) => {
                     setStartDate(e.target.value);
-                    setError("");
+                    setError('');
                   }}
                   className="text-base"
                 />
@@ -149,7 +149,7 @@ export default function CareSettingsPage() {
                   min={startDate || today}
                   onChange={(e) => {
                     setEndDate(e.target.value);
-                    setError("");
+                    setError('');
                   }}
                   className="text-base"
                 />
@@ -174,7 +174,7 @@ export default function CareSettingsPage() {
                   value={morningMealTime}
                   onValueChange={(value) => {
                     setMorningMealTime(value);
-                    setError("");
+                    setError('');
                   }}
                 >
                   <SelectTrigger id="morningMeal" className="text-base">
@@ -207,7 +207,7 @@ export default function CareSettingsPage() {
                   value={eveningMealTime}
                   onValueChange={(value) => {
                     setEveningMealTime(value);
-                    setError("");
+                    setError('');
                   }}
                 >
                   <SelectTrigger id="eveningMeal" className="text-base">
@@ -240,7 +240,7 @@ export default function CareSettingsPage() {
                   value={walkTime}
                   onValueChange={(value) => {
                     setWalkTime(value);
-                    setError("");
+                    setError('');
                   }}
                 >
                   <SelectTrigger id="walkTime" className="text-base">
@@ -280,7 +280,7 @@ export default function CareSettingsPage() {
         <CardFooter className="flex justify-between pb-6">
           <Button
             variant="outline"
-            onClick={() => router.push("/onboarding/name")}
+            onClick={() => router.push('/onboarding/name')}
             className="w-1/3 text-sm py-3"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

@@ -1,27 +1,27 @@
-"use client";
+'use client';
 
-import type React from "react";
+import type React from 'react';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Users, Heart } from "lucide-react"; // lucide-reactアイコン
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Users, Heart } from 'lucide-react'; // lucide-reactアイコン
 
 export default function NamePage() {
   // DB：care_settingsテーブルに対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
-  const [parentName, setParentName] = useState("");
-  const [childName, setChildName] = useState("");
-  const [petName, setPetName] = useState(""); // 親名前、子ども名前、ペット名前未入力
+  const [parentName, setParentName] = useState('');
+  const [childName, setChildName] = useState('');
+  const [petName, setPetName] = useState(''); // 親名前、子ども名前、ペット名前未入力
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,9 +32,9 @@ export default function NamePage() {
         childName: childName.trim(),
         petName: petName.trim(),
       };
-      localStorage.setItem("familyInfo", JSON.stringify(familyData));
+      localStorage.setItem('familyInfo', JSON.stringify(familyData));
 
-      router.push("/onboarding/third-step");
+      router.push('/onboarding/third-step');
     }
   };
 
@@ -117,7 +117,7 @@ export default function NamePage() {
         <CardFooter className="flex justify-between pb-6">
           <Button
             variant="outline"
-            onClick={() => router.push("/onboarding/login")}
+            onClick={() => router.push('/onboarding/login')}
             className="w-1/3 text-sm py-3"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

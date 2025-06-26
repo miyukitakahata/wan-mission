@@ -1,18 +1,18 @@
-"use client";
+'use client';
 // 今追加できていないページ
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, Heart } from "lucide-react"; // lucide-reactアイコン
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, FileText, Heart } from 'lucide-react'; // lucide-reactアイコン
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function ReflectionWritingPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
-  const [reflection, setReflection] = useState("");
-  const [title, setTitle] = useState("");
+  const [reflection, setReflection] = useState('');
+  const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -24,32 +24,32 @@ export default function ReflectionWritingPage() {
         id: Date.now(),
         title,
         content: reflection,
-        date: new Date().toISOString().split("T")[0],
+        date: new Date().toISOString().split('T')[0],
       };
 
       // ローカルストレージに保存
       const existingReflections = JSON.parse(
-        localStorage.getItem("reflections") || "[]"
+        localStorage.getItem('reflections') || '[]'
       );
       existingReflections.push(reflectionData);
-      localStorage.setItem("reflections", JSON.stringify(existingReflections));
+      localStorage.setItem('reflections', JSON.stringify(existingReflections));
 
       // お世話の状態をリセット（わんちゃんが戻ってくる）
-      localStorage.setItem("lastCareTime", new Date().toISOString());
-      localStorage.setItem("dogReturned", "true");
+      localStorage.setItem('lastCareTime', new Date().toISOString());
+      localStorage.setItem('dogReturned', 'true');
 
       // 少し待ってから戻ってくる演出画面に遷移
       setTimeout(() => {
-        router.push("/welcome-back");
+        router.push('/welcome-back');
       }, 1000);
     }
   };
 
   const reflectionPrompts = [
-    "わんちゃんにどんなことをしてあげられなかったですか？",
-    "わんちゃんはどんな気持ちだったと思いますか？",
-    "次回はどのようにお世話をしたいですか？",
-    "わんちゃんに謝りたいことはありますか？",
+    'わんちゃんにどんなことをしてあげられなかったですか？',
+    'わんちゃんはどんな気持ちだったと思いますか？',
+    '次回はどのようにお世話をしたいですか？',
+    'わんちゃんに謝りたいことはありますか？',
   ];
 
   return (
@@ -152,14 +152,14 @@ export default function ReflectionWritingPage() {
                 わんちゃんを呼んでいます...
               </div>
             ) : (
-              "反省文を保存する"
+              '反省文を保存する'
             )}
           </Button>
 
           <Button
             variant="outline"
             className="w-full py-3 sm:py-4 text-sm sm:text-base rounded-full"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push('/dashboard')}
             disabled={isSubmitting}
           >
             後で書く
