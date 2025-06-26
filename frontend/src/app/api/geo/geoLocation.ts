@@ -1,0 +1,1 @@
+//Geolocation取得ロジック
