@@ -31,6 +31,9 @@
 **/*.tsbuildinfo
 **/next-env.d.ts
 
+# IDE
+**/.vscode/
+
 # OS generated
 **/.DS_Store
 *.pem
