@@ -1,5 +1,6 @@
 'use client';
-//あってもいいけど操作不要ページ
+
+// あってもいいけど操作不要ページ
 import type React from 'react';
 
 import { useState } from 'react';
