@@ -1,8 +1,6 @@
-export default nextConfig;
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // config options here
-}
+  // あなたの設定
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

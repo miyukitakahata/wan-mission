@@ -1,26 +1,4 @@
-version: "3.9"
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./frontend/.env.frontend
-    depends_on:
-      - backend
-
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
-      - "5555:5555"
-    volumes:
-      - ./backend:/app
-    env_file:
-      - ./backend/.env.backend
-    depends_on:
-      - db
-
   db:
     image: postgres:15
     container_name: myapp_db
@@ -30,7 +8,7 @@ services:
       POSTGRES_DB: myapp_db
     restart: always
     ports:
-      - "5433:5432"
+      - "5433:5432" # ホスト5433→コンテナ5432
     volumes:
       - pgdata:/var/lib/postgresql/data
 
