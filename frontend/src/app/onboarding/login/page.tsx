@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
-import type React from "react";
+import type React from 'react';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Mail, Lock, Eye, EyeOff, Dog } from "lucide-react"; // lucide-reactアイコン
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Mail, Lock, Eye, EyeOff, Dog } from 'lucide-react'; // lucide-reactアイコン
 
 export default function OnboardingLoginPage() {
   // DB：usersテーブルに対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
-  const [email, setEmail] = useState("");
-  const [pin, setPin] = useState(""); //email,pin未入力
+  const [email, setEmail] = useState('');
+  const [pin, setPin] = useState(''); //email,pin未入力
   const [showPin, setShowPin] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(true); 
+  const [isNewUser, setIsNewUser] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,14 +33,14 @@ export default function OnboardingLoginPage() {
         pin,
         createdAt: new Date().toISOString(),
       };
-      localStorage.setItem("loginSettings", JSON.stringify(loginSettings));
+      localStorage.setItem('loginSettings', JSON.stringify(loginSettings));
 
       if (isNewUser) {
         // 新規ユーザーの場合、ご家族の情報入力へ
-        router.push("/onboarding/name");
+        router.push('/onboarding/name');
       } else {
         // 既存ユーザーの場合、ダッシュボードへ
-        router.push("/dashboard");
+        router.push('/dashboard');
       }
     }
   };
@@ -62,14 +62,14 @@ export default function OnboardingLoginPage() {
           {/* ユーザータイプ選択 */}
           <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
             <Button
-              variant={isNewUser ? "default" : "ghost"}
+              variant={isNewUser ? 'default' : 'ghost'}
               className="flex-1 text-sm"
               onClick={() => setIsNewUser(true)}
             >
               新規登録
             </Button>
             <Button
-              variant={!isNewUser ? "default" : "ghost"}
+              variant={!isNewUser ? 'default' : 'ghost'}
               className="flex-1 text-sm"
               onClick={() => setIsNewUser(false)}
             >
@@ -107,11 +107,11 @@ export default function OnboardingLoginPage() {
               <div className="relative">
                 <Input
                   id="pin"
-                  type={showPin ? "text" : "password"}
+                  type={showPin ? 'text' : 'password'}
                   placeholder="••••"
                   value={pin}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
                     setPin(value);
                   }}
                   required
@@ -126,7 +126,7 @@ export default function OnboardingLoginPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPin(!showPin)}
-                  aria-label={showPin ? "PINを隠す" : "PINを表示"}
+                  aria-label={showPin ? 'PINを隠す' : 'PINを表示'}
                 >
                   {showPin ? (
                     <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -158,7 +158,7 @@ export default function OnboardingLoginPage() {
               className="w-full bg-orange-500 hover:bg-orange-600 text-base py-3"
               disabled={!email || !pin || pin.length !== 4}
             >
-              {isNewUser ? "新規登録して続ける" : "ログインして続ける"}
+              {isNewUser ? '新規登録して続ける' : 'ログインして続ける'}
             </Button>
           </form>
 
@@ -174,7 +174,7 @@ export default function OnboardingLoginPage() {
         <CardFooter className="flex justify-between pb-6">
           <Button
             variant="outline"
-            onClick={() => router.push("/onboarding/welcome")}
+            onClick={() => router.push('/onboarding/welcome')}
             className="w-1/3 text-sm py-3"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
