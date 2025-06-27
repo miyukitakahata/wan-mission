@@ -1,0 +1,190 @@
+'use client';
+
+import type React from 'react';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const [pin, setPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
+  const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!pin) {
+      setError('PINを入力してください');
+      return;
+    }
+
+    if (pin.length !== 4) {
+      setError('PINは4桁で入力してください');
+      return;
+    }
+
+    // ローカルストレージから管理者PINとログインPINを取得
+    // TODO_DBから取得したデータを表示するページ
+    const adminSettings = JSON.parse(
+      localStorage.getItem('adminSettings') || '{}'
+    );
+    const loginSettings = JSON.parse(
+      localStorage.getItem('loginSettings') || '{}'
+    );
+
+    const adminPin = adminSettings.adminPin;
+    const loginPin = loginSettings.pin;
+
+    // どちらのPINも設定されていない場合
+    if (!adminPin && !loginPin) {
+      setError('認証用のPINが設定されていません');
+      return;
+    }
+
+    // 管理者PINまたはログインPINのいずれかと一致するかチェック
+    const isValidPin =
+      (adminPin && pin === adminPin) || (loginPin && pin === loginPin);
+
+    if (isValidPin) {
+      // PIN認証成功
+      router.push('/admin');
+    } else {
+      // PIN認証失敗
+      setAttempts((prev) => prev + 1);
+      setError('PINが正しくありません');
+      setPin('');
+
+      // 3回失敗したらダッシュボードに戻る
+      if (attempts >= 2) {
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 2000);
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="flex flex-col items-center space-y-2 pb-2">
+          <div className="h-16 w-16 rounded-full bg-orange-100 flex items-center justify-center">
+            <Shield className="h-10 w-10 text-orange-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-center">管理者認証</h1>
+          <p className="text-center text-base text-muted-foreground">
+            PINを入力してください
+          </p>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label
+                htmlFor="pin"
+                className="text-base flex items-center gap-2"
+              >
+                <Shield className="h-4 w-4" />
+                PIN（4桁）
+              </Label>
+              <div className="relative">
+                <Input
+                  id="pin"
+                  type={showPin ? 'text' : 'password'}
+                  placeholder="••••"
+                  value={pin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setPin(value);
+                    setError('');
+                  }}
+                  className="text-base pr-10 text-center text-2xl tracking-widest"
+                  maxLength={4}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoFocus
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPin(!showPin)}
+                  aria-label={showPin ? 'PINを隠す' : 'PINを表示'}
+                >
+                  {showPin ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-red-600">{error}</p>
+                    {attempts > 0 && attempts < 3 && (
+                      <p className="text-xs text-red-500 mt-1">
+                        残り試行回数: {3 - attempts}回
+                      </p>
+                    )}
+                    {attempts >= 2 && (
+                      <p className="text-xs text-red-500 mt-1">
+                        試行回数を超過しました。ダッシュボードに戻ります...
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-base py-3"
+              disabled={!pin || pin.length !== 4 || attempts >= 3}
+            >
+              管理者画面へ
+            </Button>
+          </form>
+
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start space-x-2">
+              <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs text-blue-800">
+                  管理者PINまたはログイン時に設定したPINで認証できます。
+                  管理者画面では、お世話の設定変更、統計確認、ゲームリセットなどができます。
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-center pb-6">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/dashboard')}
+            className="w-full text-sm py-3"
+            disabled={attempts >= 3}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            ホーム画面に戻る
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}

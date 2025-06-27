@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // あなたの設定
+  reactStrictMode: true,
+  // turbopack: {
+  //   enabled: false, // ← Disable Turbopack
+  // },
 };
 
 module.exports = nextConfig;
+
+// export default nextConfig;
+
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
+//   // config options here
+// }
+// module.exports = nextConfig

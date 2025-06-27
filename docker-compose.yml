@@ -1,3 +1,4 @@
+
 services:
   db:
     image: postgres:15
@@ -11,6 +12,6 @@ services:
       - "5433:5432" # ホスト5433→コンテナ5432
     volumes:
       - pgdata:/var/lib/postgresql/data
-
 volumes:
   pgdata:
+
