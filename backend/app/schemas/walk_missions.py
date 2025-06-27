@@ -1,19 +1,28 @@
-from pydantic import BaseModel, Field
+"""散歩ミッションの作成およびレスポンス用スキーマ定義"""
+
 from datetime import datetime
+from pydantic import BaseModel, Field
 
 
 class WalkMissionCreate(BaseModel):
-    care_log_id: int
-    started_at: datetime
-    ended_at: datetime
-    total_distance_m: int
-    result: str = Field(..., pattern="^(success|fail)$")  # v2はpattern
+    """散歩ミッション作成時のリクエストスキーマ"""
+
+    care_log_id: int  # 関連するお世話ログのID
+    started_at: datetime  # 散歩開始日時
+    ended_at: datetime  # 散歩終了日時
+    total_distance_m: int  # 総移動距離（メートル）
+    result: str = Field(
+        ..., pattern="^(success|fail)$"
+    )  # 成功または失敗を示す（正規表現で制約）
 
 
 class WalkMissionResponse(WalkMissionCreate):
-    id: int
-    created_at: datetime
+    """散歩ミッション取得レスポンススキーマ（IDと作成日時を含む）"""
 
+    id: int  # 散歩ミッションのユニークID（主キー）
+    created_at: datetime  # レコードの作成日時
 
-class Config:
-    from_attributes = True  # Pydantic v2推奨
+    class Config:
+        """ORMモデルからの変換を可能にする設定"""
+
+        from_attributes = True  # Pydantic v2で推奨される設定（ORM対応）

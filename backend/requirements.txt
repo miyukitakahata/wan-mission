@@ -1,9 +1,21 @@
+# --- FastAPI related ---
 fastapi==0.115.1
 uvicorn==0.34.0
+
+# --- Prisma Python client ---
 prisma==0.15.0
-python-dotenv==1.1.0
+
+# --- Prisma Dependencies ---
+click==8.1.7
 httpx==0.28.1
+jinja2==3.1.3
+nodeenv==1.8.0
 pydantic==2.11.1
+python-dotenv==1.1.0
+tomlkit==0.12.4
+typing-extensions==4.12.2
+
+# ---  ---
 openai==1.30.3
 stripe==9.9.0
 firebase-admin==6.5.0
