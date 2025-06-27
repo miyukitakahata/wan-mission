@@ -39,7 +39,7 @@ export default function LoadingScreen() {
             <div className="h-32 w-32 rounded-full bg-orange-100 flex items-center justify-center">
               <Dog className="h-20 w-20 text-orange-500" />
             </div>
-            <div className="absolute inset-0 rounded-full border-4 border-orange-300 border-t-orange-500 animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-orange-300 border-t-orange-500 animate-spin" />
           </div>
         </div>
 
@@ -51,7 +51,7 @@ export default function LoadingScreen() {
           <div
             className="bg-orange-500 h-2.5 rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${progress}%` }}
-          ></div>
+           />
         </div>
 
         <p className="text-base text-orange-600 font-medium animate-pulse">
@@ -62,15 +62,15 @@ export default function LoadingScreen() {
           <div
             className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: '0ms' }}
-          ></div>
+           />
           <div
             className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: '150ms' }}
-          ></div>
+           />
           <div
             className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: '300ms' }}
-          ></div>
+           />
         </div>
       </div>
     </div>

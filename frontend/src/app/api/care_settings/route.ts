@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    //APIからケア設定情報を取得
+    // APIからケア設定情報を取得
     // 実際の実装では、データベースやセッションから情報を取得します
     // ここではサンプルデータを返します
     const careSettings = {

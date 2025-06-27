@@ -23,8 +23,8 @@ RELATIONAL_FIELD_MAPPINGS: dict[str, dict[str, str]] = {
         'payment': 'payment',
     },
     'care_settings': {
-        'user': 'users',
         'care_logs': 'care_logs',
+        'user': 'users',
         'reflection_notes': 'reflection_notes',
     },
     'care_logs': {

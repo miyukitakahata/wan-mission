@@ -2,14 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button'; //radixui/button
+import { Button } from '@/components/ui/button'; // radixui/button
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from '@/components/ui/card'; //radixui/
-import { Progress } from '@/components/ui/progress'; //radixui/
+} from '@/components/ui/card'; // radixui/
+import { Progress } from '@/components/ui/progress'; // radixui/
 
 export default function WelcomePage() {
   return (

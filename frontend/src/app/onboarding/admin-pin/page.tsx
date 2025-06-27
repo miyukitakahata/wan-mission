@@ -196,7 +196,7 @@ export default function AdminPinPage() {
             {/* 注意事項 */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div className="flex items-start space-x-2">
-                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-yellow-800">
                     <strong>重要:</strong>{' '}

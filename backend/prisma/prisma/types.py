@@ -1515,29 +1515,29 @@ class FindManyusersArgsFromusersRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFromusers(TypedDict, total=False):
     """Relational arguments for users"""
-    user: Union[bool, 'usersArgsFromusersRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFromusersRecursive1']
+    user: Union[bool, 'usersArgsFromusersRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromusersRecursive1']
 
 
 class care_settingsIncludeFromusersRecursive1(TypedDict, total=False):
     """Relational arguments for users"""
-    user: Union[bool, 'usersArgsFromusersRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFromusersRecursive2']
+    user: Union[bool, 'usersArgsFromusersRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromusersRecursive2']
 
 
 class care_settingsIncludeFromusersRecursive2(TypedDict, total=False):
     """Relational arguments for users"""
-    user: Union[bool, 'usersArgsFromusersRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFromusersRecursive3']
+    user: Union[bool, 'usersArgsFromusersRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromusersRecursive3']
 
 
 class care_settingsIncludeFromusersRecursive3(TypedDict, total=False):
     """Relational arguments for users"""
-    user: Union[bool, 'usersArgsFromusersRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFromusersRecursive4']
+    user: Union[bool, 'usersArgsFromusersRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromusersRecursive4']
 
 
@@ -2580,8 +2580,8 @@ class care_settingsOptionalCreateInput(TypedDict, total=False):
     care_clear_status: Optional[_str]
     created_at: Optional[datetime.datetime]
     updated_at: Optional[datetime.datetime]
-    user: 'usersCreateNestedWithoutRelationsInput'
     care_logs: 'care_logsCreateManyNestedWithoutRelationsInput'
+    user: 'usersCreateNestedWithoutRelationsInput'
     reflection_notes: 'reflection_notesCreateManyNestedWithoutRelationsInput'
 
 
@@ -2654,8 +2654,8 @@ class care_settingsUpdateInput(TypedDict, total=False):
     care_clear_status: Optional[_str]
     created_at: Optional[datetime.datetime]
     updated_at: Optional[datetime.datetime]
-    user: 'usersUpdateOneWithoutRelationsInput'
     care_logs: 'care_logsUpdateManyWithoutRelationsInput'
+    user: 'usersUpdateOneWithoutRelationsInput'
     reflection_notes: 'reflection_notesUpdateManyWithoutRelationsInput'
 
 
@@ -2884,8 +2884,8 @@ class care_settingsListRelationFilter(TypedDict, total=False):
 
 class care_settingsInclude(TypedDict, total=False):
     """care_settings relational arguments"""
-    user: Union[bool, 'usersArgsFromcare_settings']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_settings']
+    user: Union[bool, 'usersArgsFromcare_settings']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_settings']
 
 
@@ -3006,29 +3006,29 @@ class FindManyusersArgsFromcare_settingsRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFromcare_settings(TypedDict, total=False):
     """Relational arguments for care_settings"""
-    user: Union[bool, 'usersArgsFromcare_settingsRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_settingsRecursive1']
+    user: Union[bool, 'usersArgsFromcare_settingsRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_settingsRecursive1']
 
 
 class care_settingsIncludeFromcare_settingsRecursive1(TypedDict, total=False):
     """Relational arguments for care_settings"""
-    user: Union[bool, 'usersArgsFromcare_settingsRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_settingsRecursive2']
+    user: Union[bool, 'usersArgsFromcare_settingsRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_settingsRecursive2']
 
 
 class care_settingsIncludeFromcare_settingsRecursive2(TypedDict, total=False):
     """Relational arguments for care_settings"""
-    user: Union[bool, 'usersArgsFromcare_settingsRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_settingsRecursive3']
+    user: Union[bool, 'usersArgsFromcare_settingsRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_settingsRecursive3']
 
 
 class care_settingsIncludeFromcare_settingsRecursive3(TypedDict, total=False):
     """Relational arguments for care_settings"""
-    user: Union[bool, 'usersArgsFromcare_settingsRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_settingsRecursive4']
+    user: Union[bool, 'usersArgsFromcare_settingsRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_settingsRecursive4']
 
 
@@ -3769,8 +3769,8 @@ class care_settingsWhereInput(TypedDict, total=False):
     care_clear_status: Union[None, _str, 'types.StringFilter']
     created_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    user: 'usersRelationFilter'
     care_logs: 'care_logsListRelationFilter'
+    user: 'usersRelationFilter'
     reflection_notes: 'reflection_notesListRelationFilter'
 
     # should be noted that AND and NOT should be Union['care_settingsWhereInputRecursive1', List['care_settingsWhereInputRecursive1']]
@@ -3796,8 +3796,8 @@ class care_settingsWhereInputRecursive1(TypedDict, total=False):
     care_clear_status: Union[None, _str, 'types.StringFilter']
     created_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    user: 'usersRelationFilter'
     care_logs: 'care_logsListRelationFilter'
+    user: 'usersRelationFilter'
     reflection_notes: 'reflection_notesListRelationFilter'
 
     # should be noted that AND and NOT should be Union['care_settingsWhereInputRecursive2', List['care_settingsWhereInputRecursive2']]
@@ -3823,8 +3823,8 @@ class care_settingsWhereInputRecursive2(TypedDict, total=False):
     care_clear_status: Union[None, _str, 'types.StringFilter']
     created_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    user: 'usersRelationFilter'
     care_logs: 'care_logsListRelationFilter'
+    user: 'usersRelationFilter'
     reflection_notes: 'reflection_notesListRelationFilter'
 
     # should be noted that AND and NOT should be Union['care_settingsWhereInputRecursive3', List['care_settingsWhereInputRecursive3']]
@@ -3850,8 +3850,8 @@ class care_settingsWhereInputRecursive3(TypedDict, total=False):
     care_clear_status: Union[None, _str, 'types.StringFilter']
     created_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    user: 'usersRelationFilter'
     care_logs: 'care_logsListRelationFilter'
+    user: 'usersRelationFilter'
     reflection_notes: 'reflection_notesListRelationFilter'
 
     # should be noted that AND and NOT should be Union['care_settingsWhereInputRecursive4', List['care_settingsWhereInputRecursive4']]
@@ -3877,8 +3877,8 @@ class care_settingsWhereInputRecursive4(TypedDict, total=False):
     care_clear_status: Union[None, _str, 'types.StringFilter']
     created_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
     updated_at: Union[None, datetime.datetime, 'types.DateTimeFilter']
-    user: 'usersRelationFilter'
     care_logs: 'care_logsListRelationFilter'
+    user: 'usersRelationFilter'
     reflection_notes: 'reflection_notesListRelationFilter'
 
 
@@ -4154,8 +4154,8 @@ care_settingsKeys = Literal[
     'care_clear_status',
     'created_at',
     'updated_at',
-    'user',
     'care_logs',
+    'user',
     'reflection_notes',
 ]
 care_settingsScalarFieldKeys = Literal[
@@ -4177,8 +4177,8 @@ care_settingsScalarFieldKeys = Literal[
 care_settingsScalarFieldKeysT = TypeVar('care_settingsScalarFieldKeysT', bound=care_settingsScalarFieldKeys)
 
 care_settingsRelationalFieldKeys = Literal[
-        'user',
         'care_logs',
+        'user',
         'reflection_notes',
     ]
 
@@ -4519,29 +4519,29 @@ class FindManyusersArgsFromcare_logsRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFromcare_logs(TypedDict, total=False):
     """Relational arguments for care_logs"""
-    user: Union[bool, 'usersArgsFromcare_logsRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_logsRecursive1']
+    user: Union[bool, 'usersArgsFromcare_logsRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_logsRecursive1']
 
 
 class care_settingsIncludeFromcare_logsRecursive1(TypedDict, total=False):
     """Relational arguments for care_logs"""
-    user: Union[bool, 'usersArgsFromcare_logsRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_logsRecursive2']
+    user: Union[bool, 'usersArgsFromcare_logsRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_logsRecursive2']
 
 
 class care_settingsIncludeFromcare_logsRecursive2(TypedDict, total=False):
     """Relational arguments for care_logs"""
-    user: Union[bool, 'usersArgsFromcare_logsRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_logsRecursive3']
+    user: Union[bool, 'usersArgsFromcare_logsRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_logsRecursive3']
 
 
 class care_settingsIncludeFromcare_logsRecursive3(TypedDict, total=False):
     """Relational arguments for care_logs"""
-    user: Union[bool, 'usersArgsFromcare_logsRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFromcare_logsRecursive4']
+    user: Union[bool, 'usersArgsFromcare_logsRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromcare_logsRecursive4']
 
 
@@ -5881,29 +5881,29 @@ class FindManyusersArgsFromreflection_notesRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFromreflection_notes(TypedDict, total=False):
     """Relational arguments for reflection_notes"""
-    user: Union[bool, 'usersArgsFromreflection_notesRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFromreflection_notesRecursive1']
+    user: Union[bool, 'usersArgsFromreflection_notesRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromreflection_notesRecursive1']
 
 
 class care_settingsIncludeFromreflection_notesRecursive1(TypedDict, total=False):
     """Relational arguments for reflection_notes"""
-    user: Union[bool, 'usersArgsFromreflection_notesRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFromreflection_notesRecursive2']
+    user: Union[bool, 'usersArgsFromreflection_notesRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromreflection_notesRecursive2']
 
 
 class care_settingsIncludeFromreflection_notesRecursive2(TypedDict, total=False):
     """Relational arguments for reflection_notes"""
-    user: Union[bool, 'usersArgsFromreflection_notesRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFromreflection_notesRecursive3']
+    user: Union[bool, 'usersArgsFromreflection_notesRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromreflection_notesRecursive3']
 
 
 class care_settingsIncludeFromreflection_notesRecursive3(TypedDict, total=False):
     """Relational arguments for reflection_notes"""
-    user: Union[bool, 'usersArgsFromreflection_notesRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFromreflection_notesRecursive4']
+    user: Union[bool, 'usersArgsFromreflection_notesRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromreflection_notesRecursive4']
 
 
@@ -7223,29 +7223,29 @@ class FindManyusersArgsFrommessage_logsRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFrommessage_logs(TypedDict, total=False):
     """Relational arguments for message_logs"""
-    user: Union[bool, 'usersArgsFrommessage_logsRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFrommessage_logsRecursive1']
+    user: Union[bool, 'usersArgsFrommessage_logsRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrommessage_logsRecursive1']
 
 
 class care_settingsIncludeFrommessage_logsRecursive1(TypedDict, total=False):
     """Relational arguments for message_logs"""
-    user: Union[bool, 'usersArgsFrommessage_logsRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFrommessage_logsRecursive2']
+    user: Union[bool, 'usersArgsFrommessage_logsRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrommessage_logsRecursive2']
 
 
 class care_settingsIncludeFrommessage_logsRecursive2(TypedDict, total=False):
     """Relational arguments for message_logs"""
-    user: Union[bool, 'usersArgsFrommessage_logsRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFrommessage_logsRecursive3']
+    user: Union[bool, 'usersArgsFrommessage_logsRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrommessage_logsRecursive3']
 
 
 class care_settingsIncludeFrommessage_logsRecursive3(TypedDict, total=False):
     """Relational arguments for message_logs"""
-    user: Union[bool, 'usersArgsFrommessage_logsRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFrommessage_logsRecursive4']
+    user: Union[bool, 'usersArgsFrommessage_logsRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrommessage_logsRecursive4']
 
 
@@ -8570,29 +8570,29 @@ class FindManyusersArgsFromwalk_missionsRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFromwalk_missions(TypedDict, total=False):
     """Relational arguments for walk_missions"""
-    user: Union[bool, 'usersArgsFromwalk_missionsRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwalk_missionsRecursive1']
+    user: Union[bool, 'usersArgsFromwalk_missionsRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwalk_missionsRecursive1']
 
 
 class care_settingsIncludeFromwalk_missionsRecursive1(TypedDict, total=False):
     """Relational arguments for walk_missions"""
-    user: Union[bool, 'usersArgsFromwalk_missionsRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwalk_missionsRecursive2']
+    user: Union[bool, 'usersArgsFromwalk_missionsRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwalk_missionsRecursive2']
 
 
 class care_settingsIncludeFromwalk_missionsRecursive2(TypedDict, total=False):
     """Relational arguments for walk_missions"""
-    user: Union[bool, 'usersArgsFromwalk_missionsRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwalk_missionsRecursive3']
+    user: Union[bool, 'usersArgsFromwalk_missionsRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwalk_missionsRecursive3']
 
 
 class care_settingsIncludeFromwalk_missionsRecursive3(TypedDict, total=False):
     """Relational arguments for walk_missions"""
-    user: Union[bool, 'usersArgsFromwalk_missionsRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwalk_missionsRecursive4']
+    user: Union[bool, 'usersArgsFromwalk_missionsRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwalk_missionsRecursive4']
 
 
@@ -10009,29 +10009,29 @@ class FindManyusersArgsFrompaymentRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFrompayment(TypedDict, total=False):
     """Relational arguments for payment"""
-    user: Union[bool, 'usersArgsFrompaymentRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFrompaymentRecursive1']
+    user: Union[bool, 'usersArgsFrompaymentRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrompaymentRecursive1']
 
 
 class care_settingsIncludeFrompaymentRecursive1(TypedDict, total=False):
     """Relational arguments for payment"""
-    user: Union[bool, 'usersArgsFrompaymentRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFrompaymentRecursive2']
+    user: Union[bool, 'usersArgsFrompaymentRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrompaymentRecursive2']
 
 
 class care_settingsIncludeFrompaymentRecursive2(TypedDict, total=False):
     """Relational arguments for payment"""
-    user: Union[bool, 'usersArgsFrompaymentRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFrompaymentRecursive3']
+    user: Union[bool, 'usersArgsFrompaymentRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrompaymentRecursive3']
 
 
 class care_settingsIncludeFrompaymentRecursive3(TypedDict, total=False):
     """Relational arguments for payment"""
-    user: Union[bool, 'usersArgsFrompaymentRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFrompaymentRecursive4']
+    user: Union[bool, 'usersArgsFrompaymentRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFrompaymentRecursive4']
 
 
@@ -11513,29 +11513,29 @@ class FindManyusersArgsFromwebhook_eventsRecursive4(TypedDict, total=False):
 
 class care_settingsIncludeFromwebhook_events(TypedDict, total=False):
     """Relational arguments for webhook_events"""
-    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive1']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwebhook_eventsRecursive1']
+    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive1']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwebhook_eventsRecursive1']
 
 
 class care_settingsIncludeFromwebhook_eventsRecursive1(TypedDict, total=False):
     """Relational arguments for webhook_events"""
-    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive2']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwebhook_eventsRecursive2']
+    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive2']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwebhook_eventsRecursive2']
 
 
 class care_settingsIncludeFromwebhook_eventsRecursive2(TypedDict, total=False):
     """Relational arguments for webhook_events"""
-    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive3']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwebhook_eventsRecursive3']
+    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive3']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwebhook_eventsRecursive3']
 
 
 class care_settingsIncludeFromwebhook_eventsRecursive3(TypedDict, total=False):
     """Relational arguments for webhook_events"""
-    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive4']
     care_logs: Union[bool, 'FindManycare_logsArgsFromwebhook_eventsRecursive4']
+    user: Union[bool, 'usersArgsFromwebhook_eventsRecursive4']
     reflection_notes: Union[bool, 'FindManyreflection_notesArgsFromwebhook_eventsRecursive4']
 
 
