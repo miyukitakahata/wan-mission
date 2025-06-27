@@ -1,4 +1,4 @@
-# version: "3.9"
+
 services:
   db:
     image: postgres:15
@@ -9,10 +9,9 @@ services:
       POSTGRES_DB: myapp_db
     restart: always
     ports:
-      - "5433:5432"  # ホスト5433→コンテナ5432
+      - "5433:5432" # ホスト5433→コンテナ5432
     volumes:
       - pgdata:/var/lib/postgresql/data
-
 volumes:
   pgdata:
 
