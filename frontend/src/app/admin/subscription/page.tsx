@@ -59,14 +59,14 @@ export default function SubscriptionPage() {
     }
   };
 
-  //TODO_DBにデータを更新追加
+  // TODO_DBにデータを更新追加
   const handleInputChange = (field: string, value: string) => {
     setPaymentData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
-  //TODO_DBにデータを更新追加
+  // TODO_DBにデータを更新追加
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     const matches = v.match(/\d{4,16}/g);
@@ -81,7 +81,7 @@ export default function SubscriptionPage() {
       return v;
     }
   };
-  //TODO_DBにデータを更新追加
+  // TODO_DBにデータを更新追加
   const formatExpiryDate = (value: string) => {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     if (v.length >= 2) {

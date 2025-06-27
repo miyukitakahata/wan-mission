@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
     }
 
     // ローカルストレージから管理者PINとログインPINを取得
-    //TODO_DBから取得したデータを表示するページ
+    // TODO_DBから取得したデータを表示するページ
     const adminSettings = JSON.parse(
       localStorage.getItem('adminSettings') || '{}'
     );
