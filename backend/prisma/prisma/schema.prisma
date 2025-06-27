@@ -9,22 +9,21 @@ datasource db {
 }
 
 model users {
-  id           String    @id @default(uuid())
-  firebase_uid String    @unique
-  email        String    @unique
-  current_plan String?
-  is_verified  Boolean?
-  created_at   DateTime? @default(now())
-  updated_at   DateTime? @updatedAt
-
+  id            String          @id @default(uuid())
+  firebase_uid  String          @unique
+  email         String          @unique
+  current_plan  String?
+  is_verified   Boolean?
+  created_at    DateTime?       @default(now())
+  updated_at    DateTime?       @updatedAt
   care_settings care_settings[]
   message_logs  message_logs[]
   payment       payment[]
 }
 
 model care_settings {
-  id                Int       @id @default(autoincrement())
-  user_id           String // users.id (UUID)
+  id                Int                @id @default(autoincrement())
+  user_id           String
   parent_name       String?
   child_name        String?
   dog_name          String?
@@ -35,35 +34,32 @@ model care_settings {
   walk_time         DateTime?
   care_password     String?
   care_clear_status String?
-  created_at        DateTime? @default(now())
-  updated_at        DateTime? @updatedAt
-
-  user             users              @relation(fields: [user_id], references: [id])
-  care_logs        care_logs[]
-  reflection_notes reflection_notes[]
+  created_at        DateTime?          @default(now())
+  updated_at        DateTime?          @updatedAt
+  care_logs         care_logs[]
+  user              users              @relation(fields: [user_id], references: [id])
+  reflection_notes  reflection_notes[]
 }
 
 model care_logs {
-  id              Int       @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   care_setting_id Int
   date            DateTime?
   fed_morning     Boolean?
   fed_night       Boolean?
-  created_at      DateTime? @default(now())
-
-  care_setting  care_settings   @relation(fields: [care_setting_id], references: [id])
-  walk_missions walk_missions[]
+  created_at      DateTime?       @default(now())
+  care_setting    care_settings   @relation(fields: [care_setting_id], references: [id])
+  walk_missions   walk_missions[]
 }
 
 model reflection_notes {
-  id                 Int       @id @default(autoincrement())
+  id                 Int           @id @default(autoincrement())
   care_setting_id    Int
   content            String?
-  approved_by_parent Boolean   @default(false)
-  created_at         DateTime? @default(now())
-  updated_at         DateTime? @updatedAt
-
-  care_setting care_settings @relation(fields: [care_setting_id], references: [id])
+  approved_by_parent Boolean       @default(false)
+  created_at         DateTime?     @default(now())
+  updated_at         DateTime?     @updatedAt
+  care_setting       care_settings @relation(fields: [care_setting_id], references: [id])
 }
 
 model message_logs {
@@ -72,8 +68,7 @@ model message_logs {
   content      String?
   is_llm_based Boolean?
   created_at   DateTime? @default(now())
-
-  user users @relation(fields: [user_id], references: [id])
+  user         users     @relation(fields: [user_id], references: [id])
 }
 
 model walk_missions {
@@ -84,8 +79,7 @@ model walk_missions {
   total_distance_m Int?
   result           String?
   created_at       DateTime? @default(now())
-
-  care_log care_logs @relation(fields: [care_log_id], references: [id])
+  care_log         care_logs @relation(fields: [care_log_id], references: [id])
 }
 
 model payment {
@@ -99,8 +93,7 @@ model payment {
   currency                 String?
   status                   String?
   created_at               DateTime? @default(now())
-
-  user users @relation(fields: [user_id], references: [id])
+  user                     users     @relation(fields: [user_id], references: [id])
 }
 
 model webhook_events {

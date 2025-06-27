@@ -210,8 +210,8 @@ class care_settings(bases.Basecare_settings):
     care_clear_status: Optional[_str] = None
     created_at: Optional[datetime.datetime] = None
     updated_at: Optional[datetime.datetime] = None
-    user: Optional['models.users'] = None
     care_logs: Optional[List['models.care_logs']] = None
+    user: Optional['models.users'] = None
     reflection_notes: Optional[List['models.reflection_notes']] = None
 
     # take *args and **kwargs so that other metaclasses can define arguments
@@ -1219,8 +1219,8 @@ _users_fields: Dict['types.usersKeys', PartialModelField] = OrderedDict(
 )
 
 _care_settings_relational_fields: Set[str] = {
-        'user',
         'care_logs',
+        'user',
         'reflection_notes',
     }
 _care_settings_fields: Dict['types.care_settingsKeys', PartialModelField] = OrderedDict(
@@ -1337,19 +1337,19 @@ _care_settings_fields: Dict['types.care_settingsKeys', PartialModelField] = Orde
             'is_relational': False,
             'documentation': None,
         }),
-        ('user', {
-            'name': 'user',
-            'is_list': False,
-            'optional': True,
-            'type': 'models.users',
-            'is_relational': True,
-            'documentation': None,
-        }),
         ('care_logs', {
             'name': 'care_logs',
             'is_list': True,
             'optional': True,
             'type': 'List[\'models.care_logs\']',
+            'is_relational': True,
+            'documentation': None,
+        }),
+        ('user', {
+            'name': 'user',
+            'is_list': False,
+            'optional': True,
+            'type': 'models.users',
             'is_relational': True,
             'documentation': None,
         }),

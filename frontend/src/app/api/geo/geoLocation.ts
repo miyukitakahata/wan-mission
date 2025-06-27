@@ -1,1 +1,1 @@
-//Geolocation取得ロジック
+// Geolocation取得ロジック

@@ -1,4 +1,5 @@
 "use client";
+
 // API実装してみて要検討
 // GeolocationAPIを使って、フロントで経度緯度測定し散歩の距離を測定→成功失敗判定
 // →バックエンドに距離（m）、成功か失敗かの結果を返す
@@ -147,15 +148,15 @@ export default function WalkPage() {
               {/* 歩いている効果のみ表示 */}
               {isWalking && (
                 <div className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 translate-y-1/2 flex space-x-2">
-                  <div className="w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-ping" />
                   <div
                     className="w-3 h-3 bg-green-400 rounded-full animate-ping"
                     style={{ animationDelay: "0.2s" }}
-                  ></div>
+                   />
                   <div
                     className="w-3 h-3 bg-green-400 rounded-full animate-ping"
                     style={{ animationDelay: "0.4s" }}
-                  ></div>
+                   />
                 </div>
               )}
             </div>

@@ -19,8 +19,8 @@ export default function RootLayout({
   );
 }
 
-//Kodaiさんのlayout.tsx
-//authProviderを追加してある
+// Kodaiさんのlayout.tsx
+// authProviderを追加してある
 // import type React from "react";
 // import { ThemeProvider } from "@/components/theme-provider";
 // // imoprt AuthProvider

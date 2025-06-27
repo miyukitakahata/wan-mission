@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
       localStorage.getItem('loginSettings') || '{}'
     );
 
-    const adminPin = adminSettings.adminPin;
+    const {adminPin} = adminSettings;
     const loginPin = loginSettings.pin;
 
     // どちらのPINも設定されていない場合

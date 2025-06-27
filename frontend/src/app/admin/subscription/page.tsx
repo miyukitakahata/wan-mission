@@ -30,7 +30,7 @@ import {
 
 export default function SubscriptionPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
-  const [isSubscribed, setIsSubscribed] = useState(false); //サブスク未登録状態
+  const [isSubscribed, setIsSubscribed] = useState(false); // サブスク未登録状態
   const [paymentData, setPaymentData] = useState({
     // 決済情報の初期値
     cardNumber: "",
@@ -77,15 +77,15 @@ export default function SubscriptionPage() {
     }
     if (parts.length) {
       return parts.join(" ");
-    } else {
+    } 
       return v;
-    }
+    
   };
   // TODO_DBにデータを更新追加
   const formatExpiryDate = (value: string) => {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     if (v.length >= 2) {
-      return v.substring(0, 2) + "/" + v.substring(2, 4);
+      return `${v.substring(0, 2)  }/${  v.substring(2, 4)}`;
     }
     return v;
   };

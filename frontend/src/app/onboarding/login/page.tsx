@@ -20,7 +20,7 @@ export default function OnboardingLoginPage() {
   // DB：usersテーブルに対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [email, setEmail] = useState('');
-  const [pin, setPin] = useState(''); //email,pin未入力
+  const [pin, setPin] = useState(''); // email,pin未入力
   const [showPin, setShowPin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(true);
 
