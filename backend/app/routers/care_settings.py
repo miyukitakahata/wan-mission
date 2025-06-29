@@ -21,7 +21,7 @@ care_settings_router = APIRouter(prefix="/api/care_settings", tags=["care_settin
 # 仮のダミー認証
 def verify_firebase_token():
     # 仮のfirebase_uidを返す（本来はトークンから解析）
-    return "A1b2C3d4E5F6G7"
+    return "test-firebase-uid"
 
 
 # POST/api/care_settingsのルーター

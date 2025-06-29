@@ -1,77 +1,54 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { ArrowLeft, User, Heart, Calendar, Loader2, Crown } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-
-interface CareSettings {
-  mom_name: string
-  child_name: string
-  dog_name: string
-  care_start_date: string
-  care_end_date: string
-}
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ArrowLeft, User, Heart, Calendar, Loader2, Crown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useCareSettings } from '@/hooks/useCareSettings';
 
 export default function UserInfoPage() {
-  const router = useRouter()
-  const [careSettings, setCareSettings] = useState<CareSettings | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [isPremium, setIsPremium] = useState(false)
+  const router = useRouter();
 
+  // hooksから取得
+  const { careSettings, loading, error, refetch } = useCareSettings();
+
+  // プレミアム会員状態をチェック（実際の実装では、サブスクリプション状態を確認）
+  const [isPremium, setIsPremium] = useState(false);
   useEffect(() => {
-    fetchCareSettings()
-  }, [])
+    const subscriptionData = JSON.parse(
+      localStorage.getItem('subscriptionData') || '{}'
+    );
+    setIsPremium(subscriptionData.isPremium || false);
+  }, []);
 
-  const fetchCareSettings = async () => {
-    try {
-      // ローカルストレージから情報を取得（実際のAPIの代わり）
-      const familyInfo = JSON.parse(localStorage.getItem("familyInfo") || "{}")
-      const careSettingsData = JSON.parse(localStorage.getItem("careSettings") || "{}")
-
-      // プレミアム会員状態をチェック（実際の実装では、サブスクリプション状態を確認）
-      const subscriptionData = JSON.parse(localStorage.getItem("subscriptionData") || "{}")
-      setIsPremium(subscriptionData.isPremium || false)
-
-      const settings: CareSettings = {
-        mom_name: familyInfo.parentName || "未設定",
-        child_name: familyInfo.childName || "未設定",
-        dog_name: familyInfo.petName || "未設定",
-        care_start_date: careSettingsData.startDate || "未設定",
-        care_end_date: careSettingsData.endDate || "未設定",
-      }
-
-      setCareSettings(settings)
-    } catch (err) {
-      setError("情報の取得に失敗しました")
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  // 日付フォーマット関数
   const formatDate = (dateString: string) => {
-    if (dateString === "未設定") return dateString
+    if (!dateString) return '未設定';
     try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString("ja-JP", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+      const date = new Date(dateString);
+      return date.toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
     } catch {
-      return dateString
+      return dateString;
     }
-  }
+  };
 
+  // ローディング中
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
         <div className="w-full max-w-xs mx-auto">
           <div className="flex items-center mb-6">
-            <Button variant="ghost" onClick={() => router.back()} className="mr-2">
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="mr-2"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-xl font-bold">ユーザー情報</h1>
@@ -81,15 +58,20 @@ export default function UserInfoPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
+  // エラー時
   if (error) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
         <div className="w-full max-w-xs mx-auto">
           <div className="flex items-center mb-6">
-            <Button variant="ghost" onClick={() => router.back()} className="mr-2">
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="mr-2"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-xl font-bold">ユーザー情報</h1>
@@ -97,22 +79,30 @@ export default function UserInfoPage() {
           <Card className="bg-red-50 border-red-200">
             <CardContent className="p-4 text-center">
               <p className="text-red-600">{error}</p>
-              <Button onClick={fetchCareSettings} className="mt-4 bg-orange-500 hover:bg-orange-600">
+              <Button
+                onClick={refetch}
+                className="mt-4 bg-orange-500 hover:bg-orange-600"
+              >
                 再試行
               </Button>
             </CardContent>
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
+  // データが正常に取得できた場合
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs mx-auto">
         {/* ヘッダー */}
         <div className="flex items-center mb-6">
-          <Button variant="ghost" onClick={() => router.back()} className="mr-2">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="mr-2"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-bold">ユーザー情報</h1>
@@ -129,27 +119,41 @@ export default function UserInfoPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <span className="text-sm font-medium text-orange-800">お母さんの名前</span>
-                <span className="text-sm text-orange-700">{careSettings?.mom_name}</span>
+                <span className="text-sm font-medium text-orange-800">
+                  ママパパの名前
+                </span>
+                <span className="text-sm text-orange-700">
+                  {careSettings?.parent_name || '未設定'}
+                </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <span className="text-sm font-medium text-orange-800">子供の名前</span>
-                <span className="text-sm text-orange-700">{careSettings?.child_name}</span>
+                <span className="text-sm font-medium text-orange-800">
+                  子どもの名前
+                </span>
+                <span className="text-sm text-orange-700">
+                  {careSettings?.child_name || '未設定'}
+                </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
                 <div className="flex items-center">
                   <Heart className="mr-2 h-4 w-4 text-red-500" />
-                  <span className="text-sm font-medium text-orange-800">ワンちゃんの名前</span>
+                  <span className="text-sm font-medium text-orange-800">
+                    ワンちゃんの名前
+                  </span>
                 </div>
-                <span className="text-sm text-orange-700">{careSettings?.dog_name}</span>
+                <span className="text-sm text-orange-700">
+                  {careSettings?.dog_name || '未設定'}
+                </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
                 <div className="flex items-center">
                   <Crown className="mr-2 h-4 w-4 text-yellow-500" />
-                  <span className="text-sm font-medium text-orange-800">会員ステータス</span>
+                  <span className="text-sm font-medium text-orange-800">
+                    会員ステータス
+                  </span>
                 </div>
                 <div className="flex items-center">
                   {isPremium ? (
@@ -158,7 +162,10 @@ export default function UserInfoPage() {
                       プレミアム会員
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-gray-600 border-gray-300">
+                    <Badge
+                      variant="outline"
+                      className="text-gray-600 border-gray-300"
+                    >
                       無料会員
                     </Badge>
                   )}
@@ -179,13 +186,21 @@ export default function UserInfoPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <span className="text-sm font-medium text-orange-800">お世話スタート日</span>
-                <span className="text-sm text-orange-700">{formatDate(careSettings?.care_start_date || "")}</span>
+                <span className="text-sm font-medium text-orange-800">
+                  お世話スタート日
+                </span>
+                <span className="text-sm text-orange-700">
+                  {formatDate(careSettings?.care_start_date || '')}
+                </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <span className="text-sm font-medium text-orange-800">お世話終了日</span>
-                <span className="text-sm text-orange-700">{formatDate(careSettings?.care_end_date || "")}</span>
+                <span className="text-sm font-medium text-orange-800">
+                  お世話終了日
+                </span>
+                <span className="text-sm text-orange-700">
+                  {formatDate(careSettings?.care_end_date || '')}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -195,11 +210,11 @@ export default function UserInfoPage() {
         <Button
           variant="outline"
           className="w-full border-orange-200 hover:bg-orange-50 text-orange-800"
-          onClick={() => router.push("/admin")}
+          onClick={() => router.push('/admin')}
         >
           管理者画面に戻る
         </Button>
       </div>
     </div>
-  )
+  );
 }

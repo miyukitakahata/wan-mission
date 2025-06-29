@@ -13,29 +13,78 @@ import {
   User,
   CreditCard,
 } from 'lucide-react';
+import { useCareSettings } from '@/hooks/useCareSettings';
+import { useCareLogs } from '@/hooks/useCareLogs';
 
 export default function AdminPage() {
   // TODO_DBから取得したデータを表示するページ
   const router = useRouter();
-  const [currentPoints, setCurrentPoints] = useState(45);
-  const [maxPoints] = useState(100);
-  const [consecutiveDays, setConsecutiveDays] = useState(3);
-  const [targetDays] = useState(7);
-  const [childName, setChildName] = useState('さき');
 
+  // 追加するhooksを呼ぶ
+  const {
+    careSettings,
+    loading: settingsLoading,
+    error: settingsError,
+  } = useCareSettings();
+  const { careLogs, loading: logsLoading, error: logsError } = useCareLogs();
+
+  // 現在の経過日数や目標日数、子どもの名前の状態管理
+  const [consecutiveDays, setConsecutiveDays] = useState<number | null>(null);
+  const [targetDays, setTargetDays] = useState<number>(0);
+  const [childName, setChildName] = useState<string>('');
+
+  // データを取得したらchildNameとconsecutiveDaysとtargetDaysを更新
   useEffect(() => {
-    // TODO_ローカルストレージから家族情報を取得 (DBから取得する場合はAPIを呼び出す
-    const familyInfo = JSON.parse(localStorage.getItem('familyInfo') || '{}');
-    if (familyInfo.childName) {
-      setChildName(familyInfo.childName);
+    // 両方のデータが取得出来たら
+    if (careSettings && careLogs) {
+      setChildName(careSettings.child_name);
+
+      // 連続日数の差を計算
+      const startDate = new Date(careSettings.care_start_date);
+      const today = new Date(); // 今日の日付
+      const diffTime = Math.abs(today.getTime() - startDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // 開始日を含めるために1日追加
+
+      setConsecutiveDays(diffDays);
+
+      // 目標日数を設定
+      const endDate = new Date(careSettings.care_end_date);
+      const targetDiffTime = Math.abs(endDate.getTime() - startDate.getTime());
+      const targetDiffDays =
+        Math.ceil(targetDiffTime / (1000 * 60 * 60 * 24)) + 1; // 開始日を含めるために1日追加
+
+      setTargetDays(targetDiffDays);
     }
-  }, []);
+  }, [careSettings, careLogs]);
 
-  const progressPercentage = Math.round((currentPoints / maxPoints) * 100);
+  // ローディング中やエラーがあれば表示
+  if (settingsLoading || logsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">読み込み中...</p>
+      </div>
+    );
+  }
+  if (settingsError || logsError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">エラーが発生しました</p>
+      </div>
+    );
+  }
 
-  const handleGoalClear = () => {
-    router.push('/goal-clear');
-  };
+  // nullチェック
+  if (consecutiveDays === null || childName === '') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">データがありません</p>
+      </div>
+    );
+  }
+
+  // const handleGoalClear = () => {
+  // router.push('/goal-clear');
+  // };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
@@ -57,7 +106,7 @@ export default function AdminPage() {
           <CardHeader className="pb-3">
             <h2 className="text-lg font-bold flex items-center">
               <Target className="mr-2 h-5 w-5 text-orange-500" />
-              {childName}ちゃん、{consecutiveDays}日達成中！
+              {childName}さん、{consecutiveDays}日達成中！
             </h2>
           </CardHeader>
           <CardContent>
@@ -124,7 +173,7 @@ export default function AdminPage() {
             </p>
             <Button
               className="w-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center py-4"
-              onClick={handleGoalClear}
+              onClick={() => router.push('/goal-clear')}
             >
               <Trophy className="mr-2 h-5 w-5" />
               クリアおめでとう

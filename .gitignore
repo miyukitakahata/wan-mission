@@ -43,3 +43,8 @@ Thumbs.db
 **/coverage/
 **/.coverage
 **/htmlcov/
+
+# prisma
+**/generated/client
+**/backend/prisma/prisma
+**/backend/prisma/prisma-client
