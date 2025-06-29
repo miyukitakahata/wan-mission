@@ -1,8 +1,6 @@
 generator client {
   provider = "prisma-client-py"
-  output   = "prisma"
 }
-
 
 
 

@@ -123,8 +123,8 @@ export default function DashboardPage() {
                   </p>
                   {/* 吹き出しの尻尾（下向き） */}
                   <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                    <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-white"></div>
-                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-5 border-transparent border-t-gray-300"></div>
+                    <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-white" />
+                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-5 border-transparent border-t-gray-300" />
                   </div>
                 </div>
 
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                         {isCompleted ? (
                           <div className="text-green-500 text-lg">✅</div>
                         ) : (
-                          <div className="w-5 h-5 border-2 border-gray-300 rounded"></div>
+                          <div className="w-5 h-5 border-2 border-gray-300 rounded" />
                         )}
                         <Icon className="h-5 w-5" />
                         <span className="text-sm font-medium">
