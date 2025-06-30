@@ -36,15 +36,18 @@
 
 # OS generated
 **/.DS_Store
-*.pem
-Thumbs.db
+**/*.pem
+**/Thumbs.db
 
 # Testing
 **/coverage/
 **/.coverage
 **/htmlcov/
+gps_test.html
 
 # prisma
 **/generated/client
 **/backend/prisma/prisma
 **/backend/prisma/prisma-client
+
+
