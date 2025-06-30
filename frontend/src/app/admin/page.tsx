@@ -152,6 +152,8 @@ export default function AdminPage() {
     );
   };
 
+  console.log('adminページでcareLog確認:', careLog);
+  console.log('adminページでcareSettings確認:', careSettings);
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs mx-auto">
