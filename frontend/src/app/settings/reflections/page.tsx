@@ -1,36 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Heart } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// // 反省文のサンプルデータ
-// const reflectionData = [
-//   {
-//     id: 1,
-//     date: "2023-06-10",
-//     title: "お散歩をさぼってしまいました",
-//     content:
-//       "今日は雨が降っていたので、お散歩に行きませんでした。でも、わんちゃんは散歩を楽しみにしていたようで、とても残念そうでした。明日は天気が良くなったら、少し長めにお散歩に行こうと思います。",
-//   },
-//   {
-//     id: 2,
-//     date: "2023-06-08",
-//     title: "ごはんの時間が遅れました",
-//     content:
-//       "仕事が忙しくて、わんちゃんのごはんの時間が1時間遅れてしまいました。わんちゃんはお腹を空かせて待っていたようで、申し訳ない気持ちでいっぱいです。明日からは、タイマーをセットして、時間通りにごはんをあげるようにします。",
-//   },
-//   {
-//     id: 3,
-//     date: "2023-06-05",
-//     title: "おもちゃを買い忘れました",
-//     content:
-//       "わんちゃんのお気に入りのおもちゃが壊れてしまったので、新しいものを買うと約束していましたが、忘れてしまいました。わんちゃんは古いおもちゃを探していて、とても悲しそうでした。明日こそは必ず買いに行きます。",
-//   },
-// ]
 
 type ReflectionNote = {
   id: number;
@@ -62,8 +37,9 @@ export default function ReflectionsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 sm:px-6 py-6">
-      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-        <div className="flex items-center mb-6">
+      <div className="w-full max-w-xl mx-auto">
+        {/* max-w-lg → max-w-xl に変更 */}
+        <div className="flex items-center mb-4">
           <Button
             variant="ghost"
             onClick={() => router.back()}
@@ -73,7 +49,6 @@ export default function ReflectionsPage() {
           </Button>
           <h1 className="text-xl sm:text-2xl font-bold">反省文一覧</h1>
         </div>
-
         <Tabs
           defaultValue="all"
           className="w-full"
@@ -86,7 +61,7 @@ export default function ReflectionsPage() {
           <TabsContent value="all">
             <div className="space-y-4">
               {reflectionData.map((reflection) => (
-                <Card key={reflection.id}>
+                <Card key={reflection.id} className="bg-white">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">
                       <h2 className="text-base sm:text-lg font-medium">
@@ -158,7 +133,6 @@ export default function ReflectionsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-
         <Button
           className="w-full mt-6 bg-orange-500 hover:bg-orange-600"
           onClick={() => router.push('/dashboard')}
