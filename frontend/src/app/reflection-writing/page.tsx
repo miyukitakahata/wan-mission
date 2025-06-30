@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, FileText, Heart } from 'lucide-react'; // lucide-reactアイコン
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { createReflectionNote } from '@/app/api/reflectionNotes';
+import { createReflectionNote } from '@/hooks/reflectionNotesPost';
 
 export default function ReflectionWritingPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
