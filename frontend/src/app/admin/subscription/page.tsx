@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button"; // radixui/button
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button'; // radixui/button
 import {
   Card,
   CardContent,
   CardHeader,
   CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   ArrowLeft,
   Crown,
@@ -26,18 +26,18 @@ import {
   Check,
   Lock,
   Shield,
-} from "lucide-react"; // lucide-reactアイコン
+} from 'lucide-react'; // lucide-reactアイコン
 
 export default function SubscriptionPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [isSubscribed, setIsSubscribed] = useState(false); // サブスク未登録状態
   const [paymentData, setPaymentData] = useState({
     // 決済情報の初期値
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    cardholderName: "",
-    paymentMethod: "credit",
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: '',
+    paymentMethod: 'credit',
   });
   const [showPaymentForm, setShowPaymentForm] = useState(true);
 
@@ -45,17 +45,17 @@ export default function SubscriptionPage() {
     // 実際の実装では、ここでStripe決済処理を行います
     try {
       // Stripe決済処理のプレースホルダー
-      console.log("Stripe決済処理開始", paymentData);
+      console.log('Stripe決済処理開始', paymentData);
 
       // 決済成功のシミュレーション
       setTimeout(() => {
         setIsSubscribed(true);
         alert(
-          "決済が完了しました！プレミアムプランにご加入いただきありがとうございます！"
+          '決済が完了しました！プレミアムプランにご加入いただきありがとうございます！'
         );
       }, 2000);
     } catch (error) {
-      alert("決済処理中にエラーが発生しました。もう一度お試しください。");
+      alert('決済処理中にエラーが発生しました。もう一度お試しください。');
     }
   };
 
@@ -68,24 +68,23 @@ export default function SubscriptionPage() {
   };
   // TODO_DBにデータを更新追加
   const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || "";
+    const match = (matches && matches[0]) || '';
     const parts = [];
     for (let i = 0, len = match.length; i < len; i += 4) {
       parts.push(match.substring(i, i + 4));
     }
     if (parts.length) {
-      return parts.join(" ");
-    } 
-      return v;
-    
+      return parts.join(' ');
+    }
+    return v;
   };
   // TODO_DBにデータを更新追加
   const formatExpiryDate = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     if (v.length >= 2) {
-      return `${v.substring(0, 2)  }/${  v.substring(2, 4)}`;
+      return `${v.substring(0, 2)}/${v.substring(2, 4)}`;
     }
     return v;
   };
@@ -93,17 +92,17 @@ export default function SubscriptionPage() {
   const features = [
     {
       icon: MessageCircle,
-      title: "わんことおはなし機能",
+      title: 'わんことおはなし機能',
       description:
-        "AIを使ってわんちゃんと楽しく会話ができます。わんちゃんの気持ちがもっとわかるようになります！",
-      color: "text-blue-500",
+        'AIを使ってわんちゃんと楽しく会話ができます。わんちゃんの気持ちがもっとわかるようになります！',
+      color: 'text-blue-500',
     },
     {
       icon: Heart,
-      title: "保護犬・保護猫支援",
+      title: '保護犬・保護猫支援',
       description:
-        "月額料金の一部が保護犬・保護猫団体に寄付されます。あなたのお世話が困っている動物たちの支援につながります。",
-      color: "text-red-500",
+        '月額料金の一部が保護犬・保護猫団体に寄付されます。あなたのお世話が困っている動物たちの支援につながります。',
+      color: 'text-red-500',
     },
   ];
 
@@ -214,7 +213,7 @@ export default function SubscriptionPage() {
                   <Select
                     value={paymentData.paymentMethod}
                     onValueChange={(value) =>
-                      handleInputChange("paymentMethod", value)
+                      handleInputChange('paymentMethod', value)
                     }
                   >
                     <SelectTrigger>
@@ -241,7 +240,7 @@ export default function SubscriptionPage() {
                       placeholder="YAMADA TARO"
                       value={paymentData.cardholderName}
                       onChange={(e) =>
-                        handleInputChange("cardholderName", e.target.value)
+                        handleInputChange('cardholderName', e.target.value)
                       }
                       className="text-sm"
                     />
@@ -257,7 +256,7 @@ export default function SubscriptionPage() {
                       value={paymentData.cardNumber}
                       onChange={(e) =>
                         handleInputChange(
-                          "cardNumber",
+                          'cardNumber',
                           formatCardNumber(e.target.value)
                         )
                       }
@@ -280,7 +279,7 @@ export default function SubscriptionPage() {
                         value={paymentData.expiryDate}
                         onChange={(e) =>
                           handleInputChange(
-                            "expiryDate",
+                            'expiryDate',
                             formatExpiryDate(e.target.value)
                           )
                         }
@@ -298,8 +297,8 @@ export default function SubscriptionPage() {
                         value={paymentData.cvv}
                         onChange={(e) =>
                           handleInputChange(
-                            "cvv",
-                            e.target.value.replace(/\D/g, "").slice(0, 4)
+                            'cvv',
+                            e.target.value.replace(/\D/g, '').slice(0, 4)
                           )
                         }
                         maxLength={4}
@@ -330,14 +329,14 @@ export default function SubscriptionPage() {
                 <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-yellow-800">
-                      月額料金
+                      料金
                     </span>
                     <span className="text-lg font-bold text-yellow-800">
                       ¥300
                     </span>
                   </div>
                   <p className="text-xs text-yellow-700 mt-1">
-                    初回決済後、毎月自動的に課金されます。いつでも解約可能です。
+                    1回限りのお支払いです。以降の自動課金はありません。
                   </p>
                 </div>
               </div>
@@ -371,7 +370,7 @@ export default function SubscriptionPage() {
         <Button
           variant="outline"
           className="w-full border-orange-200 hover:bg-orange-50 text-orange-800"
-          onClick={() => router.push("/admin")}
+          onClick={() => router.push('/admin')}
         >
           管理者画面に戻る
         </Button>

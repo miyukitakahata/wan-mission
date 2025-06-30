@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 
 // バックエンドからどんなデータ型でもらうのかを定義
 export interface CareSettings {
+  id: number;
   parent_name: string;
   child_name: string;
   dog_name: string;
@@ -40,8 +41,11 @@ export function useCareSettings() {
       // サーバーから来たレスポンスをJSONに変換
       const data = await res.json();
 
+      console.log('useCareSettingsのfetchデータ確認:', data);
+
       // 取得したデータを画面で使えるようにstateにセット
       setCareSettings({
+        id: data.id,
         parent_name: data.parent_name,
         child_name: data.child_name,
         dog_name: data.dog_name,
