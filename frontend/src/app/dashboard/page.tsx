@@ -55,7 +55,28 @@ export default function DashboardPage() {
       }
     };
     fetchCareLog();
-  }, []);
+  }, [router]);
+
+  // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
+  useEffect(() => {
+    const checkYesterdayWalk = async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const dateStr = yesterday.toISOString().slice(0, 10);
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettingId}&date=${dateStr}`
+        );
+        const data = await res.json();
+        if (data && data.care_log_id && !data.walked) {
+          router.push('/sad-departure');
+        }
+      } catch (e) {
+        console.error('昨日の散歩確認エラー', e);
+      }
+    };
+    checkYesterdayWalk();
+  }, [router]);
 
   // ミッション定義
   const missions = [

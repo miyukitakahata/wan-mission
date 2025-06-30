@@ -1,7 +1,7 @@
 """散歩ミッションAPIのルーター定義"""
 
 # 標準ライブラリ
-from datetime import date, datetime
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 # サードパーティライブラリ
@@ -17,6 +17,8 @@ from app.schemas.walk_missions import (
 
 # 散歩ミッション用のAPIルーターを作成
 walk_missions_router = APIRouter(prefix="/api/walk_missions", tags=["walk_missions"])
+
+JST = timezone(timedelta(hours=9))
 
 
 # 散歩ミッション新規登録API
@@ -34,10 +36,13 @@ async def create_walk_mission(walk_mission: WalkMissionCreate):
         print(f"[walk_missions] POST受信: {walk_mission}")
 
         # 当日の care_log を確認・作成
-        today = date.today()
-        # 今日の範囲を定義（datetime型で）
-        start_of_day = datetime.combine(today, datetime.min.time())
-        end_of_day = datetime.combine(today, datetime.max.time())
+        now_jst = datetime.now(JST)
+        today = now_jst.date()
+        # 今日の範囲を定義（datetime型でJSTで生成しUTCに変換）
+        start_of_day_jst = datetime.combine(today, datetime.min.time(), JST)
+        end_of_day_jst = datetime.combine(today, datetime.max.time(), JST)
+        start_of_day = start_of_day_jst.astimezone(timezone.utc)
+        end_of_day = end_of_day_jst.astimezone(timezone.utc)
 
         # care_setting を取得（1つしかない想定）
         care_setting = await prisma_client.care_settings.find_first()
@@ -62,7 +67,7 @@ async def create_walk_mission(walk_mission: WalkMissionCreate):
         if not care_log:
             print("[walk_missions] care_log作成中...")
             # 日付をdatetimeに変換（Prismaスキーマに合わせる）
-            date_as_datetime = datetime.combine(today, datetime.min.time())
+            date_as_datetime = start_of_day
 
             care_log = await prisma_client.care_logs.create(
                 data={
