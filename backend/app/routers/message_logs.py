@@ -20,12 +20,26 @@ FREE_PLAN_MESSAGES = [
     response_model=MessageLogResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def generate_message_log(user_id: str = Depends(verify_firebase_token)):
+async def generate_message_log(firebase_uid: str = Depends(verify_firebase_token)):
     """
     犬のひとことを生成して保存し、返すAPI
     （無料プラン対応版・固定セリフからランダム選択）
     """
     try:
+        # firebase_uidからusersテーブルを検索
+        user = await prisma_client.users.find_unique(
+            where={"firebase_uid": firebase_uid}
+        )
+
+        if not user:
+            raise HTTPException(
+                status_code=400,
+                detail="指定されたFirebase UIDのユーザーが存在しません",
+            )
+
+        # 内部UUID
+        user_id = user.id
+
         # ランダムメッセージを選ぶ
         selected_message = random.choice(FREE_PLAN_MESSAGES)
 
