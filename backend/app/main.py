@@ -11,6 +11,7 @@ from app.routers.user import user_router
 from app.routers.care_logs import care_logs_router
 from app.routers.care_settings import care_settings_router
 from app.routers.walk_missions import walk_missions_router
+from app.routers.reflection_notes import reflection_notes_router
 from app.routers.message_logs import message_logs_router
 
 
@@ -47,6 +48,7 @@ app.include_router(user_router)
 app.include_router(care_logs_router)
 app.include_router(care_settings_router)
 app.include_router(walk_missions_router)
+app.include_router(reflection_notes_router)
 app.include_router(message_logs_router)
 
 

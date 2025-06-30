@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, FileText, Heart } from 'lucide-react'; // lucide-reactアイコン
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { createReflectionNote } from '@/hooks/reflectionNotesPost';
 
 export default function ReflectionWritingPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
@@ -20,32 +21,25 @@ export default function ReflectionWritingPage() {
     if (reflection.trim() && title.trim()) {
       setIsSubmitting(true);
 
-      // 反省文を保存する処理
-      const reflectionData = {
-        id: Date.now(),
-        title,
-        content: reflection,
-        date: new Date().toISOString().split('T')[0],
-      };
+      try {
+        // APIで送信
+        await createReflectionNote(`${title}\n${reflection}`);
 
-      // ローカルストレージに保存
-      const existingReflections = JSON.parse(
-        localStorage.getItem('reflections') || '[]'
-      );
-      existingReflections.push(reflectionData);
-      localStorage.setItem('reflections', JSON.stringify(existingReflections));
+        // お世話の状態をリセット（わんちゃんが戻ってくる）
+        localStorage.setItem('lastCareTime', new Date().toISOString());
+        localStorage.setItem('dogReturned', 'true');
 
-      // お世話の状態をリセット（わんちゃんが戻ってくる）
-      localStorage.setItem('lastCareTime', new Date().toISOString());
-      localStorage.setItem('dogReturned', 'true');
-
-      // 少し待ってから戻ってくる演出画面に遷移
-      setTimeout(() => {
-        router.push('/welcome-back');
-      }, 1000);
+        setTimeout(() => {
+          router.push('/welcome-back');
+        }, 1000);
+      } catch (error) {
+        alert('保存に失敗しました。ネットワークを確認してください。');
+        console.error(error);
+        setIsSubmitting(false);
+      }
     }
   };
-
+  // 反省文のヒント
   const reflectionPrompts = [
     'わんちゃんにどんなことをしてあげられなかったですか？',
     'わんちゃんはどんな気持ちだったと思いますか？',
