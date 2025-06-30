@@ -21,12 +21,19 @@ export default function AdminPage() {
   const router = useRouter();
 
   // 追加するhooksを呼ぶ
+  // CareSettings取得
   const {
     careSettings,
     loading: settingsLoading,
     error: settingsError,
   } = useCareSettings();
-  const { careLog, loading: logsLoading, error: logsError } = useCareLogs();
+  // careSettingsが取得できた後でcareLogsを呼ぶ
+  const careSettingId = careSettings?.id ?? 0;
+  const {
+    careLog,
+    loading: logsLoading,
+    error: logsError,
+  } = useCareLogs(careSettingId);
 
   // 現在の経過日数や目標日数、子どもの名前の状態管理
   const [consecutiveDays, setConsecutiveDays] = useState<number | null>(null);
@@ -35,8 +42,12 @@ export default function AdminPage() {
 
   // データを取得したらchildNameとconsecutiveDaysとtargetDaysを更新
   useEffect(() => {
-    // 両方のデータが取得出来たら
+    // careSettingsのデータが取得出来たら
     if (careSettings) {
+      console.log(
+        'adminぺージでcareSettingsのデータ取れているか:',
+        careSettings
+      );
       setChildName(careSettings.child_name);
 
       // 連続日数の差を計算
@@ -57,7 +68,9 @@ export default function AdminPage() {
     }
   }, [careSettings]);
 
+  // =========================
   // 目標カードだけ分岐レンダリング
+  // =========================
   const renderGoalCard = () => {
     if (settingsLoading || logsLoading) {
       return (
@@ -81,7 +94,7 @@ export default function AdminPage() {
       );
     }
 
-    if (consecutiveDays === null || childName === '') {
+    if (!careSettings || consecutiveDays === null || childName === '') {
       return (
         <Card className="mb-4 shadow-lg">
           <CardContent>
@@ -91,7 +104,7 @@ export default function AdminPage() {
       );
     }
 
-    if (!careLog) {
+    if (!careLog || careLog.care_log_id === null) {
       return (
         <Card className="mb-4 shadow-lg border border-orange-200 bg-orange-50">
           <CardContent>
@@ -103,7 +116,7 @@ export default function AdminPage() {
       );
     }
 
-    // ここまで来たらすべてのデータOK
+    // ここまで来たらすべてのデータOK(careLogがあるならreturnできる)
     return (
       <Card className="mb-4 shadow-lg">
         <CardHeader className="pb-3">
@@ -138,41 +151,7 @@ export default function AdminPage() {
       </Card>
     );
   };
-  /*
-  // ローディング中やエラーがあれば表示
-  if (settingsLoading || logsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">読み込み中...</p>
-      </div>
-    );
-  }
-  if (settingsError || logsError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">エラーが発生しました</p>
-      </div>
-    );
-  }
 
-  // nullチェック
-  if (consecutiveDays === null || childName === '') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">データがありません</p>
-      </div>
-    );
-  }
-
-  // 今日の日付の記録(care_log)があるかどうか
-  const hasTodayLog = careLog !== null;
-  // hasTodayLogがtrueなら → 目標カードを表示
-  // hasTodayLogがfalseなら → 「今日はまだお世話記録がありません」を表示
-
-  // const handleGoalClear = () => {
-  // router.push('/goal-clear');
-  // };
-*/
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs mx-auto">
