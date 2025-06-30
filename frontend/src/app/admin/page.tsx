@@ -26,7 +26,7 @@ export default function AdminPage() {
     loading: settingsLoading,
     error: settingsError,
   } = useCareSettings();
-  const { careLogs, loading: logsLoading, error: logsError } = useCareLogs();
+  const { careLog, loading: logsLoading, error: logsError } = useCareLogs();
 
   // 現在の経過日数や目標日数、子どもの名前の状態管理
   const [consecutiveDays, setConsecutiveDays] = useState<number | null>(null);
@@ -36,7 +36,7 @@ export default function AdminPage() {
   // データを取得したらchildNameとconsecutiveDaysとtargetDaysを更新
   useEffect(() => {
     // 両方のデータが取得出来たら
-    if (careSettings && careLogs) {
+    if (careSettings) {
       setChildName(careSettings.child_name);
 
       // 連続日数の差を計算
@@ -55,8 +55,90 @@ export default function AdminPage() {
 
       setTargetDays(targetDiffDays);
     }
-  }, [careSettings, careLogs]);
+  }, [careSettings]);
 
+  // 目標カードだけ分岐レンダリング
+  const renderGoalCard = () => {
+    if (settingsLoading || logsLoading) {
+      return (
+        <Card className="mb-4 shadow-lg">
+          <CardContent>
+            <p className="text-center text-gray-500 py-4">読み込み中...</p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (settingsError || logsError) {
+      return (
+        <Card className="mb-4 shadow-lg">
+          <CardContent>
+            <p className="text-center text-red-500 py-4">
+              エラーが発生しました
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (consecutiveDays === null || childName === '') {
+      return (
+        <Card className="mb-4 shadow-lg">
+          <CardContent>
+            <p className="text-center text-gray-500 py-4">データがありません</p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (!careLog) {
+      return (
+        <Card className="mb-4 shadow-lg border border-orange-200 bg-orange-50">
+          <CardContent>
+            <p className="text-center text-orange-800 py-4">
+              今日はまだお世話記録がありません
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // ここまで来たらすべてのデータOK
+    return (
+      <Card className="mb-4 shadow-lg">
+        <CardHeader className="pb-3">
+          <h2 className="text-lg font-bold flex items-center">
+            <Target className="mr-2 h-5 w-5 text-orange-500" />
+            {childName}さん、{consecutiveDays}日達成中！
+          </h2>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+              <p className="text-center font-medium text-orange-800">
+                {targetDays}日連続でお世話を達成しよう！
+              </p>
+              <div className="mt-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-orange-700">
+                    現在の連続日数
+                  </span>
+                  <span className="text-sm font-bold text-orange-800">
+                    {consecutiveDays}/{targetDays}日
+                  </span>
+                </div>
+                <Progress
+                  value={(consecutiveDays / targetDays) * 100}
+                  className="h-2"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+  /*
   // ローディング中やエラーがあれば表示
   if (settingsLoading || logsLoading) {
     return (
@@ -82,10 +164,15 @@ export default function AdminPage() {
     );
   }
 
+  // 今日の日付の記録(care_log)があるかどうか
+  const hasTodayLog = careLog !== null;
+  // hasTodayLogがtrueなら → 目標カードを表示
+  // hasTodayLogがfalseなら → 「今日はまだお世話記録がありません」を表示
+
   // const handleGoalClear = () => {
   // router.push('/goal-clear');
   // };
-
+*/
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs mx-auto">
@@ -102,37 +189,7 @@ export default function AdminPage() {
         </div>
 
         {/* 家族会議で決めた目標 */}
-        <Card className="mb-4 shadow-lg">
-          <CardHeader className="pb-3">
-            <h2 className="text-lg font-bold flex items-center">
-              <Target className="mr-2 h-5 w-5 text-orange-500" />
-              {childName}さん、{consecutiveDays}日達成中！
-            </h2>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                <p className="text-center font-medium text-orange-800">
-                  {targetDays}日連続でお世話を達成しよう！
-                </p>
-                <div className="mt-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm text-orange-700">
-                      現在の連続日数
-                    </span>
-                    <span className="text-sm font-bold text-orange-800">
-                      {consecutiveDays}/{targetDays}日
-                    </span>
-                  </div>
-                  <Progress
-                    value={(consecutiveDays / targetDays) * 100}
-                    className="h-2"
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {renderGoalCard()}
 
         {/* ナビゲーションボタン */}
         <div className="space-y-3">
