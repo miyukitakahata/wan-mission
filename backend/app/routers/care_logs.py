@@ -1,7 +1,7 @@
 """お世話記録（care_logs）APIルーターの定義"""
 
 # 標準ライブラリ
-from datetime import date, datetime
+from datetime import datetime, timedelta, timezone
 
 # サードパーティライブラリ
 from fastapi import APIRouter, HTTPException, status, Query
@@ -17,6 +17,9 @@ from app.schemas.care_logs import (
 
 care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
 
+# 日本時間 (UTC+9)
+JST = timezone(timedelta(hours=9))
+
 
 # POST /api/care_logs のルーター
 @care_logs_router.post(
@@ -31,7 +34,6 @@ async def create_care_log(request: CareLogCreateRequest):
     """
     try:
         print(f"[care_logs] POST受信: {request}")
-
         # 対応する care_setting を取得（1つしかない想定）
         # TO-DO ユーザーごとに対応する care_setting を取得（1つしかない想定）
         care_setting = await prisma_client.care_settings.find_first()
@@ -39,23 +41,20 @@ async def create_care_log(request: CareLogCreateRequest):
             print("[care_logs] care_setting not found")
             raise HTTPException(status_code=404, detail="Care setting not found")
 
-        print(f"[care_logs] care_setting取得成功: {care_setting.id}")
-
-        # 日付をdatetimeに変換（Prismaスキーマに合わせる）
-        date_as_datetime = datetime.combine(request.date, datetime.min.time())
-        print(f"[care_logs] 変換後日付: {date_as_datetime}")
-
+        # 日本時間で日付範囲を作成
+        today_jst = request.date
+        start_of_day_jst = datetime.combine(today_jst, datetime.min.time(), tzinfo=JST)
+        end_of_day_jst = datetime.combine(today_jst, datetime.max.time(), tzinfo=JST)
         # すでに同じ日付の記録が存在するかチェック
-        # 同じ日の範囲で検索（00:00:00 ～ 23:59:59）
-        start_of_day = date_as_datetime
-        end_of_day = date_as_datetime.replace(hour=23, minute=59, second=59)
+        start_of_day_utc = start_of_day_jst.astimezone(timezone.utc)
+        end_of_day_utc = end_of_day_jst.astimezone(timezone.utc)
 
         existing_log = await prisma_client.care_logs.find_first(
             where={
                 "care_setting_id": care_setting.id,
                 "date": {
-                    "gte": start_of_day,
-                    "lte": end_of_day,
+                    "gte": start_of_day_utc,
+                    "lte": end_of_day_utc,
                 },
             }
         )
@@ -67,11 +66,13 @@ async def create_care_log(request: CareLogCreateRequest):
                 detail="この日付の記録は既に存在します。PATCHで更新してください。",
             )
 
-        # 新規記録を作成
+        # 保存する日時はUTC
+        date_as_datetime = start_of_day_jst.astimezone(timezone.utc)
+
         new_log = await prisma_client.care_logs.create(
             data={
                 "care_setting_id": care_setting.id,
-                "date": date_as_datetime,  # datetimeとして保存
+                "date": date_as_datetime,
                 "fed_morning": request.fed_morning,
                 "fed_night": request.fed_night,
             }
@@ -81,13 +82,11 @@ async def create_care_log(request: CareLogCreateRequest):
         return new_log
 
     except HTTPException:
-        # HTTPExceptionはそのまま再発生
         raise
     except Exception as e:
         print(f"[care_logs] POST エラー詳細: {type(e).__name__}: {e}")
         raise HTTPException(
-            status_code=500,
-            detail="お世話記録の登録中にエラーが発生しました",
+            status_code=500, detail="お世話記録の登録中にエラーが発生しました"
         ) from e
 
 
@@ -148,7 +147,7 @@ async def update_care_log(
 )
 async def get_today_care_log(care_setting_id: int = Query(...)):
     """
-    今日のお世話記録と散歩タスク完了状況を取得するAPI
+    今日（日本時間）のお世話記録と散歩タスク完了状況を取得するAPI
     - fed_morning, fed_night: care_logs から取得
     - walked: walk_missions の result が 'success' なら True
     - care_log_id: care_logs の主キー（POST/PATCHと同じ形式で返す）
@@ -156,27 +155,34 @@ async def get_today_care_log(care_setting_id: int = Query(...)):
     try:
         print(f"[care_logs] GET today受信: care_setting_id={care_setting_id}")
 
-        today = date.today()
-        # 今日の範囲を定義（datetime型で）
-        start_of_day = datetime.combine(today, datetime.min.time())
-        end_of_day = datetime.combine(today, datetime.max.time())
+        # 現在の日本時間を取得
+        now_jst = datetime.now(JST)
+        today_jst = now_jst.date()
 
-        print(f"[care_logs] 検索範囲: {start_of_day} ～ {end_of_day}")
+        # 日本時間での今日の開始と終了を定義
+        start_of_day_jst = datetime.combine(today_jst, datetime.min.time(), tzinfo=JST)
+        end_of_day_jst = datetime.combine(today_jst, datetime.max.time(), tzinfo=JST)
+
+        # UTC に変換（DBのUTC保存に合わせる）
+        start_of_day_utc = start_of_day_jst.astimezone(timezone.utc)
+        end_of_day_utc = end_of_day_jst.astimezone(timezone.utc)
+
+        print(f"[care_logs] 検索範囲(JST): {start_of_day_jst} ～ {end_of_day_jst}")
+        print(f"[care_logs] 検索範囲(UTC): {start_of_day_utc} ～ {end_of_day_utc}")
 
         # 今日の care_log を取得
         care_log = await prisma_client.care_logs.find_first(
             where={
                 "care_setting_id": care_setting_id,
                 "date": {
-                    "gte": start_of_day,
-                    "lte": end_of_day,
+                    "gte": start_of_day_utc,
+                    "lte": end_of_day_utc,
                 },
             }
         )
 
         if not care_log:
             print("[care_logs] 今日の記録なし、デフォルト値で返却")
-            # レコードがなければデフォルト値で返す
             fed_morning = False
             fed_night = False
             care_log_id = None
@@ -194,8 +200,8 @@ async def get_today_care_log(care_setting_id: int = Query(...)):
                 where={
                     "care_log_id": care_log_id,
                     "started_at": {
-                        "gte": start_of_day,
-                        "lte": end_of_day,
+                        "gte": start_of_day_utc,
+                        "lte": end_of_day_utc,
                     },
                     "result": "success",
                 }
@@ -219,4 +225,71 @@ async def get_today_care_log(care_setting_id: int = Query(...)):
         raise HTTPException(
             status_code=500,
             detail="今日のお世話記録取得中にエラーが発生しました",
+        ) from e
+
+
+# GET /api/care_logs/by_date のルーター（昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト用のAPI）
+@care_logs_router.get(
+    "/by_date",
+    response_model=CareLogTodayResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_care_log_by_date(
+    care_setting_id: int = Query(...),
+    date: str = Query(...),
+):
+    """
+    指定日（日本時間）の care_log と散歩タスク完了状況を取得するAPI
+    """
+    try:
+        target_date = datetime.strptime(date, "%Y-%m-%d").date()
+        start_of_day_jst = datetime.combine(
+            target_date, datetime.min.time(), tzinfo=JST
+        )
+        end_of_day_jst = datetime.combine(target_date, datetime.max.time(), tzinfo=JST)
+
+        start_of_day_utc = start_of_day_jst.astimezone(timezone.utc)
+        end_of_day_utc = end_of_day_jst.astimezone(timezone.utc)
+
+        care_log = await prisma_client.care_logs.find_first(
+            where={
+                "care_setting_id": care_setting_id,
+                "date": {
+                    "gte": start_of_day_utc,
+                    "lte": end_of_day_utc,
+                },
+            }
+        )
+
+        if not care_log:
+            return CareLogTodayResponse(
+                care_log_id=None,
+                fed_morning=False,
+                fed_night=False,
+                walked=False,
+            )
+
+        missions = await prisma_client.walk_missions.find_many(
+            where={
+                "care_log_id": care_log.id,
+                "started_at": {
+                    "gte": start_of_day_utc,
+                    "lte": end_of_day_utc,
+                },
+                "result": "success",
+            }
+        )
+        walked = len(missions) > 0
+
+        return CareLogTodayResponse(
+            care_log_id=care_log.id,
+            fed_morning=care_log.fed_morning or False,
+            fed_night=care_log.fed_night or False,
+            walked=walked,
+        )
+    except Exception as e:
+        print(f"[care_logs] GET by_date エラー詳細: {type(e).__name__}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="指定日の記録取得中にエラーが発生しました",
         ) from e
