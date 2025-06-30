@@ -1,13 +1,17 @@
 """散歩ミッションの作成およびレスポンス用スキーマ定義"""
 
+# 標準ライブラリ
 from datetime import datetime
+from typing import Optional
+
+# サードパーティライブラリ
 from pydantic import BaseModel, Field
 
 
 class WalkMissionCreate(BaseModel):
     """散歩ミッション作成時のリクエストスキーマ"""
 
-    care_log_id: int  # 関連するお世話ログのID
+    care_log_id: Optional[int] = None  # 指定しない、自動設定
     started_at: datetime  # 散歩開始日時
     ended_at: datetime  # 散歩終了日時
     total_distance_m: int  # 総移動距離（メートル）
