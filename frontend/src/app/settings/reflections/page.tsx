@@ -14,6 +14,7 @@ type ReflectionNote = {
   created_at: string;
   updated_at: string;
   care_setting_id: number;
+  date: string;
 };
 
 export default function ReflectionsPage() {

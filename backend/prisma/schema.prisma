@@ -16,7 +16,6 @@ model users {
   created_at    DateTime?       @default(now())
   updated_at    DateTime?       @updatedAt
   care_settings care_settings[]
-  message_logs  message_logs[]
   payment       payment[]
 }
 
@@ -31,24 +30,25 @@ model care_settings {
   morning_meal_time DateTime?
   night_meal_time   DateTime?
   walk_time         DateTime?
-  care_password     String?
   care_clear_status String?
   created_at        DateTime?          @default(now())
   updated_at        DateTime?          @updatedAt
+  care_password          String?
   care_logs         care_logs[]
   user              users              @relation(fields: [user_id], references: [id])
   reflection_notes  reflection_notes[]
 }
 
 model care_logs {
-  id              Int             @id @default(autoincrement())
-  care_setting_id Int
-  date            DateTime?
-  fed_morning     Boolean?
-  fed_night       Boolean?
-  created_at      DateTime?       @default(now())
-  care_setting    care_settings   @relation(fields: [care_setting_id], references: [id])
-  walk_missions   walk_missions[]
+  id                    Int           @id @default(autoincrement())
+  care_setting_id       Int
+  date                  String
+  fed_morning           Boolean?
+  fed_night             Boolean?
+  created_at            DateTime?     @default(now())
+  walk_result           Boolean?
+  walk_total_distance_m Int?
+  care_setting          care_settings @relation(fields: [care_setting_id], references: [id])
 }
 
 model reflection_notes {
@@ -59,26 +59,6 @@ model reflection_notes {
   created_at         DateTime?     @default(now())
   updated_at         DateTime?     @updatedAt
   care_setting       care_settings @relation(fields: [care_setting_id], references: [id])
-}
-
-model message_logs {
-  id           Int       @id @default(autoincrement())
-  user_id      String
-  content      String?
-  is_llm_based Boolean?
-  created_at   DateTime? @default(now())
-  user         users     @relation(fields: [user_id], references: [id])
-}
-
-model walk_missions {
-  id               Int       @id @default(autoincrement())
-  care_log_id      Int
-  started_at       DateTime?
-  ended_at         DateTime?
-  total_distance_m Int?
-  result           String?
-  created_at       DateTime? @default(now())
-  care_log         care_logs @relation(fields: [care_log_id], references: [id])
 }
 
 model payment {
