@@ -57,70 +57,92 @@ export default function DashboardPage() {
     fetchCareLog();
   }, [router]);
 
+  // 開発のため、一旦コメントアウトします。
   // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
-  useEffect(() => {
-    const checkYesterdayWalk = async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const dateStr = yesterday.toISOString().slice(0, 10);
-      try {
-        const res = await fetch(
-          `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettingId}&date=${dateStr}`
-        );
-        const data = await res.json();
-        if (data && data.care_log_id && !data.walked) {
-          router.push('/sad-departure');
-        }
-      } catch (e) {
-        console.error('昨日の散歩確認エラー', e);
-      }
-    };
-    checkYesterdayWalk();
-  }, [router]);
+  // useEffect(() => {
+  //   const checkYesterdayWalk = async () => {
+  //     const yesterday = new Date();
+  //     yesterday.setDate(yesterday.getDate() - 1);
+  //     const dateStr = yesterday.toISOString().slice(0, 10);
+  //     try {
+  //       const res = await fetch(
+  //         `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettingId}&date=${dateStr}`
+  //       );
+  //       const data = await res.json();
+  //       if (data && data.care_log_id && !data.walked) {
+  //         router.push('/sad-departure');
+  //       }
+  //     } catch (e) {
+  //       console.error('昨日の散歩確認エラー', e);
+  //     }
+  //   };
+  //   checkYesterdayWalk();
+  // }, [router]);
 
   // ミッション定義
   const missions = [
     {
       id: 'morning-food',
-      name: '朝ごはんをあげる',
+      name: 'あさごはん',
       icon: Coffee,
       completed: careLog.fed_morning,
     },
     {
       id: 'evening-food',
-      name: '夕ご飯をあげる',
+      name: 'ゆうごはん',
       icon: Utensils,
       completed: careLog.fed_night,
     },
     {
       id: 'walk',
-      name: '散歩に行く',
+      name: 'おさんぽ',
       icon: Footprints,
       completed: careLog.walked,
     },
   ];
-
+  // to-do: hiragana に変換する
   // わんちゃんのひとこと
   const dogMessages = [
-    '今日も一緒に遊ぼうね！',
-    'お腹すいたワン！',
-    '散歩に行きたいワン〜',
-    'ありがとうワン！',
-    '元気いっぱいだワン！',
-    '撫でてくれてありがとうワン♪',
-    '今日はいい天気だワン！',
-    '一緒にいると楽しいワン〜',
-    'お世話してくれて嬉しいワン！',
-    '遊ぼうワン！ワン！',
-    '大好きだワン♡',
-    '今度はどこに行くワン？',
+    // '今日も一緒に遊ぼうね！',
+    // 'お腹すいたワン！',
+    // '散歩に行きたいワン〜',
+    // 'ありがとうワン！',
+    // '元気いっぱいだワン！',
+    // '撫でてくれてありがとうワン♪',
+    // '今日はいい天気だワン！',
+    // '一緒にいると楽しいワン〜',
+    // 'お世話してくれて嬉しいワン！',
+    'あそぼうワン！ワン！',
+    // '大好きだワン♡',
+    // '今度はどこに行くワン？',
   ];
 
   const [currentMessage, setCurrentMessage] = useState(dogMessages[0]);
 
-  const handleDogClick = () => {
-    const randomIndex = Math.floor(Math.random() * dogMessages.length);
-    setCurrentMessage(dogMessages[randomIndex]);
+  const handleDogClick = async () => {
+    try {
+      // Firebase認証トークンを取得
+      //   const auth = getAuth();
+      //   const user = auth.currentUser;
+      // if (!user) {
+      //     throw new Error('ログインが必要です');
+      //   }
+      // const idToken = await user.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/message_logs/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${idToken}` // 認証トークンを追加
+        },
+      });
+      if (!res.ok) {
+        throw new Error('メッセージ取得失敗');
+      }
+      const data = await res.json();
+      setCurrentMessage(data.message);
+    } catch (error) {
+      console.error('犬メッセージ取得エラー:', error);
+    }
   };
 
   // お世話タスク完了時の処理
@@ -214,7 +236,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/dashboard')}
               >
                 <Heart className="h-5 w-5 mb-1" />
-                <span className="text-xs">お世話</span>
+                <span className="text-xs">おせわ</span>
               </Button>
               <Button
                 variant="outline"
@@ -222,7 +244,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/walk')}
               >
                 <Footprints className="h-5 w-5 mb-1" />
-                <span className="text-xs">お散歩</span>
+                <span className="text-xs">おさんぽ</span>
               </Button>
               <Button
                 variant="outline"
@@ -230,7 +252,7 @@ export default function DashboardPage() {
                 onClick={() => router.push('/admin-login')}
               >
                 <Settings className="h-5 w-5 mb-1" />
-                <span className="text-xs">管理者</span>
+                <span className="text-xs">かんりしゃ</span>
               </Button>
             </div>
           </div>
@@ -282,7 +304,7 @@ export default function DashboardPage() {
                 <CardHeader className="pb-3">
                   <h2 className="text-lg font-bold flex items-center">
                     <Star className="mr-2 h-5 w-5 text-yellow-500" />
-                    今日のお世話ミッション
+                    今日のおせわミッション
                   </h2>
                 </CardHeader>
                 <CardContent>
