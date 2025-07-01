@@ -1,4 +1,4 @@
-// GPS 距離計算テストページ（平衡版）
+// GPS 距離計算テストページ（cl改善版）
 // 未来のテストのために保存される
 
 'use client';
@@ -22,7 +22,7 @@ export default function WalkGPSTestPage() {
   const totalDistanceRef = useRef(0);
   const lastUpdateTimeRef = useRef<Date | null>(null);
 
-  // 平衡版追加変数
+  // cl改善版追加変数
   const accumulatedDistanceRef = useRef(0);
   const consecutiveSmallMovesRef = useRef(0);
   const positionHistoryRef = useRef<
@@ -109,7 +109,7 @@ export default function WalkGPSTestPage() {
     return Math.min(baseThreshold, 10); // 最大10m
   };
 
-  // GPS位置更新処理（平衡版）
+  // GPS位置更新処理（cl改善版）
   const handlePositionUpdate = (position: GeolocationPosition) => {
     const now = new Date();
     const currentLat = position.coords.latitude;
@@ -238,7 +238,7 @@ export default function WalkGPSTestPage() {
     startTimeRef.current = new Date();
     lastUpdateTimeRef.current = null;
 
-    addDebugInfo('散歩開始 - 平衡版GPS追跡開始');
+    addDebugInfo('散歩開始 - cl改善版GPS追跡開始');
 
     // GPS追跡開始
     watchIdRef.current = navigator.geolocation.watchPosition(
@@ -322,7 +322,7 @@ export default function WalkGPSTestPage() {
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50 p-4">
       <div className="max-w-md mx-auto space-y-6">
         <h1 className="text-2xl font-bold text-center text-green-800 mb-6">
-          🚶‍♀️ GPS距離テスト（平衡版）
+          🚶‍♀️ GPS距離テスト（cl改善版）
         </h1>
 
         {/* メイン情報カード */}
@@ -393,7 +393,7 @@ export default function WalkGPSTestPage() {
         {/* 使用説明 */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">テスト方法（平衡版）</CardTitle>
+            <CardTitle className="text-sm">テスト方法（cl改善版）</CardTitle>
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <p>1. 屋外の開けた場所に移動</p>
@@ -402,7 +402,7 @@ export default function WalkGPSTestPage() {
             <p>4. デバッグ情報でGPS更新を確認</p>
             <div className="bg-blue-50 p-2 rounded">
               <p className="text-blue-800 font-medium text-xs">
-                📝 平衡版改善点：
+                📝 cl改善版改善点：
                 <br />
                 • 累積距離システム：小さな移動も蓄積
                 <br />

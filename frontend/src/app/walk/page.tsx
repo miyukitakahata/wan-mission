@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Play, Square, Clock } from 'lucide-react';
+// import { ArrowLeft, Play, Square, Clock } from 'lucide-react';
+import { ArrowLeft, Clock } from 'lucide-react';
+
 import {
   Dialog,
   DialogContent,
@@ -14,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { GPSTracker } from '@/app/api/geo/geoLocation';
 import { saveWalkRecord } from '@/app/api/walk_api/walkApi';
+import DogWalkAnimation from '@/components/ui/dog-walk-animation';
 
 export default function WalkPage() {
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function WalkPage() {
 
   // GPS関連の状態管理
   const [gpsTracker] = useState(() => new GPSTracker());
-  const [gpsStatus, setGpsStatus] = useState('準備中');
+  // const [gpsStatus, setGpsStatus] = useState('準備中');
 
   // 時間フォーマット関数
   const formatTime = (seconds: number) => {
@@ -48,12 +51,13 @@ export default function WalkPage() {
     // エラーコールバック設定
     gpsTracker.setErrorCallback((error: string) => {
       console.error('GPS エラー:', error);
-      setGpsStatus(`エラー: ${error}`);
+      // setGpsStatus(`エラー: ${error}`);
     });
 
     // 位置更新コールバック設定
     gpsTracker.setPositionCallback((position) => {
-      setGpsStatus(`GPS精度: ${position.accuracy.toFixed(1)}m`);
+      console.log(`GPS精度: ${position.accuracy.toFixed(1)}m`);
+      // setGpsStatus(`GPS精度: ${position.accuracy.toFixed(1)}m`);
     });
 
     return () => {
@@ -68,14 +72,15 @@ export default function WalkPage() {
     setIsWalking(true);
     setWalkTime(0);
     setWalkDistance(0);
-    setGpsStatus('GPS初期化中...');
+    // setGpsStatus('GPS初期化中...');
 
     try {
       // GPS追跡開始
       const trackingStarted = await gpsTracker.startTracking();
 
       if (trackingStarted) {
-        setGpsStatus('GPS追跡開始');
+        console.log('GPS追跡開始');
+        // setGpsStatus('GPS追跡開始');
 
         // 時間カウンタ開始
         const timer = setInterval(() => {
@@ -84,26 +89,26 @@ export default function WalkPage() {
         setWalkTimer(timer);
 
         setDialogContent({
-          title: 'お散歩記録開始！',
-          description:
-            'GPS追跡を開始しました。安全に気をつけて楽しい散歩をしてください！',
+          title: 'おさんぽかいし！',
+          description: 'きをつけて、たのしくおさんぽしてね！',
         });
         setShowDialog(true);
       } else {
         // GPS開始失敗の場合
         setIsWalking(false);
-        setGpsStatus('GPS初期化失敗');
+        console.error('GPS初期化失敗');
+        // setGpsStatus('GPS初期化失敗');
         setDialogContent({
-          title: 'GPS エラー',
+          title: 'ばしょがわからないよ',
           description:
-            '位置情報の取得に失敗しました。位置情報の許可を確認してください。',
+            'ばしょのじょうほうが うまくとれなかったみたい。もういちどためしてみてね！',
         });
         setShowDialog(true);
       }
     } catch (error) {
       console.error('散歩開始エラー:', error);
       setIsWalking(false);
-      setGpsStatus('開始エラー');
+      // setGpsStatus('開始エラー');
     }
   };
 
@@ -115,7 +120,8 @@ export default function WalkPage() {
 
     // GPS追跡停止
     gpsTracker.stopTracking();
-    setGpsStatus('GPS停止');
+    console.log('GPS追跡停止');
+    // setGpsStatus('GPS停止');
     setIsWalking(false);
 
     // 散歩データを準備
@@ -155,8 +161,8 @@ export default function WalkPage() {
       }
 
       setDialogContent({
-        title: 'お散歩完了！',
-        description: `距離: ${Math.round(walkDistance)}m\n時間: ${formatTime(walkTime)}\n記録を自動保存しました。`,
+        title: 'おさんぽおつかれさま！',
+        description: `きょり：${Math.round(walkDistance)}m\nじかん：${formatTime(walkTime)}\nきょうもがんばったね！きろくしたよ。`,
       });
       setShowDialog(true);
     } catch (error) {
@@ -200,144 +206,107 @@ export default function WalkPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-100 to-blue-100 relative overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0 opacity-30">
-        <Image
-          src="/images/walk-background.png"
-          alt="Walk background"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-green-50 px-6 py-8">
+      <div className="flex flex-col h-screen max-w-[390px] mx-auto overflow-hidden">
+        {/* ヘッダー */}
+        <div className="mb-10 flex items-center p-3 bg-green-50 h-14 flex-shrink-0">
           <Button
             variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            className="text-green-700 hover:bg-green-200"
+            onClick={() => router.push('/dashboard')}
+            className="mr-2 p-2"
           >
-            <ArrowLeft className="h-6 w-6" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-green-800">お散歩</h1>
-          <div className="w-10" /> {/* Spacer */}
+          <h1 className="text-lg font-bold">おさんぽ</h1>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-md mx-auto space-y-8">
-          {/* Walk Stats */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-lg">
-            <div className="grid grid-cols-2 gap-6 text-center">
-              <div>
-                <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {Math.round(walkDistance)}m
-                </div>
-                <div className="text-sm text-gray-600">距離</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-green-600 mb-2">
-                  {formatTime(walkTime)}
-                </div>
-                <div className="text-sm text-gray-600">時間</div>
-              </div>
+        {/* メインコンテンツ */}
+        <div className="mb-10 w-full max-w-xs">
+          <div className="mb-10 bg-white rounded-3xl px-8 py-5 border-2 border-green-200 flex flex-col justify-center items-center">
+            {/* 距離＋時間：縦並びセンター */}
+            <div className="flex flex-col items-center justify-center w-full">
+              {/* 距離 */}
+              <span className="text-base font-bold text-green-800">
+                {Math.round(walkDistance)} メートル
+              </span>
+              {/* 時間 */}
+              <span className="flex items-center text-base text-gray-800 font-bold mt-2">
+                <Clock className="h-5 w-5 text-blue-500 mr-1" />
+                {formatTime(walkTime)}
+              </span>
             </div>
-
-            {/* GPS Status */}
-            <div className="mt-4 text-center">
-              <div className="text-xs text-gray-500">{gpsStatus}</div>
-            </div>
+            {/* 2行目 */}
+            {/* <div className="flex flex-row items-center justify-between w-full"> */}
+            {/* 状態 */}
+            {/* <span className="text-base text-green-600 font-medium">
+              {isWalking ? 'お散歩中' : 'お散歩前'} */}
+            {/* </span> */}
+            {/* GPS */}
+            {/* <span className="text-xs text-gray-500">{gpsStatus}</span>
+          </div> */}
           </div>
 
-          {/* Dog Image Centered */}
-          <div className="flex justify-center">
-            <div className="relative w-40 h-40">
-              <Image
-                src="/images/cute-puppy.png"
-                alt="わんちゃん"
-                fill
-                style={{ objectFit: 'contain' }}
-                priority
-              />
-            </div>
-          </div>
-
-          {/* Walk Control */}
-          <div className="text-center space-y-4">
-            {!isWalking ? (
-              <Button
-                onClick={startWalk}
-                className="w-full max-w-xs h-12 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold text-base flex items-center justify-center shadow-md mx-auto"
-              >
-                <Play className="h-5 w-5 mr-2" />
-                おさんぽかいし
-              </Button>
-            ) : (
-              <Button
-                onClick={endWalk}
-                className="w-full max-w-xs h-12 rounded-full bg-red-500 hover:bg-red-600 text-white font-bold text-base flex items-center justify-center shadow-md mx-auto"
-              >
-                <Square className="h-5 w-5 mr-2" />
-                おさんぽしゅうりょう
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              className="w-full max-w-xs h-12 rounded-full font-bold text-base mt-2 mx-auto"
-              onClick={() => router.back()}
+          {/* アニメーションエリア */}
+          <div className="mb-10 w-full flex justify-center">
+            <div
+              className="border-2 border-gray-200 rounded-3xl overflow-hidden shadow-md bg-white flex items-center justify-center"
+              style={{ width: 280, height: 200 }}
             >
-              戻る
-            </Button>
-            <div className="text-center">
-              <p className="text-gray-600 text-sm">
-                {isWalking
-                  ? '散歩中です。安全に気をつけて！'
-                  : 'ボタンを押して散歩を開始しましょう'}
-              </p>
+              <DogWalkAnimation isWalking={isWalking} />
             </div>
           </div>
 
-          {/* Instructions */}
+          {/* お散歩前 or お散歩中 状態テキスト（中央寄せ） */}
+          <div className="mb-8 w-full flex flex-col items-center justify-center">
+            <span className="text-lg text-green-600 font-bold">
+              {isWalking ? 'おさんぽちゅう' : 'おさんぽまえ'}
+            </span>
+            {/* <span className="text-xs text-gray-500 mt-1">{gpsStatus}</span> */}
+          </div>
+
+          {/* 開始ボタン */}
           {!isWalking && (
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-md">
-              <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-                <Clock className="h-5 w-5 mr-2 text-blue-500" />
-                散歩のコツ
-              </h3>
-              <ul className="text-sm text-gray-600 space-y-2">
-                <li>• 安全な場所を選んで散歩しましょう</li>
-                <li>• 水分補給を忘れずに</li>
-              </ul>
-            </div>
+            <Button
+              className="w-full max-w-xs bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl shadow-xl text-xl font-bold mb-4"
+              onClick={startWalk}
+            >
+              おさんぽかいし
+            </Button>
+          )}
+
+          {/* 終了ボタン */}
+          {isWalking && (
+            <Button
+              className="w-full max-w-xs bg-red-500 hover:bg-red-600 text-white py-5 rounded-2xl shadow-xl text-xl font-bold mt-4"
+              onClick={endWalk}
+            >
+              おさんぽおわり
+            </Button>
           )}
         </div>
-      </div>
 
-      {/* Dialog */}
-      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
-        <DialogContent className="max-w-sm mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-center text-green-800">
-              {dialogContent.title}
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              {dialogContent.description}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center mt-4">
-            <Button
-              onClick={handleDialogClose}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              OK
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {/* ダイアログ部分 */}
+        <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+          <DialogContent className="bg-white rounded-lg max-w-sm mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl">
+                {dialogContent.title}
+              </DialogTitle>
+              <DialogDescription className="text-center pt-2 text-base whitespace-pre-line">
+                {dialogContent.description}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center mt-4">
+              <Button
+                onClick={handleDialogClose}
+                className="bg-black text-white border border-white px-6 py-2 rounded-lg shadow-none hover:bg-gray-800 active:bg-gray-900"
+              >
+                OK
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
