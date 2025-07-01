@@ -57,6 +57,7 @@ export default function DashboardPage() {
     fetchCareLog();
   }, [router]);
 
+  // To-do
   // 開発のため、一旦コメントアウトします。
   // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
   // useEffect(() => {
@@ -100,22 +101,9 @@ export default function DashboardPage() {
       completed: careLog.walked,
     },
   ];
-  // to-do: hiragana に変換する
+
   // わんちゃんのひとこと
-  const dogMessages = [
-    // '今日も一緒に遊ぼうね！',
-    // 'お腹すいたワン！',
-    // '散歩に行きたいワン〜',
-    // 'ありがとうワン！',
-    // '元気いっぱいだワン！',
-    // '撫でてくれてありがとうワン♪',
-    // '今日はいい天気だワン！',
-    // '一緒にいると楽しいワン〜',
-    // 'お世話してくれて嬉しいワン！',
-    'あそぼうワン！ワン！',
-    // '大好きだワン♡',
-    // '今度はどこに行くワン？',
-  ];
+  const dogMessages = ['きょうもいっしょにあそぼうね！'];
 
   const [currentMessage, setCurrentMessage] = useState(dogMessages[0]);
 
@@ -220,7 +208,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* 載入中顯示 */}
+      {/* 読み込み中表示 */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <p>読み込み中...</p>
@@ -304,7 +292,7 @@ export default function DashboardPage() {
                 <CardHeader className="pb-3">
                   <h2 className="text-lg font-bold flex items-center">
                     <Star className="mr-2 h-5 w-5 text-yellow-500" />
-                    今日のおせわミッション
+                    きょうのおせわみっしょん
                   </h2>
                 </CardHeader>
                 <CardContent>
