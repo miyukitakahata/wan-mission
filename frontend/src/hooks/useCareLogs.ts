@@ -1,6 +1,6 @@
 'use client';
 
-// import { formatInTimeZone } from 'date-fns-tz';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useState, useEffect } from 'react';
 
 // バックエンドからどんなデータ型でもらうのかを定義
@@ -28,12 +28,12 @@ export function useCareLogs(careSettingId: number) {
       console.log('[useCareLogs] fetchCareLogs start');
 
       // 日本時間の「今日」を文字列にする
-      // const todayJapan = formatInTimeZone(
-      //   new Date(),
-      //   'Asia/Tokyo',
-      //   'yyyy-MM-dd'
-      // );
-      // console.log('[useCareLogs] todayJapanの確認:', todayJapan);
+      const todayJapan = formatInTimeZone(
+        new Date(),
+        'Asia/Tokyo',
+        'yyyy-MM-dd'
+      );
+      console.log('[useCareLogs] todayJapanの確認:', todayJapan);
 
       // バックエンドのFastAPIに直接GETリクエスト
       const res = await fetch(

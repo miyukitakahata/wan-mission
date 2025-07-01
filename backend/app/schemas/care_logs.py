@@ -14,7 +14,7 @@ class CareLogResponse(BaseModel):
 
     id: int
     care_setting_id: int
-    date: datetime  # Prismaスキーマに合わせてdatetimeに変更
+    date: str  # Prismaスキーマに合わせてstrに変更
     fed_morning: Optional[bool]
     fed_night: Optional[bool]
     created_at: datetime
@@ -29,7 +29,7 @@ class CareLogResponse(BaseModel):
 class CareLogCreateRequest(BaseModel):
     """お世話記録の新規作成用リクエストモデル"""
 
-    date: date  # フロントエンドからはdate形式で受信
+    date: str  # フロントエンドからはstr形式で受信
     fed_morning: bool
     fed_night: bool
 
