@@ -21,8 +21,8 @@ def create_checkout_session():
             },
         ],
         mode="payment",
-        success_url=YOUR_DOMAIN + "/success",
-        cancel_url=YOUR_DOMAIN + "/cancel",
+        success_url=YOUR_DOMAIN + "/admin/subscription/success",
+        cancel_url=YOUR_DOMAIN + "/admin/subscription/cancel",
     )
     # セッションのURLを返す
     return checkout_session.url
