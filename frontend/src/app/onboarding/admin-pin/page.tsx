@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getAuth } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,39 +24,119 @@ export default function AdminPinPage() {
   const [showConfirmPin, setShowConfirmPin] = useState(false); // 確認用PINコードの表示／非表示を切り替えるための状態
   const [error, setError] = useState('');
 
-  const handleSubmit = () => {
-    if (!adminPin) {
-      setError('管理者PINを入力してください');
-      return;
+  const handleSubmit = async () => {
+    try {
+      const familyInfoStr = localStorage.getItem('familyInfo');
+      const careSettingsStr = localStorage.getItem('careSettings');
+
+      if (!familyInfoStr || !careSettingsStr) {
+        setError('必要な設定情報が見つかりません');
+        return;
+      }
+
+      const familyInfo = JSON.parse(familyInfoStr);
+      const careSettings = JSON.parse(careSettingsStr);
+
+      console.log('[Step5] familyInfo:', familyInfo);
+      console.log('[Step5] careSettings:', careSettings);
+
+      const {
+        parent_name: parentName,
+        child_name: childName,
+        dog_name: dogName,
+      } = familyInfo;
+
+      const {
+        care_start_date: careStartDate,
+        care_end_date: careEndDate,
+        morning_meal_time: morningMealTime,
+        night_meal_time: nightMealTime,
+        walk_time: walkTime,
+      } = careSettings;
+
+      // バリデーション
+      if (!parentName || !childName || !dogName) {
+        setError('家族情報が不完全です');
+        return;
+      }
+
+      if (
+        !careStartDate ||
+        !careEndDate ||
+        !morningMealTime ||
+        !nightMealTime ||
+        !walkTime
+      ) {
+        setError('お世話設定が不完全です');
+        return;
+      }
+
+      if (!adminPin) {
+        setError('管理者PINを入力してください');
+        return;
+      }
+
+      if (adminPin.length !== 4) {
+        setError('PINは4桁で入力してください');
+        return;
+      }
+
+      if (!/^\d{4}$/.test(adminPin)) {
+        setError('PINは数字のみで入力してください');
+        return;
+      }
+
+      if (adminPin !== confirmPin) {
+        setError('PINが一致しません');
+        return;
+      }
+
+      const token = await getAuth().currentUser?.getIdToken();
+      if (!token) {
+        setError('認証情報が取得できません');
+        return;
+      }
+
+      const res = await fetch('/api/care_settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          parent_name: parentName,
+          child_name: childName,
+          dog_name: dogName,
+          care_password: adminPin,
+          care_start_date: careStartDate,
+          care_end_date: careEndDate,
+          morning_meal_time: `${careStartDate}T${morningMealTime}`,
+          night_meal_time: `${careStartDate}T${nightMealTime}`,
+          walk_time: `${careStartDate}T${walkTime}`,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || 'サーバーエラーが発生しました');
+      }
+
+      const created = await res.json();
+      localStorage.setItem('careSettingId', String(created.id));
+      localStorage.setItem('lastCareTime', new Date().toISOString());
+      localStorage.setItem(
+        'adminSettings',
+        JSON.stringify({
+          adminPin,
+          createdAt: new Date().toISOString(),
+        })
+      );
+
+      router.push('/loading-screen');
+    } catch (err: any) {
+      console.error('登録失敗:', err);
+      setError(err.message || '登録中にエラーが発生しました');
     }
-
-    if (adminPin.length !== 4) {
-      setError('PINは4桁で入力してください');
-      return;
-    }
-
-    if (!/^\d{4}$/.test(adminPin)) {
-      setError('PINは数字のみで入力してください');
-      return;
-    }
-
-    if (adminPin !== confirmPin) {
-      setError('PINが一致しません');
-      return;
-    }
-
-    // 管理者PINを保存
-    const adminSettings = {
-      adminPin,
-      createdAt: new Date().toISOString(),
-    };
-    localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
-
-    // お世話開始時間を記録
-    localStorage.setItem('lastCareTime', new Date().toISOString());
-
-    // ローディング画面に遷移
-    router.push('/loading-screen');
   };
 
   const isFormComplete =
@@ -112,7 +193,7 @@ export default function AdminPinPage() {
                     setAdminPin(value);
                     setError('');
                   }}
-                  className="text-base pr-10 text-center text-2xl tracking-widest"
+                  className="pr-10 text-center text-2xl tracking-widest"
                   maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"
@@ -156,7 +237,7 @@ export default function AdminPinPage() {
                     setConfirmPin(value);
                     setError('');
                   }}
-                  className="text-base pr-10 text-center text-2xl tracking-widest"
+                  className="pr-10 text-center text-2xl tracking-widest"
                   maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"
@@ -222,7 +303,7 @@ export default function AdminPinPage() {
             onClick={handleSubmit}
             disabled={!isFormComplete}
           >
-            設定完了
+            お世話を始める
           </Button>
         </CardFooter>
       </Card>
