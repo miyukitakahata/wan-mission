@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { getAuth } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,8 +23,14 @@ export default function AdminPinPage() {
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false); // 確認用PINコードの表示／非表示を切り替えるための状態
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // 送信中状態
+  const [isSuccess, setIsSuccess] = useState(false); // 成功状態
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError('');
+    setIsSuccess(false);
+
     try {
       const familyInfoStr = localStorage.getItem('familyInfo');
       const careSettingsStr = localStorage.getItem('careSettings');
@@ -49,6 +55,54 @@ export default function AdminPinPage() {
         night_meal_time: nightMealTime,
         walk_time: walkTime,
       } = careSettings;
+
+      // 時間フォーマットを確認・修正する関数
+      const formatTimeString = (timeStr: string | undefined): string => {
+        if (!timeStr) return '00:00';
+
+        // 既に HH:MM 形式の場合はそのまま返す
+        if (/^\d{2}:\d{2}$/.test(timeStr)) {
+          return timeStr;
+        }
+
+        // H:MM 形式の場合は 0 を追加
+        if (/^\d{1}:\d{2}$/.test(timeStr)) {
+          return `0${timeStr}`;
+        }
+
+        // その他の形式の場合はデフォルト値
+        console.warn('[Step5] 不正な時間形式:', timeStr);
+        return '00:00';
+      };
+
+      // 時間データを正しい形式に変換
+      const formattedMorningTime = formatTimeString(morningMealTime);
+      const formattedNightTime = formatTimeString(nightMealTime);
+      const formattedWalkTime = formatTimeString(walkTime);
+
+      console.log('[Step5] 時間データ変換:', {
+        original: { morningMealTime, nightMealTime, walkTime },
+        formatted: {
+          formattedMorningTime,
+          formattedNightTime,
+          formattedWalkTime,
+        },
+      });
+
+      // 送信するデータの詳細ログ
+      const requestData = {
+        parent_name: parentName,
+        child_name: childName,
+        dog_name: dogName,
+        care_password: adminPin,
+        care_start_date: careStartDate,
+        care_end_date: careEndDate,
+        morning_meal_time: formattedMorningTime,
+        night_meal_time: formattedNightTime,
+        walk_time: formattedWalkTime,
+        care_clear_status: 'ongoing',
+      };
+      console.log('[Step5] 送信データ:', requestData);
 
       // バリデーション
       if (!parentName || !childName || !dogName) {
@@ -87,44 +141,66 @@ export default function AdminPinPage() {
         return;
       }
 
-      const token = await getAuth().currentUser?.getIdToken();
+      const token = await auth.currentUser?.getIdToken();
       if (!token) {
         setError('認証情報が取得できません');
         return;
       }
 
-      const res = await fetch('/api/care_settings', {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const res = await fetch(`${API_BASE_URL}/api/care_settings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          parent_name: parentName,
-          child_name: childName,
-          dog_name: dogName,
-          care_password: adminPin,
-          care_start_date: careStartDate, // "2024-07-03"
-          care_end_date: careEndDate, // "2024-07-31"
-          morning_meal_time: morningMealTime, // "08:00"
-          night_meal_time: nightMealTime, // "19:00"
-          walk_time: walkTime, // "18:00"
-          care_clear_status: 'ongoing',
-        }),
+        body: JSON.stringify(requestData),
       });
 
       let data = null;
       try {
         data = await res.json();
+        console.log('[Step5] API レスポンス:', data);
       } catch (e) {
-        // 万一、JSONでないレスポンスの場合
+        console.error('[Step5] JSONパースエラー:', e);
         data = null;
       }
 
       if (!res.ok) {
-        throw new Error(
-          (data && data.detail) || 'サーバーエラーが発生しました'
-        );
+        console.error('[Step5] API エラー:', {
+          status: res.status,
+          statusText: res.statusText,
+          data,
+        });
+
+        let errorMessage = 'サーバーエラーが発生しました';
+
+        if (res.status === 422) {
+          // バリデーションエラーの場合
+          if (data && data.detail) {
+            if (Array.isArray(data.detail)) {
+              // Pydantic バリデーションエラーの配列
+              errorMessage = `入力データにエラーがあります:\n${data.detail
+                .map(
+                  (err: any) =>
+                    `${err.loc ? err.loc.join('.') : 'フィールド'}: ${err.msg}`
+                )
+                .join('\n')}`;
+            } else if (typeof data.detail === 'string') {
+              errorMessage = data.detail;
+            } else {
+              errorMessage = JSON.stringify(data.detail, null, 2);
+            }
+          }
+        } else if (data && data.detail) {
+          errorMessage =
+            typeof data.detail === 'string'
+              ? data.detail
+              : JSON.stringify(data.detail);
+        }
+
+        throw new Error(errorMessage);
       }
 
       // 成功時の処理
@@ -138,10 +214,17 @@ export default function AdminPinPage() {
         })
       );
 
-      router.push('/loading-screen');
+      setIsSuccess(true);
+
+      // 成功メッセージを表示してから遷移
+      setTimeout(() => {
+        router.push('/loading-screen');
+      }, 2000);
     } catch (err: any) {
       console.error('登録失敗:', err);
       setError(err.message || '登録中にエラーが発生しました');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -271,12 +354,21 @@ export default function AdminPinPage() {
               </div>
             )}
 
-            {isFormComplete && (
+            {isFormComplete && !isSuccess && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-4 w-4 text-green-600" />
                   <p className="text-sm text-green-700">管理者PIN設定完了！</p>
                 </div>
+              </div>
+            )}
+
+            {/* 成功メッセージ */}
+            {isSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <p className="text-sm text-green-700 text-center">
+                  設定完了！わんちゃんとの楽しい時間が始まります
+                </p>
               </div>
             )}
 
@@ -307,9 +399,9 @@ export default function AdminPinPage() {
           <Button
             className="w-2/3 ml-2 bg-orange-500 hover:bg-orange-600 text-sm py-3"
             onClick={handleSubmit}
-            disabled={!isFormComplete}
+            disabled={!isFormComplete || isSubmitting}
           >
-            お世話を始める
+            {isSubmitting ? '設定中...' : 'お世話を始める'}
           </Button>
         </CardFooter>
       </Card>

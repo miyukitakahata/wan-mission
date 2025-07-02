@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 // import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -13,9 +15,6 @@ import {
   Utensils,
   Star,
 } from 'lucide-react';
-import { useCareSettings } from '@/hooks/useCareSettings';
-// Firebase 認証用 import
-// import { getAuth } from 'firebase/auth'; // to-do: 本番環境で有効化
 
 // 本番環境での Firebase 認証設定手順:
 // 1. Firebase config を設定
@@ -30,12 +29,18 @@ export default function DashboardPage() {
   const router = useRouter();
   // const searchParams = useSearchParams();
 
-  // useCareSettings hook を使用してcare_settingsを取得
-  const {
-    careSettings,
-    loading: careSettingsLoading,
-    // error: careSettingsError,
-  } = useCareSettings();
+  // care_settings の状態管理
+  const [careSettings, setCareSettings] = useState<{
+    id: number;
+    parent_name: string;
+    child_name: string;
+    dog_name: string;
+    care_start_date: string;
+    care_end_date: string;
+  } | null>(null);
+  const [careSettingsLoading, setCareSettingsLoading] = useState(true);
+  const [authUser, setAuthUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Firebase 認証ヘッダーを取得する関数
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
@@ -43,20 +48,15 @@ export default function DashboardPage() {
       'Content-Type': 'application/json',
     };
 
-    // to-do: 本番環境では Firebase 認証を有効化
     try {
-      // const auth = getAuth();
-      // const user = auth.currentUser;
-      // if (user) {
-      //   const token = await user.getIdToken();
-      //   headers.Authorization = `Bearer ${token}`;
-      //   console.log('[Dashboard] Firebase token を取得しました');
-      // } else {
-      //   throw new Error('ユーザーが未ログイン状態です');
-      // }
-
-      // 開発環境用: 認証を一時的にスキップ
-      console.log('[Dashboard] 開発環境: 認証をスキップします');
+      const user = auth.currentUser;
+      if (user) {
+        const token = await user.getIdToken();
+        headers.Authorization = `Bearer ${token}`;
+        console.log('[Dashboard] Firebase token を取得しました');
+      } else {
+        throw new Error('ユーザーが未ログイン状態です');
+      }
     } catch (authError) {
       console.error('[Dashboard] Firebase 認証エラー:', authError);
       throw authError;
@@ -72,13 +72,74 @@ export default function DashboardPage() {
     walked: false,
     care_log_id: null,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   // クライアント側でのみ日付を使用
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Firebase認証状態を監視
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log(
+        '[Dashboard] 認証状態変更:',
+        user ? 'ログイン済み' : '未ログイン'
+      );
+      setAuthUser(user);
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // care_settings を取得（認証完了後）
+  useEffect(() => {
+    if (authLoading || !authUser) {
+      console.log('[Dashboard] 認証待ちまたは未認証のためAPIコール延期');
+      return;
+    }
+
+    const fetchCareSettings = async () => {
+      setCareSettingsLoading(true);
+      try {
+        const headers = await getAuthHeaders();
+
+        const res = await fetch(`${API_BASE_URL}/api/care_settings/me`, {
+          method: 'GET',
+          headers,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCareSettings({
+            id: data.id,
+            parent_name: data.parent_name,
+            child_name: data.child_name,
+            dog_name: data.dog_name,
+            care_start_date: data.care_start_date,
+            care_end_date: data.care_end_date,
+          });
+          console.log('[Dashboard] care_settings取得成功:', data);
+        } else if (res.status === 404) {
+          console.log(
+            '[Dashboard] care_settings が見つかりません（新規ユーザー）'
+          );
+          // 新規ユーザーの場合、onboarding にリダイレクト
+          router.push('/onboarding');
+        } else {
+          console.error(`[Dashboard] care_settings取得失敗: ${res.status}`);
+        }
+      } catch (error) {
+        console.error('[Dashboard] care_settings取得エラー:', error);
+      } finally {
+        setCareSettingsLoading(false);
+      }
+    };
+
+    fetchCareSettings();
+  }, [authLoading, authUser, router]);
 
   // お世話状態をAPIから取得（care_settings取得後に実行）
   useEffect(() => {
@@ -121,6 +182,8 @@ export default function DashboardPage() {
   }, [careSettings?.id, mounted]); // careSettings.id と mounted に依存
 
   // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
+  // COMMENTED OUT: 昨日散歩確認機能を一時的に無効化
+  /*
   useEffect(() => {
     if (!careSettings?.id || !mounted) return; // care_settings がない場合、またはマウント前は実行しない
 
@@ -192,6 +255,7 @@ export default function DashboardPage() {
 
     checkYesterdayWalk();
   }, [careSettings?.id, mounted, router]); // careSettings.id, mounted, router に依存
+  */
 
   // ミッション定義
   const missions = [
@@ -223,17 +287,16 @@ export default function DashboardPage() {
   const handleDogClick = async () => {
     try {
       // Firebase認証トークンを取得
-      //   const auth = getAuth();
-      //   const user = auth.currentUser;
-      // if (!user) {
-      //     throw new Error('ログインが必要です');
-      //   }
-      // const idToken = await user.getIdToken();
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('ログインが必要です');
+      }
+      const idToken = await user.getIdToken();
       const res = await fetch(`${API_BASE_URL}/api/message_logs/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${idToken}` // 認証トークンを追加
+          Authorization: `Bearer ${idToken}`, // 認証トークンを追加
         },
       });
       if (!res.ok) {
@@ -332,10 +395,19 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* 読み込み中表示 */}
-      {!careSettings?.id || loading || careSettingsLoading ? (
+      {authLoading ||
+      !authUser ||
+      !careSettings?.id ||
+      loading ||
+      careSettingsLoading ? (
         <div className="flex justify-center items-center h-64">
           <p>
-            {!careSettings?.id ? 'ユーザー情報を取得中...' : '読み込み中...'}
+            {(() => {
+              if (authLoading) return '認証確認中...';
+              if (!authUser) return '認証が必要です';
+              if (!careSettings?.id) return 'ユーザー情報を取得中...';
+              return '読み込み中...';
+            })()}
           </p>
         </div>
       ) : (
