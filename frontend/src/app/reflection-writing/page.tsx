@@ -1,6 +1,5 @@
 'use client';
 
-// 今追加できていないページ
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { ArrowLeft, FileText, Heart } from 'lucide-react'; // lucide-reactアイ
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { createReflectionNote } from '@/hooks/reflectionNotesPost';
+import Image from 'next/image';
 
 export default function ReflectionWritingPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
@@ -35,139 +35,111 @@ export default function ReflectionWritingPage() {
       } catch (error) {
         alert('保存に失敗しました。ネットワークを確認してください。');
         console.error(error);
+      } finally {
         setIsSubmitting(false);
       }
     }
   };
-  // 反省文のヒント
-  const reflectionPrompts = [
-    'わんちゃんにどんなことをしてあげられなかったですか？',
-    'わんちゃんはどんな気持ちだったと思いますか？',
-    '次回はどのようにお世話をしたいですか？',
-    'わんちゃんに謝りたいことはありますか？',
-  ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 px-4 sm:px-6 py-6">
-      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-        <div className="flex items-center mb-6">
+    <div className="flex flex-col min-h-screen bg-white px-6 py-8">
+      <div className="w-full max-w-xs mx-auto">
+        {/* ヘッダー */}
+        <div className="flex items-center mb-8">
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="mr-2"
+            className="mr-2 p-2"
           >
-            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl sm:text-2xl font-bold flex items-center">
-            <FileText className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
-            反省文を書く
-          </h1>
         </div>
 
-        <Card className="mb-6 bg-white shadow-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center">
-              <Heart className="mr-2 h-4 w-4 text-red-500" />
-              <h2 className="text-base sm:text-lg font-medium">
-                わんちゃんへの気持ちを書いてみましょう
-              </h2>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 mb-4">
-              わんちゃんが悲しい思いをしてしまいました。あなたの気持ちを素直に書いて、
-              次回はもっと良いお世話ができるように振り返ってみましょう。
+        {/* メインコンテンツ */}
+        <div className="flex flex-col items-center space-y-8">
+          {/* タイトル */}
+          <div className="text-center space-y-2 px-4">
+            <p className="text-base font-medium text-gray-800 leading-relaxed">
+              わんちゃんはさびしくなって、どこかへ行ってしまいました。
             </p>
+            <p className="text-base font-medium text-gray-800 leading-relaxed">
+              次はもっと仲よくすごせるように、
+            </p>
+            <p className="text-base font-medium text-gray-800 leading-relaxed">
+              反省のきもちを書いてみよう。
+            </p>
+          </div>
 
-            <div className="space-y-4">
-              <div>
-                <Label
-                  htmlFor="title"
-                  className="text-sm sm:text-base font-medium"
-                >
-                  反省文のタイトル
-                </Label>
-                <Input
-                  id="title"
-                  type="text"
-                  placeholder="例：お散歩をさぼってしまいました"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1"
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div>
-                <Label
-                  htmlFor="reflection"
-                  className="text-sm sm:text-base font-medium"
-                >
-                  反省文
-                </Label>
-                <Textarea
-                  id="reflection"
-                  placeholder="わんちゃんへの気持ちや反省を書いてください..."
-                  value={reflection}
-                  onChange={(e) => setReflection(e.target.value)}
-                  className="mt-1 min-h-32"
-                  rows={6}
-                  disabled={isSubmitting}
-                />
-              </div>
+          {/* 反省文記入フォーム */}
+          <div className="w-full max-w-sm space-y-4 bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+            <div>
+              <Label
+                htmlFor="title"
+                className="text-sm font-medium text-gray-700"
+              >
+                タイトル
+              </Label>
+              <Input
+                id="title"
+                type="text"
+                placeholder="例：お散歩をさぼってしまいました"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="mt-1"
+                disabled={isSubmitting}
+              />
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-6 bg-blue-50">
-          <CardHeader className="pb-2">
-            <h3 className="text-base font-medium">書くヒント</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {reflectionPrompts.map((prompt, index) => (
-                <div key={index} className="flex items-start">
-                  <span className="text-blue-500 mr-2 text-sm">•</span>
-                  <p className="text-sm text-gray-600">{prompt}</p>
-                </div>
-              ))}
+            <div>
+              <Label
+                htmlFor="reflection"
+                className="text-sm font-medium text-gray-700"
+              >
+                反省文
+              </Label>
+              <Textarea
+                id="reflection"
+                placeholder="わんちゃんへの気持ちや反省を書いてください..."
+                value={reflection}
+                onChange={(e) => setReflection(e.target.value)}
+                className="mt-1 min-h-24"
+                rows={4}
+                disabled={isSubmitting}
+              />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <div className="space-y-3">
+          {/* 犬のシルエット */}
+          <div className="w-40 h-40 flex items-center justify-center">
+            <Image
+              src="/images/sad-dog-silhouette.png"
+              alt="悲しそうな犬のシルエット"
+              width={160}
+              height={160}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+          </div>
+
+          {/* おくる（送信）ボタン */}
           <Button
-            className="w-full bg-purple-400 hover:bg-purple-500 text-white py-4 sm:py-6 text-sm sm:text-base rounded-full disabled:opacity-50"
+            className={`w-32 text-white py-3 rounded-full shadow-md text-sm font-medium ${
+              reflection.trim() && title.trim() && !isSubmitting
+                ? 'bg-purple-400 hover:bg-purple-500'
+                : 'bg-gray-300 cursor-not-allowed'
+            }`}
             onClick={handleSubmit}
             disabled={!reflection.trim() || !title.trim() || isSubmitting}
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                わんちゃんを呼んでいます...
+                送信中...
               </div>
             ) : (
-              '反省文を保存する'
+              'おくる'
             )}
           </Button>
-
-          <Button
-            variant="outline"
-            className="w-full py-3 sm:py-4 text-sm sm:text-base rounded-full"
-            onClick={() => router.push('/dashboard')}
-            disabled={isSubmitting}
-          >
-            後で書く
-          </Button>
         </div>
-
-        {reflection.trim() && title.trim() && !isSubmitting && (
-          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-            <p className="text-xs text-green-700 text-center">
-              反省文を書くことで、わんちゃんとの絆が深まります。きっとわんちゃんも喜んでくれるでしょう。
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
