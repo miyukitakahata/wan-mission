@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,50 +29,69 @@ import {
 
 export default function CareSettingsPage() {
   // DB：care_settingテーブルに対応
-  // あさごはん、夕ご飯時間修正必要
-  const router = useRouter(); // Next.jsのフックページ遷移などに使う
+  // あさごはん、夕ご飯、散歩時間など設定用
+  const router = useRouter();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [morningMealTime, setMorningMealTime] = useState('');
   const [eveningMealTime, setEveningMealTime] = useState('');
-  const [walkTime, setWalkTime] = useState(''); // 開始日、終了日、朝ご飯、夜ごはん、散歩時間
+  const [walkTime, setWalkTime] = useState('');
   const [error, setError] = useState('');
 
-  // 今日の日付を取得（最小日付として使用）
-  const today = new Date().toISOString().split('T')[0];
+  // 今日の日付（YYYY-MM-DD形式、最小日付用）
+  // クライアント側でのみ日付を設定
+  const [today, setToday] = useState('');
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+    setToday(new Date().toISOString().split('T')[0]);
+  }, []);
+
+  // 指定した時間範囲で30分刻みの時間リストを生成する関数
+  // 例: generateTimeOptions(6, 10) => ["6:00", "6:30", ..., "10:30"]
+  const generateTimeOptions = (startHour: number, endHour: number) => {
+    const options: string[] = [];
+    for (let hour = startHour; hour <= endHour; hour += 1) {
+      options.push(`${hour}:00`);
+      options.push(`${hour}:30`);
+    }
+    return options;
+  };
+
+  // 各時間帯ごとの選択肢（プロダクト要件に合わせて調整可）
+  const morningMealOptions = generateTimeOptions(6, 10); // 6:00～10:30
+  const eveningMealOptions = generateTimeOptions(17, 22); // 17:00～22:30
+  const walkTimeOptions = generateTimeOptions(6, 21); // 6:00～21:30
+
+  // フォーム送信時のバリデーション・保存
   const handleSubmit = () => {
     if (!startDate) {
       setError('お世話スタート日を選択してください');
       return;
     }
-
     if (!endDate) {
       setError('お世話終了日を選択してください');
       return;
     }
-
     if (new Date(startDate) > new Date(endDate)) {
       setError('終了日はスタート日より後の日付を選択してください');
       return;
     }
-
     if (!morningMealTime) {
       setError('朝ごはんの時間を選択してください');
       return;
     }
-
     if (!eveningMealTime) {
       setError('夕ご飯の時間を選択してください');
       return;
     }
-
     if (!walkTime) {
       setError('お散歩時間を選択してください');
       return;
     }
 
-    // お世話設定を保存
+    // お世話設定をローカルストレージに保存
     const careSettings = {
       startDate,
       endDate,
@@ -81,14 +100,14 @@ export default function CareSettingsPage() {
       walkTime,
     };
     localStorage.setItem('careSettings', JSON.stringify(careSettings));
-
-    // お世話開始時間を記録
     localStorage.setItem('lastCareTime', new Date().toISOString());
+    console.log('[CareSettingsPage] Saved care settings:', careSettings);
 
-    // ローディング画面に遷移
+    // 次の画面へ遷移
     router.push('/onboarding/admin-pin');
   };
 
+  // フォーム全項目が埋まっているか
   const isFormComplete =
     startDate && endDate && morningMealTime && eveningMealTime && walkTime;
 
@@ -112,7 +131,6 @@ export default function CareSettingsPage() {
               <h3 className="text-base font-medium text-center">
                 📅 お世話期間
               </h3>
-
               <div className="space-y-2">
                 <Label
                   htmlFor="startDate"
@@ -125,7 +143,7 @@ export default function CareSettingsPage() {
                   id="startDate"
                   type="date"
                   value={startDate}
-                  min={today}
+                  min={mounted ? today : undefined}
                   onChange={(e) => {
                     setStartDate(e.target.value);
                     setError('');
@@ -133,7 +151,6 @@ export default function CareSettingsPage() {
                   className="text-base"
                 />
               </div>
-
               <div className="space-y-2">
                 <Label
                   htmlFor="endDate"
@@ -146,7 +163,7 @@ export default function CareSettingsPage() {
                   id="endDate"
                   type="date"
                   value={endDate}
-                  min={startDate || today}
+                  min={startDate || (mounted ? today : undefined)}
                   onChange={(e) => {
                     setEndDate(e.target.value);
                     setError('');
@@ -162,6 +179,7 @@ export default function CareSettingsPage() {
                 ⏰ お世話時間
               </h3>
 
+              {/* 朝ごはんの時間 */}
               <div className="space-y-2">
                 <Label
                   htmlFor="morningMeal"
@@ -177,24 +195,23 @@ export default function CareSettingsPage() {
                     setError('');
                   }}
                 >
-                  <SelectTrigger id="morningMeal" className="text-base">
+                  <SelectTrigger
+                    id="morningMeal"
+                    className="text-base bg-white"
+                  >
                     <SelectValue placeholder="時間を選択" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 5 }, (_, i) => i + 6).map((hour) => (
-                      <SelectItem key={hour} value={`${hour}:00`}>
-                        {hour}:00
-                      </SelectItem>
-                    ))}
-                    {Array.from({ length: 5 }, (_, i) => i + 6).map((hour) => (
-                      <SelectItem key={`${hour}-30`} value={`${hour}:30`}>
-                        {hour}:30
+                  <SelectContent className="bg-white shadow-lg rounded-md border border-black">
+                    {morningMealOptions.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* 夕ご飯の時間 */}
               <div className="space-y-2">
                 <Label
                   htmlFor="eveningMeal"
@@ -210,24 +227,23 @@ export default function CareSettingsPage() {
                     setError('');
                   }}
                 >
-                  <SelectTrigger id="eveningMeal" className="text-base">
+                  <SelectTrigger
+                    id="eveningMeal"
+                    className="text-base bg-white"
+                  >
                     <SelectValue placeholder="時間を選択" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 6 }, (_, i) => i + 17).map((hour) => (
-                      <SelectItem key={hour} value={`${hour}:00`}>
-                        {hour}:00
-                      </SelectItem>
-                    ))}
-                    {Array.from({ length: 6 }, (_, i) => i + 17).map((hour) => (
-                      <SelectItem key={`${hour}-30`} value={`${hour}:30`}>
-                        {hour}:30
+                  <SelectContent className="bg-white shadow-lg rounded-md border border-black">
+                    {eveningMealOptions.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* お散歩時間 */}
               <div className="space-y-2">
                 <Label
                   htmlFor="walkTime"
@@ -243,18 +259,13 @@ export default function CareSettingsPage() {
                     setError('');
                   }}
                 >
-                  <SelectTrigger id="walkTime" className="text-base">
+                  <SelectTrigger id="walkTime" className="text-base bg-white">
                     <SelectValue placeholder="時間を選択" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 14 }, (_, i) => i + 8).map((hour) => (
-                      <SelectItem key={hour} value={`${hour}:00`}>
-                        {hour}:00
-                      </SelectItem>
-                    ))}
-                    {Array.from({ length: 14 }, (_, i) => i + 8).map((hour) => (
-                      <SelectItem key={`${hour}-30`} value={`${hour}:30`}>
-                        {hour}:30
+                  <SelectContent className="bg-white shadow-lg rounded-md border border-black">
+                    {walkTimeOptions.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -262,19 +273,21 @@ export default function CareSettingsPage() {
               </div>
             </div>
 
+            {/* エラー表示 */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                 <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
-            {isFormComplete && (
+            {/* 完了メッセージ */}
+            {/* {isFormComplete && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                 <p className="text-sm text-green-700 text-center">
-                  設定完了！わんちゃんとの楽しい時間が始まります 🐕
+                  設定完了！わんちゃんとの楽しい時間が始まります
                 </p>
               </div>
-            )}
+            )} */}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between pb-6">
@@ -291,7 +304,7 @@ export default function CareSettingsPage() {
             onClick={handleSubmit}
             disabled={!isFormComplete}
           >
-            お世話を始める
+            次へ
           </Button>
         </CardFooter>
       </Card>
