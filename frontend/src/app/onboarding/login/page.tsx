@@ -15,33 +15,69 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, Dog } from 'lucide-react'; // lucide-reactアイコン
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
+import { auth } from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
 
 export default function OnboardingLoginPage() {
   // DB：usersテーブルに対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [email, setEmail] = useState('');
-  const [pin, setPin] = useState(''); // email,pin未入力
   const [showPin, setShowPin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(true);
+  const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && pin && pin.length === 4) {
-      // ログイン情報を保存（管理者認証でも使用できるように）
-      const loginSettings = {
-        email,
-        pin,
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem('loginSettings', JSON.stringify(loginSettings));
 
+    // email または password が未入力、または password が6文字未満ならエラー
+    if (!email || password.length !== 6) {
+      alert('メールアドレスと6桁のパスワードを正しく入力してください');
+      return;
+    }
+
+    try {
       if (isNewUser) {
-        // 新規ユーザーの場合、ご家族の情報入力へ
+        // Firebase Auth に新規ユーザー登録
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const firebaseUID = userCredential.user.uid;
+
+        // IDトークン取得
+        const idToken = await userCredential.user.getIdToken();
+
+        // ユーザー情報をdbに登録
+        await fetch('http://localhost:8000/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            firebase_uid: firebaseUID,
+            email,
+            current_plan: 'free',
+            is_verified: true,
+          }),
+        });
+
+        // ✅ ご家族情報入力画面へ
         router.push('/onboarding/name');
       } else {
-        // 既存ユーザーの場合、ダッシュボードへ
+        // ✅ Firebase Auth ログイン処理
+        await signInWithEmailAndPassword(auth, email, password);
+
+        // ✅ ログイン後、ダッシュボードへ
         router.push('/dashboard');
       }
+    } catch (error: any) {
+      alert(`エラー: ${error.message}`);
+      console.error('Firebase Auth / DB登録失敗:', error);
     }
   };
 
@@ -107,25 +143,25 @@ export default function OnboardingLoginPage() {
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="pin"
+                htmlFor="password"
                 className="text-base flex items-center gap-2"
               >
                 <Lock className="h-4 w-4" />
-                4桁PIN
+                パスワード(6桁)
               </Label>
               <div className="relative">
                 <Input
-                  id="pin"
+                  id="pssword"
                   type={showPin ? 'text' : 'password'}
-                  placeholder="••••"
-                  value={pin}
+                  placeholder="••••••"
+                  value={password}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                    setPin(value);
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setPassword(value);
                   }}
                   required
                   className="text-base pr-10 text-center text-2xl tracking-widest"
-                  maxLength={4}
+                  maxLength={6}
                   inputMode="numeric"
                   pattern="[0-9]*"
                 />
@@ -146,7 +182,7 @@ export default function OnboardingLoginPage() {
               </div>
               {isNewUser && (
                 <p className="text-sm text-muted-foreground">
-                  覚えやすい4桁の数字を設定してください
+                  覚えやすい6桁の数字を設定してください
                 </p>
               )}
             </div>
@@ -165,7 +201,7 @@ export default function OnboardingLoginPage() {
             <Button
               type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600 text-base py-3"
-              disabled={!email || !pin || pin.length !== 4}
+              disabled={!email || password.length !== 6}
             >
               {isNewUser ? '新規登録して続ける' : 'ログインして続ける'}
             </Button>
@@ -175,7 +211,6 @@ export default function OnboardingLoginPage() {
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-700 text-center">
                 新規登録の場合、次のステップでご家族の情報を入力していただきます。
-                設定したPINは管理者画面へのアクセスにも使用できます。
               </p>
             </div>
           )}

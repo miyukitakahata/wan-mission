@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { getAuth } from 'firebase/auth';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -21,9 +22,37 @@ export default function AdminLoginPage() {
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
+  const isVaild = await verifyPin(pin); // 🔽
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 🔽 ここに追加
+  const verifyPin = async (pin: string) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw new Error('ログインユーザーが見つかりません');
+    }
+
+    const token = await user.getIdToken();
+
+    const res = await fetch('/api/care_settings/verify_pin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ input_password: pin }),
+    });
+
+    if (!res.ok) throw new Error('PIN照合API失敗');
+
+    const data = await res.json();
+    return data.verified === true;
+  };
+
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // エラーをリセット
 
     if (!pin) {
       setError('PINを入力してください');
@@ -35,29 +64,54 @@ export default function AdminLoginPage() {
       return;
     }
 
-    // ローカルストレージから管理者PINとログインPINを取得
-    // TODO_DBから取得したデータを表示するページ
-    const adminSettings = JSON.parse(
-      localStorage.getItem('adminSettings') || '{}'
-    );
-    const loginSettings = JSON.parse(
-      localStorage.getItem('loginSettings') || '{}'
-    );
-
-    const {adminPin} = adminSettings;
-    const loginPin = loginSettings.pin;
-
-    // どちらのPINも設定されていない場合
-    if (!adminPin && !loginPin) {
-      setError('認証用のPINが設定されていません');
+      try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      setError('ログイン情報が見つかりません');
       return;
     }
 
-    // 管理者PINまたはログインPINのいずれかと一致するかチェック
-    const isValidPin =
-      (adminPin && pin === adminPin) || (loginPin && pin === loginPin);
+    const idToken = await user.getIdToken(); // Firebase IDトークン取得
 
-    if (isValidPin) {
+    const res = await fetch('/api/care_settings/verify_pin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`, // 認証トークンを送信
+      },
+      body: JSON.stringify({ input_password: pin }),
+    });
+
+    if (!res.ok) {
+      throw new Error('APIエラー');
+    }
+
+    const result = await res.json();
+    // // ローカルストレージから管理者PINとログインPINを取得
+    // // TODO_DBから取得したデータを表示するページ
+    // const adminSettings = JSON.parse(
+    //   localStorage.getItem('adminSettings') || '{}'
+    // );
+    // const loginSettings = JSON.parse(
+    //   localStorage.getItem('loginSettings') || '{}'
+    // );
+
+    // const { adminPin } = adminSettings;
+    // const loginPin = loginSettings.pin;
+
+    // // どちらのPINも設定されていない場合
+    // if (!adminPin && !loginPin) {
+    //   setError('認証用のPINが設定されていません');
+    //   return;
+    // }
+
+    // // 管理者PINまたはログインPINのいずれかと一致するかチェック
+    // const isValidPin =
+    //   (adminPin && pin === adminPin) || (loginPin && pin === loginPin);
+
+
+    if (result.verified) {
       // PIN認証成功
       router.push('/admin');
     } else {
@@ -73,7 +127,13 @@ export default function AdminLoginPage() {
         }, 2000);
       }
     }
-  };
+  } catch (err) {
+    console.error('PIN認証エラー:', err);
+    setError('PIN認証中にエラーが発生しました');
+  }
+}
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">
