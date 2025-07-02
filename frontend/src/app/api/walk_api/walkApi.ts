@@ -6,21 +6,11 @@
 // determineWalkSuccess：距離に基づいて目標達成可否を判定する。
 // cl改善版対応：累積距離システム、動的しきい値、時間窓検証を使用した高精度GPS追跡データ
 
-// Firebase認証用ヘルパー関数
-// to-do: 本番環境では Firebase 認証を有効化する
-// import { getAuth } from 'firebase/auth';
-
-const getAuthHeader = async (): Promise<HeadersInit> =>
-  // 開発環境用の仮実装
-  // 本番では Firebase からトークンを取得する
-  // const user = getAuth().currentUser;
-  // if (!user) throw new Error('未ログイン状態です');
-  // const token = await user.getIdToken();
-
-  ({
-    'Content-Type': 'application/json',
-    // Authorization: `Bearer ${token}`, // 本番では有効化
-  });
+// 認証ヘッダーを生成するヘルパー関数
+const getAuthHeader = (token?: string): HeadersInit => ({
+  'Content-Type': 'application/json',
+  ...(token && { Authorization: `Bearer ${token}` }),
+});
 // 散步データの型定義（cl改善版対応）
 export interface WalkData {
   id?: string;
@@ -82,11 +72,12 @@ export const determineWalkSuccess = (
 // 散歩記録を更新する関数（既存のcare_logを更新）
 const updateWalkRecord = async (
   walkData: any,
-  careSettingId: number
+  careSettingId: number,
+  token?: string
 ): Promise<WalkResult> => {
   try {
     // 認証ヘッダーを取得
-    const headers = await getAuthHeader();
+    const headers = getAuthHeader(token);
 
     console.log(
       `[WalkAPI] updateWalkRecord: care_setting_id: ${careSettingId}`
@@ -146,11 +137,12 @@ const updateWalkRecord = async (
 // 散步記録を保存する関数（care_logsに統合）
 export const saveWalkRecord = async (
   walkData: any,
-  careSettingId: number
+  careSettingId: number,
+  token?: string
 ): Promise<WalkResult> => {
   try {
     // 認証ヘッダーを取得
-    const headers = await getAuthHeader();
+    const headers = getAuthHeader(token);
 
     console.log(`[WalkAPI] saveWalkRecord: care_setting_id: ${careSettingId}`);
 
@@ -180,7 +172,7 @@ export const saveWalkRecord = async (
       // 既存の記録がある場合はPATCHで更新を試行
       if (response.status === 400) {
         console.log('[WalkAPI] 既存記録があるため更新APIを使用');
-        return await updateWalkRecord(careLogData, careSettingId);
+        return await updateWalkRecord(careLogData, careSettingId, token);
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }

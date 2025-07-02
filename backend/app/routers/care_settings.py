@@ -1,8 +1,16 @@
+"""
+Care settings router module.
+
+このモジュールは、お世話設定に関するAPIエンドポイントを提供します。
+"""
+
 # app/routers/care_settings.py
 
-from fastapi import APIRouter, HTTPException, Depends, status, Depends
-from app.db import prisma_client
 from datetime import time, datetime
+
+from fastapi import APIRouter, HTTPException, Depends, status
+
+from app.db import prisma_client
 from app.schemas.care_settings import (
     CareSettingCreateRequest,
     CareSettingCreateResponse,
@@ -19,6 +27,7 @@ from app.dependencies import verify_firebase_token
 
 
 care_settings_router = APIRouter(prefix="/api/care_settings", tags=["care_settings"])
+
 
 # POST/api/care_settingsのルーター
 @care_settings_router.post(
