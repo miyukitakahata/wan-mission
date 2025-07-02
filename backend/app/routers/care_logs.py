@@ -21,7 +21,7 @@ care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
 
 # POST /api/care_logs のルーター
 @care_logs_router.post(
-    "/",
+    "",
     response_model=CareLogResponse,
     status_code=status.HTTP_201_CREATED,
 )

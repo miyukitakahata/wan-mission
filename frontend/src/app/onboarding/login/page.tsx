@@ -151,7 +151,7 @@ export default function OnboardingLoginPage() {
               </Label>
               <div className="relative">
                 <Input
-                  id="pssword"
+                  id="password"
                   type={showPin ? 'text' : 'password'}
                   placeholder="••••••"
                   value={password}
