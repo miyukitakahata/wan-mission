@@ -19,7 +19,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
+import auth from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
 
 export default function OnboardingLoginPage() {
   // DB：usersテーブルに対応
@@ -161,7 +161,7 @@ export default function OnboardingLoginPage() {
                   }}
                   required
                   className="pr-10 text-center text-2xl tracking-widest"
-                  maxLength={6}
+                  maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"
                 />
