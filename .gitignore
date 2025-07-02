@@ -26,6 +26,9 @@
 
 # Firebase
 **/serviceAccountKey.json
+**/.service-account.json
+**/.firebase.json
+**/.adminsdk.json
 
 # typescript
 **/*.tsbuildinfo
@@ -49,5 +52,9 @@ gps_test.html
 **/generated/client
 **/backend/prisma/prisma
 **/backend/prisma/prisma-client
+
+# Firebase Admin SDK
+**/backend/firebase/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
+
 
 
