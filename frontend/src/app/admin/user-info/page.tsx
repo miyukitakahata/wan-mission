@@ -120,7 +120,7 @@ export default function UserInfoPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
                 <span className="text-sm font-medium text-orange-800">
-                  ママパパの名前
+                  ママパパのお名前
                 </span>
                 <span className="text-sm text-orange-700">
                   {careSettings?.parent_name || '未設定'}
@@ -129,7 +129,7 @@ export default function UserInfoPage() {
 
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
                 <span className="text-sm font-medium text-orange-800">
-                  子どもの名前
+                  お子さまのお名前
                 </span>
                 <span className="text-sm text-orange-700">
                   {careSettings?.child_name || '未設定'}

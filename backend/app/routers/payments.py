@@ -4,11 +4,15 @@ from fastapi import APIRouter, HTTPException
 from app.services import stripe_service
 from fastapi.responses import JSONResponse
 
-payment_router = APIRouter(prefix="/api/payments", tags=["payments"])
+payments_router = APIRouter(prefix="/api/payments", tags=["payments"])
 
 
-@payment_router.post("/create-checkout-session")
+@payments_router.post("/create-checkout-session")
 async def create_checkout_session():
+    """
+    フロントが呼ぶ「Checkoutセッション作成API」
+    → Stripe決済ページへのURLを返す
+    """
     try:
         # StripeのCheckoutセッションを作成
         session_url = stripe_service.create_checkout_session()
