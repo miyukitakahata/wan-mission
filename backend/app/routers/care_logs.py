@@ -1,10 +1,10 @@
 """お世話記録（care_logs）APIルーターの定義"""
 
 # 標準ライブラリ
-from datetime import datetime
+# from datetime import datetime
 
 # サードパーティライブラリ
-from fastapi import APIRouter, HTTPException, status, Query
+from fastapi import APIRouter, HTTPException, status, Query, Depends
 
 # ローカルアプリケーション
 from app.db import prisma_client
@@ -14,6 +14,7 @@ from app.schemas.care_logs import (
     CareLogUpdateRequest,
     CareLogTodayResponse,
 )
+from app.dependencies import verify_firebase_token
 
 care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
 
@@ -24,21 +25,31 @@ care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
     response_model=CareLogResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_care_log(request: CareLogCreateRequest):
+async def create_care_log(
+    request: CareLogCreateRequest, firebase_uid: str = Depends(verify_firebase_token)
+):
     """
     お世話記録の新規作成API
     ※ 通常は1日1件。重複記録は不可（エラー返却）
     """
     try:
-        print(f"[care_logs] POST受信: {request}")
-        # 対応する care_setting を取得（1つしかない想定）
-        # TO-DO ユーザーごとに対応する care_setting を取得（1つしかない想定）
-        care_setting = await prisma_client.care_settings.find_first()
+        print(f"[care_logs] POST受信: firebase_uid={firebase_uid}, request={request}")
+
+        # UID → users.id を取得
+        user = await prisma_client.users.find_unique(
+            where={"firebase_uid": firebase_uid}
+        )
+        if not user:
+            raise HTTPException(status_code=401, detail="ユーザーが存在しません")
+
+        # 対象ユーザーの care_setting を取得
+        care_setting = await prisma_client.care_settings.find_first(
+            where={"user_id": user.id}
+        )
         if not care_setting:
-            print("[care_logs] care_setting not found")
             raise HTTPException(status_code=404, detail="Care setting not found")
 
-        # 同じ日付がすでにあるかチェック
+        # 同じ日付の記録がすでにあるかチェック
         existing_log = await prisma_client.care_logs.find_first(
             where={"care_setting_id": care_setting.id, "date": request.date}
         )
@@ -50,12 +61,15 @@ async def create_care_log(request: CareLogCreateRequest):
                 detail="この日付の記録は既に存在します。PATCHで更新してください。",
             )
 
+        # 新規作成
         new_log = await prisma_client.care_logs.create(
             data={
                 "care_setting_id": care_setting.id,
                 "date": request.date,  # そのまま文字列で保存
                 "fed_morning": request.fed_morning,
                 "fed_night": request.fed_night,
+                "walk_result": None,
+                "walk_total_distance_m": None,
             }
         )
 
@@ -80,24 +94,26 @@ async def create_care_log(request: CareLogCreateRequest):
 async def update_care_log(
     care_log_id: int,
     request: CareLogUpdateRequest,
+    firebase_uid: str = Depends(verify_firebase_token),
 ):
     """
-    お世話記録の更新API（fed_morning / fed_night の部分更新）
+    お世話記録の更新API（fed_morning / fed_night / walk_result の部分更新）
     """
     try:
         print(f"[care_logs] PATCH受信: care_log_id={care_log_id}, request={request}")
 
-        # 対象の care_log を取得
-        existing_log = await prisma_client.care_logs.find_unique(
-            where={"id": care_log_id}
+        # care_log_id と firebase_uid が紐づくかチェック（不正なIDで他人のログ更新を防ぐ）
+        existing_log = await prisma_client.care_logs.find_first(
+            where={
+                "id": care_log_id,
+                "care_setting": {"user": {"firebase_uid": firebase_uid}},
+            }
         )
+
         if not existing_log:
-            print(f"[care_logs] care_log not found: {care_log_id}")
+            print(f"[care_logs] care_log not found or not authorized: {care_log_id}")
             raise HTTPException(status_code=404, detail="Care log not found")
 
-        print(f"[care_logs] 既存記録取得成功: {existing_log.id}")
-
-        # 更新処理（model_dumpで未指定項目は除外）
         update_data = request.model_dump(exclude_unset=True)
         print(f"[care_logs] 更新データ: {update_data}")
 
@@ -110,7 +126,6 @@ async def update_care_log(
         return updated_log
 
     except HTTPException:
-        # HTTPExceptionはそのまま再発生
         raise
     except Exception as e:
         print(f"[care_logs] PATCH エラー詳細: {type(e).__name__}: {e}")
@@ -120,22 +135,33 @@ async def update_care_log(
         ) from e
 
 
-# GET /api/care_logs/today のルーター → フロントで日本時間をUTCにしてリクエストしてもらう
+# GET /api/care_logs/today のルーター→ フロントで日本時間をUTCにしてリクエストしてもらう
 @care_logs_router.get(
     "/today",
     response_model=CareLogTodayResponse,
     status_code=status.HTTP_200_OK,
 )
-async def get_today_care_log(care_setting_id: int = Query(...), date: str = Query(...)):
+async def get_today_care_log(
+    care_setting_id: int = Query(...),
+    date: str = Query(...),
+    firebase_uid: str = Depends(verify_firebase_token),
+):
     """
     指定日付文字列（例: "2025-07-01"）のお世話記録と散歩タスク完了状況を取得するAPI
-    - fed_morning, fed_night: care_logs から取得
-    - walked: walk_missions の result が 'success' なら True
-    - care_log_id: care_logs の主キー（POST/PATCHと同じ形式で返す）
     """
     try:
-        print(f"[care_logs] GET today受信: care_setting_id={care_setting_id}")
+        print(
+            f"[care_logs] GET today受信: "
+            f"care_setting_id={care_setting_id}, firebase_uid={firebase_uid}"
+        )
         print(f"[care_logs] 検索日付: {date}")
+
+        # care_setting_id が本人のものか確認
+        care_setting = await prisma_client.care_settings.find_first(
+            where={"id": care_setting_id, "user": {"firebase_uid": firebase_uid}}
+        )
+        if not care_setting:
+            raise HTTPException(status_code=403, detail="不正な care_setting_id です")
 
         # 今日の care_log を取得
         care_log = await prisma_client.care_logs.find_first(
@@ -147,39 +173,19 @@ async def get_today_care_log(care_setting_id: int = Query(...), date: str = Quer
 
         if not care_log:
             print("[care_logs] 今日の記録なし、デフォルト値で返却")
-            fed_morning = False
-            fed_night = False
-            care_log_id = None
-        else:
-            print(f"[care_logs] 今日の記録取得成功: {care_log.id}")
-            fed_morning = care_log.fed_morning or False
-            fed_night = care_log.fed_night or False
-            care_log_id = care_log.id
-
-        # 今日の walk_missions で result='success' があるか判定
-        # walk_missionsも同じdate文字列で検索する設計にする
-        walked = False
-        if care_log_id:
-            print(f"[care_logs] walk_missions検索開始: care_log_id={care_log_id}")
-            missions = await prisma_client.walk_missions.find_many(
-                where={
-                    "care_log_id": care_log.id,
-                    "result": "success",
-                }
+            return CareLogTodayResponse(
+                care_log_id=None,
+                fed_morning=False,
+                fed_night=False,
+                walked=False,
             )
-            walked = len(missions) > 0
-            print(
-                f"[care_logs] walk_missions検索結果: {len(missions)}件, walked={walked}"
-            )
-
-        response = CareLogTodayResponse(
+        print(f"[care_logs] 今日の記録取得成功: {care_log.id}")
+        return CareLogTodayResponse(
             care_log_id=care_log.id,
-            fed_morning=fed_morning or False,
-            fed_night=fed_night or False,
-            walked=walked,
+            fed_morning=care_log.fed_morning or False,
+            fed_night=care_log.fed_night or False,
+            walked=care_log.walk_result or False,
         )
-        print(f"[care_logs] レスポンス: {response}")
-        return response
 
     except Exception as e:
         print(f"[care_logs] GET today エラー詳細: {type(e).__name__}: {e}")
@@ -198,14 +204,26 @@ async def get_today_care_log(care_setting_id: int = Query(...), date: str = Quer
 async def get_care_log_by_date(
     care_setting_id: int = Query(...),
     date: str = Query(...),
+    firebase_uid: str = Depends(verify_firebase_token),
 ):
     """
     指定日付文字列（例: "2025-07-01"）のお世話記録を取得するAPI
     """
     try:
-        print(f"[care_logs] GET by_date受信: care_setting_id={care_setting_id}")
+        print(
+            f"[care_logs] GET by_date受信: "
+            f"care_setting_id={care_setting_id}, firebase_uid={firebase_uid}"
+        )
         print(f"[care_logs] 検索日付: {date}")
 
+        # care_setting_id が本人のものか確認
+        care_setting = await prisma_client.care_settings.find_first(
+            where={"id": care_setting_id, "user": {"firebase_uid": firebase_uid}}
+        )
+        if not care_setting:
+            raise HTTPException(status_code=403, detail="不正な care_setting_id です")
+
+        # 該当日の care_log を取得
         care_log = await prisma_client.care_logs.find_first(
             where={
                 "care_setting_id": care_setting_id,
@@ -221,19 +239,11 @@ async def get_care_log_by_date(
                 walked=False,
             )
 
-        missions = await prisma_client.walk_missions.find_many(
-            where={
-                "care_log_id": care_log.id,
-                "result": "success",
-            }
-        )
-        walked = len(missions) > 0
-
         return CareLogTodayResponse(
             care_log_id=care_log.id,
             fed_morning=care_log.fed_morning or False,
             fed_night=care_log.fed_night or False,
-            walked=walked,
+            walked=care_log.walk_result or False,
         )
     except Exception as e:
         print(f"[care_logs] GET by_date エラー詳細: {type(e).__name__}: {e}")
