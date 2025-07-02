@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 // import { ArrowLeft, Play, Square, Clock } from 'lucide-react';
 import { ArrowLeft, Clock } from 'lucide-react';
+import { getAuth } from 'firebase/auth';
 
 import {
   Dialog,
@@ -29,6 +30,8 @@ export default function WalkPage() {
     title: '',
     description: '',
   });
+
+  const [careSettingId, setCareSettingId] = useState<number | null>(null);
 
   // GPS関連の状態管理
   const [gpsTracker] = useState(() => new GPSTracker());
@@ -67,6 +70,38 @@ export default function WalkPage() {
       }
     };
   }, [gpsTracker]);
+
+  useEffect(() => {
+    const fetchCareSettingId = async () => {
+      try {
+        const token = await getAuth().currentUser?.getIdToken();
+        if (!token) throw new Error('ログインユーザーの認証情報がありません');
+
+        const userRes = await fetch('/api/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!userRes.ok) throw new Error('ユーザー情報取得に失敗しました');
+
+        const user = await userRes.json();
+
+        const careRes = await fetch(`/api/care_settings?user_id=${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!careRes.ok) throw new Error('お世話設定の取得に失敗しました');
+
+        const careSetting = await careRes.json();
+        setCareSettingId(careSetting.id);
+      } catch (err) {
+        console.error('[WalkPage] careSettingIdの取得エラー:', err);
+      }
+    };
+
+    fetchCareSettingId();
+  }, []);
 
   const startWalk = async () => {
     setIsWalking(true);
@@ -133,8 +168,12 @@ export default function WalkPage() {
     };
 
     try {
+      if (!careSettingId) {
+        throw new Error('careSettingId が取得できませんでした');
+      }
+
       // バックエンドに散歩データ保存
-      const result = await saveWalkRecord(walkData);
+      const result = await saveWalkRecord(walkData, careSettingId);
       console.log('散歩データ保存完了:', result);
 
       // ローカルストレージにも保存（バックアップ）

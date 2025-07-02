@@ -160,8 +160,8 @@ export default function OnboardingLoginPage() {
                     setPassword(value);
                   }}
                   required
-                  className="text-base pr-10 text-center text-2xl tracking-widest"
-                  maxLength={6}
+                  className="pr-10 text-center text-2xl tracking-widest"
+                  maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"
                 />

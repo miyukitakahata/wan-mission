@@ -33,8 +33,9 @@ export default function NamePage() {
         petName: petName.trim(),
       };
       localStorage.setItem('familyInfo', JSON.stringify(familyData));
+      console.log('[NamePage] Saving family info:', familyData);
 
-      router.push('/onboarding/third-step');
+      router.push('/onboarding/fourth-step');
     }
   };
 
