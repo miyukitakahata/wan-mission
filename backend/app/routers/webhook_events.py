@@ -106,11 +106,29 @@ async def process_webhook_events():
             currency = data_object.get("currency")
             payment_status = data_object.get("payment_status")
 
+            # webhook_eventsテーブルからeventを取って、event.firebase_uidを取り出す
+            firebase_uid = event.firebase_uid
+            if not firebase_uid:
+                print(f"[WARN] Firebase UIDが見つからないのでスキップ: {event.id}")
+                continue
+
+            # firebase_uidでusersテーブルからユーザーを取得
+            user_record = await prisma_client.users.find_unique(
+                where={"firebase_uid": firebase_uid}
+            )
+            if not user_record:
+                print(
+                    f"[WARN] Firebase UIDに対応するユーザーが見つからないのでスキップ: {firebase_uid}"
+                )
+                continue
+
+            user_id = user_record.id  # ユーザーIDを取得
+
             # paymentテーブルにINSERT
             await prisma_client.payment.create(
                 data={
-                    "user_id": "485b2ff9-c511-4ac6-ab84-6f77f3e0bba3",  # 本当はFirebaseUIDからマッピングする
-                    "firebase_uid": None,
+                    "user_id": user_id,  # 本当はFirebaseUIDからマッピングする
+                    "firebase_uid": event.firebase_uid,  # webhook_eventsテーブルに入ってるfirebase_uidカラムの値
                     "stripe_session_id": stripe_session_id,
                     "stripe_payment_intent_id": payment_intent_id,
                     "amount": amount,
@@ -119,7 +137,13 @@ async def process_webhook_events():
                 }
             )
 
-            # 処理が完了したら、DBのwebhookフラグを更新
+            # ユーザープランをpremiumに更新
+            await prisma_client.users.update(
+                where={"id": user_id},
+                data={"current_plan": "premium"},  # ユーザープランをプレミアムに更新
+            )
+
+            # 処理が完了したら、DBのprocessedをTrueに更新
             await prisma_client.webhook_events.update(
                 where={"id": event.id}, data={"processed": True}
             )

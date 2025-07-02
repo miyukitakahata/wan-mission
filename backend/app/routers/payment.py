@@ -5,7 +5,7 @@ from app.services import stripe_service
 from fastapi.responses import JSONResponse
 from app.schemas.payment import CheckoutSessionCreateRequest
 
-payment_router = APIRouter(prefix="/api/payment", tags=["payments"])
+payment_router = APIRouter(prefix="/api/payments", tags=["payments"])
 
 
 @payment_router.post("/create-checkout-session")

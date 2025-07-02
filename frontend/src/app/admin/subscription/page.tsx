@@ -8,9 +8,11 @@ import { Crown, MessageCircle, Heart, ArrowLeft } from 'lucide-react';
 import { getAuth } from 'firebase/auth'; // Firebaseの認証をインポート
 
 // ログイン済みのユーザーID（Firebase UID）を取得
-const auth = getAuth();
-const user = auth.currentUser;
-const firebaseUid = user ? user.uid : null;
+// const auth = getAuth();
+// const user = auth.currentUser;
+// const firebaseUid = user ? user.uid : null;
+const firebaseUid = 'test-firebase-uid';
+// firebaseUidで決済できるか確認
 
 export default function SubscriptionPage() {
   const router = useRouter();
@@ -45,7 +47,7 @@ export default function SubscriptionPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            firebaseUid,
+            firebase_uid: firebaseUid,
           }),
         }
       );
