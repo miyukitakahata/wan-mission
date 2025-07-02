@@ -1,8 +1,7 @@
-// src/firebase/config.ts
 // Firebaseの初期化と認証モジュールの設定ファイル
 
 // Firebase SDKから必要な関数をインポート
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 // Firebaseプロジェクトの設定情報
@@ -14,8 +13,9 @@ const firebaseConfig = {
 };
 
 // Firebaseアプリを初期化（1回だけ実行）
-const app = initializeApp(firebaseConfig);
+const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-// Firebaseの認証モジュールをエクスポート
-const auth = getAuth(app);
-export default auth;
+export const auth = getAuth(app);
+
+export { app };
