@@ -3,19 +3,24 @@
 from fastapi import APIRouter, HTTPException
 from app.services import stripe_service
 from fastapi.responses import JSONResponse
+from app.schemas.payment import CheckoutSessionCreateRequest
 
-payments_router = APIRouter(prefix="/api/payments", tags=["payments"])
+payment_router = APIRouter(prefix="/api/payment", tags=["payments"])
 
 
-@payments_router.post("/create-checkout-session")
-async def create_checkout_session():
+@payment_router.post("/create-checkout-session")
+async def create_checkout_session(request_data: CheckoutSessionCreateRequest):
     """
     フロントが呼ぶ「Checkoutセッション作成API」
     → Stripe決済ページへのURLを返す
     """
     try:
+        # リクエストデータからFirebase UIDを取得
+        firebase_uid = request_data.firebase_uid
+        print(f"[INFO] フロントから受け取ったFirebase UID: {firebase_uid}")
+
         # StripeのCheckoutセッションを作成
-        session_url = stripe_service.create_checkout_session()
+        session_url = stripe_service.create_checkout_session(firebase_uid)
 
         # セッションのURLを返す(明示的にJSONレスポンスを作って返す)
         return JSONResponse(

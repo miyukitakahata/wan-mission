@@ -8,7 +8,9 @@ webhook_events_router = APIRouter(prefix="/api/webhook_events", tags=["webhook_e
 
 @webhook_events_router.post("/")
 async def stripe_webhook(request: Request):
-    """StripeのWebhookイベントを受け取るエンドポイント"""
+    """
+    StripeのWebhookイベントを受け取るエンドポイント
+    """
     try:
         # ここにStripeのWebhookイベント処理ロジックを実装
         # 例: 支払い成功時の処理など
@@ -20,10 +22,14 @@ async def stripe_webhook(request: Request):
         event_type = event.get("type")
         data_object = event.get("data", {}).get("object", {})
 
-        stripe_session_id = None
         if event_type == "checkout.session.completed":
             # Checkoutセッション完了イベントの場合、セッションIDを取得
             stripe_session_id = data_object.get("id")
+            firebase_uid = data_object.get("metadata", {}).get("firebase_uid")
+        else:
+            # 他のイベントタイプの場合はセッションIDはNone
+            stripe_session_id = None
+            firebase_uid = None
 
         payment_intent_id = data_object.get("payment_intent")
         customer_email = data_object.get("billing_details", {}).get("email")
@@ -44,6 +50,7 @@ async def stripe_webhook(request: Request):
                 "payment_status": payment_status,
                 "payload": json.dumps(event),  # Webhookイベントの全体を保存
                 "processed": False,  # 未処理フラグ
+                "firebase_uid": firebase_uid,  # Firebase UIDを保存
             }
         )
 
@@ -55,3 +62,77 @@ async def stripe_webhook(request: Request):
     except Exception as e:
         print(f"[ERROR] Webhook処理失敗: {e}")
         raise HTTPException(status_code=500, detail="Webhook processing failed") from e
+
+
+@webhook_events_router.post("/process")
+async def process_webhook_events():
+    """
+    未処理のWebhookイベントを処理してpaymentテーブルに送るエンドポイント
+    """
+    try:
+        # 未処理のcheckout.session.completed のWebhookイベントを取得
+        events = await prisma_client.webhook_events.find_many(
+            where={"processed": False, "event_type": "checkout.session.completed"}
+        )
+
+        # もし0件なら早期リターン
+        if not events:
+            return JSONResponse(
+                {"message": "未処理のWebhookイベントはありません"},
+                status_code=200,
+            )
+
+        # 1件ずつループ処理を行う
+        for event in events:
+            # イベントの処理ロジックを実装
+            print(f"[INFO] 処理中のWebhookイベント: {event.id}")
+
+            # payloadを復元する(文字列ならjson.loads、dictならそのまま)
+            if isinstance(event.payload, dict):
+                payload = event.payload
+            else:
+                payload = json.loads(event.payload)
+            data_object = payload.get("data", {}).get("object", {})
+
+            # 必要な情報を取り出す
+            stripe_session_id = data_object.get("id")
+
+            if not stripe_session_id:
+                print(f"[WARN] session_idが取れないのでスキップ: {event.id}")
+                continue
+
+            payment_intent_id = data_object.get("payment_intent")
+            amount = data_object.get("amount_total")
+            currency = data_object.get("currency")
+            payment_status = data_object.get("payment_status")
+
+            # paymentテーブルにINSERT
+            await prisma_client.payment.create(
+                data={
+                    "user_id": "485b2ff9-c511-4ac6-ab84-6f77f3e0bba3",  # 本当はFirebaseUIDからマッピングする
+                    "firebase_uid": None,
+                    "stripe_session_id": stripe_session_id,
+                    "stripe_payment_intent_id": payment_intent_id,
+                    "amount": amount,
+                    "currency": currency,
+                    "status": payment_status,
+                }
+            )
+
+            # 処理が完了したら、DBのwebhookフラグを更新
+            await prisma_client.webhook_events.update(
+                where={"id": event.id}, data={"processed": True}
+            )
+
+        return JSONResponse(
+            {
+                "message": f"{len(events)} 件のイベントを処理してpaymentテーブルに保存しました"
+            },
+            status_code=200,
+        )
+
+    except Exception as e:
+        print(f"[ERROR] Webhookイベントの処理に失敗しました: {e}")
+        raise HTTPException(
+            status_code=500, detail="Webhook event processing failed"
+        ) from e

@@ -9,7 +9,7 @@ PRICE_ID = os.getenv("STRIPE_PRICE_ID")
 YOUR_DOMAIN = os.getenv("YOUR_DOMAIN")
 
 
-def create_checkout_session():
+def create_checkout_session(firebase_uid: str):
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         # 決済するアイテム情報のリスト
@@ -23,6 +23,9 @@ def create_checkout_session():
         mode="payment",
         success_url=YOUR_DOMAIN + "/admin/subscription/success",
         cancel_url=YOUR_DOMAIN + "/admin/subscription/cancel",
+        metadata={
+            "firebase_uid": firebase_uid,  # Firebase UIDをメタデータに保存
+        },
     )
     # セッションのURLを返す
     return checkout_session.url

@@ -5,6 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Crown, MessageCircle, Heart, ArrowLeft } from 'lucide-react';
+import { getAuth } from 'firebase/auth'; // Firebaseの認証をインポート
+
+// ログイン済みのユーザーID（Firebase UID）を取得
+const auth = getAuth();
+const user = auth.currentUser;
+const firebaseUid = user ? user.uid : null;
 
 export default function SubscriptionPage() {
   const router = useRouter();
@@ -35,6 +41,12 @@ export default function SubscriptionPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/payments/create-checkout-session`,
         {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firebaseUid,
+          }),
         }
       );
       const data = await res.json();
