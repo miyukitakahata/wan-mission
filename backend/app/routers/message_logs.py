@@ -5,11 +5,11 @@
 
 import os
 import random
-from typing import Dict, Any
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from app.db import prisma_client
 from app.dependencies import verify_firebase_token
+from openai import OpenAI, OpenAIError
 
 message_logs_router = APIRouter(prefix="/api/message_logs", tags=["message_logs"])
 
@@ -41,8 +41,6 @@ def get_openai_message() -> str:
         str: 生成されたメッセージ
     """
     try:
-        # pylint: disable=import-outside-toplevel
-        from openai import OpenAI
 
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
@@ -57,9 +55,9 @@ def get_openai_message() -> str:
                 {
                     "role": "system",
                     "content": (
-                        "あなたは犬のキャラクターです。犬の育成に関する知識を犬語で短く"
+                        "あなたは犬のキャラクターです。犬の育成に関する知識をお伝えします"
                         "話す相手は8歳の子供です。なるべくひらがなで話してください"
-                        "30文字以内で伝えてください。語尾は「ワン」「だワン」「するワン」などを使ってください。"
+                        "30文字以内で伝えてください。語尾は「ワン」「だワン」「するワン」などを使ってください"
                     ),
                 }
             ],
@@ -74,9 +72,12 @@ def get_openai_message() -> str:
 
         raise ValueError("OpenAIからの応答が空です")
 
-    except Exception as openai_error:
+    except OpenAIError as openai_error:
         print(f"OpenAI API エラー: {openai_error}")
         # エラーが発生した場合は固定メッセージを返す
+        return random.choice(FREE_PLAN_MESSAGES)
+    except ValueError as value_error:
+        print(f"OpenAI API 設定エラー: {value_error}")
         return random.choice(FREE_PLAN_MESSAGES)
 
 
@@ -118,10 +119,7 @@ async def generate_message_log(
 
         return JSONResponse(content={"message": message})
 
-    except HTTPException:
-        # HTTPExceptionはそのまま再発生
-        raise
-    except Exception as general_error:
+    except (KeyError, AttributeError, TypeError) as general_error:
         print(f"[ERROR] generate_message_log: {general_error}")
         # 予期しないエラーの場合でも、最低限固定メッセージを返す
         fallback_message = random.choice(FREE_PLAN_MESSAGES)

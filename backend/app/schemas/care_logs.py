@@ -17,11 +17,12 @@ class CareLogResponse(BaseModel):
     date: str  # Prismaスキーマに合わせてstrに変更
     fed_morning: Optional[bool]
     fed_night: Optional[bool]
+    walk_result: Optional[bool]  # 追加
+    walk_total_distance_m: Optional[int]  # 追加
     created_at: datetime
 
     class Config:
         """Pydantic設定クラス（ORMモデル対応）"""
-
         from_attributes = True
 
 
@@ -32,6 +33,8 @@ class CareLogCreateRequest(BaseModel):
     date: str  # フロントエンドからはstr形式で受信
     fed_morning: bool
     fed_night: bool
+    walk_result: Optional[int] = None  # 追加（任意項目）
+    walk_total_distance_m: Optional[int] = None  # 追加（任意項目）
 
 
 # PATCH /api/care_logs/:id のリクエストモデル
@@ -40,6 +43,8 @@ class CareLogUpdateRequest(BaseModel):
 
     fed_morning: Optional[bool] = None
     fed_night: Optional[bool] = None
+    walk_result: Optional[bool] = None  # 追加
+    walk_total_distance_m: Optional[int] = None  # 追加
 
 
 # 今日のお世話記録取得用レスポンスモデル
