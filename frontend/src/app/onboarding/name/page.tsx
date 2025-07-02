@@ -21,16 +21,16 @@ export default function NamePage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [parentName, setParentName] = useState('');
   const [childName, setChildName] = useState('');
-  const [petName, setPetName] = useState(''); // 親名前、子ども名前、ペット名前未入力
+  const [dogName, setdogName] = useState(''); // 親名前、子ども名前、ペット名前未入力
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (parentName.trim() && childName.trim() && petName.trim()) {
+    if (parentName.trim() && childName.trim() && dogName.trim()) {
       // 家族情報を保存
       const familyData = {
         parentName: parentName.trim(),
         childName: childName.trim(),
-        petName: petName.trim(),
+        dogName: dogName.trim(),
       };
       localStorage.setItem('familyInfo', JSON.stringify(familyData));
       console.log('[NamePage] Saving family info:', familyData);
@@ -90,17 +90,17 @@ export default function NamePage() {
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="petName"
+                htmlFor="dogName"
                 className="text-base flex items-center gap-2"
               >
                 <Heart className="h-4 w-4 text-red-500" />
                 ペットの名前
               </Label>
               <Input
-                id="petName"
+                id="dogName"
                 placeholder="ポチ"
-                value={petName}
-                onChange={(e) => setPetName(e.target.value)}
+                value={dogName}
+                onChange={(e) => setdogName(e.target.value)}
                 required
                 className="text-base"
               />
@@ -128,7 +128,7 @@ export default function NamePage() {
             className="w-2/3 ml-2 bg-orange-500 hover:bg-orange-600 text-sm py-3"
             onClick={handleSubmit}
             disabled={
-              !parentName.trim() || !childName.trim() || !petName.trim()
+              !parentName.trim() || !childName.trim() || !dogName.trim()
             }
           >
             次へ

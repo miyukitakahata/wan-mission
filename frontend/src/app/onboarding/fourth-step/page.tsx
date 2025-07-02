@@ -93,11 +93,11 @@ export default function CareSettingsPage() {
 
     // お世話設定をローカルストレージに保存
     const careSettings = {
-      startDate,
-      endDate,
-      morningMealTime,
-      eveningMealTime,
-      walkTime,
+      care_start_date: startDate,
+      care_end_date: endDate,
+      morning_meal_time: morningMealTime,
+      night_meal_time: eveningMealTime, // ← night_meal_time に統一
+      walk_time: walkTime,
     };
     localStorage.setItem('careSettings', JSON.stringify(careSettings));
     localStorage.setItem('lastCareTime', new Date().toISOString());

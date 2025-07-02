@@ -19,7 +19,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
+import auth from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
 
 export default function OnboardingLoginPage() {
   // DB：usersテーブルに対応
@@ -151,7 +151,7 @@ export default function OnboardingLoginPage() {
               </Label>
               <div className="relative">
                 <Input
-                  id="pssword"
+                  id="password"
                   type={showPin ? 'text' : 'password'}
                   placeholder="••••••"
                   value={password}
