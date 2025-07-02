@@ -40,11 +40,7 @@ export default function AdminPinPage() {
       console.log('[Step5] familyInfo:', familyInfo);
       console.log('[Step5] careSettings:', careSettings);
 
-      const {
-        parent_name: parentName,
-        child_name: childName,
-        dog_name: dogName,
-      } = familyInfo;
+      const { parentName, childName, dogName } = familyInfo;
 
       const {
         care_start_date: careStartDate,
@@ -108,21 +104,31 @@ export default function AdminPinPage() {
           child_name: childName,
           dog_name: dogName,
           care_password: adminPin,
-          care_start_date: careStartDate,
-          care_end_date: careEndDate,
-          morning_meal_time: `${careStartDate}T${morningMealTime}`,
-          night_meal_time: `${careStartDate}T${nightMealTime}`,
-          walk_time: `${careStartDate}T${walkTime}`,
+          care_start_date: careStartDate, // "2024-07-03"
+          care_end_date: careEndDate, // "2024-07-31"
+          morning_meal_time: morningMealTime, // "08:00"
+          night_meal_time: nightMealTime, // "19:00"
+          walk_time: walkTime, // "18:00"
+          care_clear_status: 'ongoing',
         }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || 'サーバーエラーが発生しました');
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        // 万一、JSONでないレスポンスの場合
+        data = null;
       }
 
-      const created = await res.json();
-      localStorage.setItem('careSettingId', String(created.id));
+      if (!res.ok) {
+        throw new Error(
+          (data && data.detail) || 'サーバーエラーが発生しました'
+        );
+      }
+
+      // 成功時の処理
+      localStorage.setItem('careSettingId', String(data.id));
       localStorage.setItem('lastCareTime', new Date().toISOString());
       localStorage.setItem(
         'adminSettings',
