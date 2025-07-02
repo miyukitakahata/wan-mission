@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 // import { ArrowLeft, Play, Square, Clock } from 'lucide-react';
 import { ArrowLeft, Clock } from 'lucide-react';
-import { getAuth } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
 
 import {
   Dialog,
@@ -44,6 +44,15 @@ export default function WalkPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Firebase認証トークンを取得するヘルパー関数
+  const getFirebaseToken = async (): Promise<string> => {
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) {
+      throw new Error('認証トークンが取得できませんでした');
+    }
+    return token;
+  };
+
   // コンポーネントマウント時にGPSTrackerを設定
   useEffect(() => {
     // 距離更新コールバック設定
@@ -74,10 +83,10 @@ export default function WalkPage() {
   useEffect(() => {
     const fetchCareSettingId = async () => {
       try {
-        const token = await getAuth().currentUser?.getIdToken();
-        if (!token) throw new Error('ログインユーザーの認証情報がありません');
+        const token = await getFirebaseToken();
 
-        const userRes = await fetch('/api/users/me', {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        const userRes = await fetch(`${API_BASE_URL}/api/users/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -86,17 +95,24 @@ export default function WalkPage() {
 
         const user = await userRes.json();
 
-        const careRes = await fetch(`/api/care_settings?user_id=${user.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const careRes = await fetch(
+          `${API_BASE_URL}/api/care_settings?user_id=${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!careRes.ok) throw new Error('お世話設定の取得に失敗しました');
 
         const careSetting = await careRes.json();
         setCareSettingId(careSetting.id);
       } catch (err) {
         console.error('[WalkPage] careSettingIdの取得エラー:', err);
+        // 認証エラーの場合は適切なエラーメッセージを表示
+        if (err instanceof Error && err.message.includes('認証トークン')) {
+          console.error('Firebase認証が必要です');
+        }
       }
     };
 
@@ -172,8 +188,11 @@ export default function WalkPage() {
         throw new Error('careSettingId が取得できませんでした');
       }
 
+      // Firebase認証トークンを取得
+      const token = await getFirebaseToken();
+
       // バックエンドに散歩データ保存
-      const result = await saveWalkRecord(walkData, careSettingId);
+      const result = await saveWalkRecord(walkData, careSettingId, token);
       console.log('散歩データ保存完了:', result);
 
       // ローカルストレージにも保存（バックアップ）
