@@ -82,6 +82,7 @@ const updateWalkRecord = async (
     console.log(
       `[WalkAPI] updateWalkRecord: care_setting_id: ${careSettingId}`
     );
+    console.log(`[WalkAPI] updateWalkRecord: walkData:`, walkData);
 
     const todayResponse = await fetch(
       `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettingId}&date=${walkData.date}`,
@@ -91,34 +92,45 @@ const updateWalkRecord = async (
       }
     );
 
+    console.log(`[WalkAPI] today API response status: ${todayResponse.status}`);
+
     if (!todayResponse.ok) {
       throw new Error(`今日の記録取得エラー: ${todayResponse.status}`);
     }
 
     const todayData = await todayResponse.json();
+    console.log(`[WalkAPI] today API response data:`, todayData);
 
     if (!todayData.care_log_id) {
       throw new Error('更新対象のcare_logが見つかりません');
     }
 
     // PATCHで散歩記録を更新
+    const patchData = {
+      walk_result: walkData.walk_result,
+      walk_total_distance_m: walkData.walk_total_distance_m,
+    };
+    console.log(`[WalkAPI] PATCH データ:`, patchData);
+
     const response = await fetch(
       `${API_BASE_URL}/api/care_logs/${todayData.care_log_id}`,
       {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({
-          walk_result: walkData.walk_result,
-          walk_total_distance_m: walkData.walk_total_distance_m,
-        }),
+        body: JSON.stringify(patchData),
       }
     );
 
+    console.log(`[WalkAPI] PATCH response status: ${response.status}`);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[WalkAPI] PATCH エラー詳細:`, errorText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
+    console.log(`[WalkAPI] PATCH 成功:`, result);
     return {
       success: true,
       message: '散歩記録が正常に更新されました',
@@ -145,6 +157,7 @@ export const saveWalkRecord = async (
     const headers = getAuthHeader(token);
 
     console.log(`[WalkAPI] saveWalkRecord: care_setting_id: ${careSettingId}`);
+    console.log(`[WalkAPI] 元の散歩データ:`, walkData);
 
     // 散歩の成功判定
     const walkSuccess = determineWalkSuccess(
@@ -152,9 +165,8 @@ export const saveWalkRecord = async (
       walkData.duration
     );
 
-    // care_logs API用のデータ構造に変換（care_setting_idを追加）
+    // care_logs API用のデータ構造に変換（散歩のみの場合）
     const careLogData = {
-      care_setting_id: careSettingId,
       date: walkData.date,
       walk_result: walkSuccess,
       walk_total_distance_m: Math.round(walkData.distance),
@@ -168,10 +180,16 @@ export const saveWalkRecord = async (
       body: JSON.stringify(careLogData),
     });
 
+    console.log(`[WalkAPI] POST レスポンス status: ${response.status}`);
+
     if (!response.ok) {
       // 既存の記録がある場合はPATCHで更新を試行
       if (response.status === 400) {
-        console.log('[WalkAPI] 既存記録があるため更新APIを使用');
+        console.log(
+          '[WalkAPI] 400エラー検出 - 既存記録があるため更新APIを使用'
+        );
+        const responseText = await response.text();
+        console.log('[WalkAPI] 400エラーの詳細:', responseText);
         return await updateWalkRecord(careLogData, careSettingId, token);
       }
       throw new Error(`HTTP error! status: ${response.status}`);

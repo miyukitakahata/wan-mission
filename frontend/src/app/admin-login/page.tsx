@@ -42,13 +42,12 @@ export default function AdminLoginPage() {
     }
 
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      if (!user.currentUser) {
         setError('ログイン情報が見つかりません');
         return;
       }
 
-      const idToken = await user.getIdToken(); // Firebase IDトークン取得
+      const idToken = await user.currentUser.getIdToken(); // Firebase IDトークン取得
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${API_BASE_URL}/api/care_settings/verify_pin`, {

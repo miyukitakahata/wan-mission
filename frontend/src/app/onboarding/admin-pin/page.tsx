@@ -79,10 +79,23 @@ export default function AdminPinPage() {
         return '00:00';
       };
 
+      // 日本時間基準で日付を処理する関数
+      const formatDateForJST = (dateStr: string): string => {
+        if (!dateStr) return '';
+
+        // 日付文字列をそのまま使用（ユーザーが選択した日付は日本時間の日付として扱う）
+        console.log('[Step5] JST基準日付:', dateStr);
+        return dateStr;
+      };
+
       // 時間データを正しい形式に変換
       const formattedMorningTime = formatTimeString(morningMealTime);
       const formattedNightTime = formatTimeString(nightMealTime);
       const formattedWalkTime = formatTimeString(walkTime);
+
+      // 日期データをJST基準で処理
+      const formattedStartDate = formatDateForJST(careStartDate);
+      const formattedEndDate = formatDateForJST(careEndDate);
 
       console.log('[Step5] 時間データ変換:', {
         original: { morningMealTime, nightMealTime, walkTime },
@@ -93,14 +106,19 @@ export default function AdminPinPage() {
         },
       });
 
+      console.log('[Step5] 日期データ変換:', {
+        original: { careStartDate, careEndDate },
+        formatted: { formattedStartDate, formattedEndDate },
+      });
+
       // 送信するデータの詳細ログ
       const requestData = {
         parent_name: parentName,
         child_name: childName,
         dog_name: dogName,
         care_password: adminPin,
-        care_start_date: careStartDate,
-        care_end_date: careEndDate,
+        care_start_date: formattedStartDate,
+        care_end_date: formattedEndDate,
         morning_meal_time: formattedMorningTime,
         night_meal_time: formattedNightTime,
         walk_time: formattedWalkTime,

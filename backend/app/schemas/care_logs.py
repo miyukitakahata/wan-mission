@@ -23,6 +23,7 @@ class CareLogResponse(BaseModel):
 
     class Config:
         """Pydantic設定クラス（ORMモデル対応）"""
+
         from_attributes = True
 
 
@@ -31,10 +32,10 @@ class CareLogCreateRequest(BaseModel):
     """お世話記録の新規作成用リクエストモデル"""
 
     date: str  # フロントエンドからはstr形式で受信
-    fed_morning: bool
-    fed_night: bool
-    walk_result: Optional[int] = None  # 追加（任意項目）
-    walk_total_distance_m: Optional[int] = None  # 追加（任意項目）
+    fed_morning: Optional[bool] = None  # 散歩のみの場合は任意項目
+    fed_night: Optional[bool] = None  # 散歩のみの場合は任意項目
+    walk_result: Optional[bool] = None  # 散歩結果（boolean）
+    walk_total_distance_m: Optional[int] = None  # 散歩距離（メートル）
 
 
 # PATCH /api/care_logs/:id のリクエストモデル

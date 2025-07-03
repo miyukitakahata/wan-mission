@@ -56,7 +56,7 @@ export default function OnboardingLoginPage() {
         const idToken = await userCredential.user.getIdToken();
 
         // ユーザー情報をdbに登録
-        await fetch('http://localhost:8000/api/users', {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
