@@ -37,8 +37,8 @@ async def stripe_webhook(request: Request):
         currency = data_object.get("currency")
         payment_status = data_object.get("status")
 
-        # DBに保存
-        await prisma_client.webhook_events.create(
+        # webhook_eventsテーブルに保存
+        saved_event = await prisma_client.webhook_events.create(
             data={
                 "id": event_id,
                 "event_type": event_type,
@@ -54,6 +54,11 @@ async def stripe_webhook(request: Request):
             }
         )
 
+        # 受信直後に即処理を呼ぶ
+        if event_type == "checkout.session.completed":
+            # checkout.session.completed イベントの場合、即座に処理を開始
+            await process_webhook_event(saved_event)
+
         return JSONResponse(
             {"message": "Webhook eventを保存しました"},
             status_code=200,
@@ -64,6 +69,82 @@ async def stripe_webhook(request: Request):
         raise HTTPException(status_code=500, detail="Webhook processing failed") from e
 
 
+# 条件に合う未処理のWebhookイベントを処理してpaymentテーブルに送る関数
+async def process_webhook_event(event):
+    """
+    未処理のWebhookイベントを処理してpaymentテーブルに送る関数
+    """
+    print(f"[INFO] 自動処理開始: {event.id}")
+    try:
+        # payloadを復元する(文字列ならjson.loads、dictならそのまま)
+        if isinstance(event.payload, dict):
+            payload = event.payload
+        else:
+            payload = json.loads(event.payload)
+        data_object = payload.get("data", {}).get("object", {})
+
+        # 必要な情報を取り出す
+        stripe_session_id = data_object.get("id")
+        if not stripe_session_id:
+            print(f"[WARN] session_idが取れないのでスキップ: {event.id}")
+            return
+
+        payment_intent_id = data_object.get("payment_intent")
+        amount = data_object.get("amount_total")
+        currency = data_object.get("currency")
+        payment_status = data_object.get("payment_status")
+
+        # webhook_eventsテーブルからeventを取って、event.firebase_uidを取り出す
+        firebase_uid = event.firebase_uid
+        if not firebase_uid:
+            print(f"[WARN] Firebase UIDが見つからないのでスキップ: {event.id}")
+            return
+
+        # ユーザーをfirebase_uidで探す
+        user_record = await prisma_client.users.find_unique(
+            where={"firebase_uid": firebase_uid}
+        )
+        if not user_record:
+            print(
+                f"[WARN] Firebase UIDに対応するユーザーが見つからないのでスキップ: {firebase_uid}"
+            )
+            return
+
+        user_id = user_record.id  # ユーザーIDを取得
+
+        # paymentテーブルにINSERT
+        await prisma_client.payment.create(
+            data={
+                "user_id": user_id,  # 本当はFirebaseUIDからマッピングする
+                "firebase_uid": event.firebase_uid,  # webhook_eventsテーブルに入ってるfirebase_uidカラムの値
+                "stripe_session_id": stripe_session_id,
+                "stripe_payment_intent_id": payment_intent_id,
+                "amount": amount,
+                "currency": currency,
+                "status": payment_status,
+            }
+        )
+
+        # ユーザープランをpremiumに更新
+        await prisma_client.users.update(
+            where={"id": user_id},
+            data={"current_plan": "premium"},  # ユーザープランをプレミアムに更新
+        )
+
+        # 処理が完了したら、webhook_events.processedをTrueに更新
+        await prisma_client.webhook_events.update(
+            where={"id": event.id}, data={"processed": True}
+        )
+
+    except Exception as e:
+        print(f"[ERROR] Webhookイベントの処理に失敗しました: {e}")
+        # エラー内容をwebhook_eventsテーブルに保存
+        await prisma_client.webhook_events.update(
+            where={"id": event.id}, data={"error_message": str(e)}
+        )
+
+
+# 手動操作によるWebhookイベント処理エンドポイント
 @webhook_events_router.post("/process")
 async def process_webhook_events():
     """
