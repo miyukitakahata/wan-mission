@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { auth } from '@/lib/firebase/config';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,40 +23,209 @@ export default function AdminPinPage() {
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false); // 確認用PINコードの表示／非表示を切り替えるための状態
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // 送信中状態
+  const [isSuccess, setIsSuccess] = useState(false); // 成功状態
 
-  const handleSubmit = () => {
-    if (!adminPin) {
-      setError('管理者PINを入力してください');
-      return;
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError('');
+    setIsSuccess(false);
+
+    try {
+      const familyInfoStr = localStorage.getItem('familyInfo');
+      const careSettingsStr = localStorage.getItem('careSettings');
+
+      if (!familyInfoStr || !careSettingsStr) {
+        setError('必要な設定情報が見つかりません');
+        return;
+      }
+
+      const familyInfo = JSON.parse(familyInfoStr);
+      const careSettings = JSON.parse(careSettingsStr);
+
+      console.log('[Step5] familyInfo:', familyInfo);
+      console.log('[Step5] careSettings:', careSettings);
+
+      const { parentName, childName, dogName } = familyInfo;
+
+      const {
+        care_start_date: careStartDate,
+        care_end_date: careEndDate,
+        morning_meal_time: morningMealTime,
+        night_meal_time: nightMealTime,
+        walk_time: walkTime,
+      } = careSettings;
+
+      // 時間フォーマットを確認・修正する関数
+      const formatTimeString = (timeStr: string | undefined): string => {
+        if (!timeStr) return '00:00';
+
+        // 既に HH:MM 形式の場合はそのまま返す
+        if (/^\d{2}:\d{2}$/.test(timeStr)) {
+          return timeStr;
+        }
+
+        // H:MM 形式の場合は 0 を追加
+        if (/^\d{1}:\d{2}$/.test(timeStr)) {
+          return `0${timeStr}`;
+        }
+
+        // その他の形式の場合はデフォルト値
+        console.warn('[Step5] 不正な時間形式:', timeStr);
+        return '00:00';
+      };
+
+      // 時間データを正しい形式に変換
+      const formattedMorningTime = formatTimeString(morningMealTime);
+      const formattedNightTime = formatTimeString(nightMealTime);
+      const formattedWalkTime = formatTimeString(walkTime);
+
+      console.log('[Step5] 時間データ変換:', {
+        original: { morningMealTime, nightMealTime, walkTime },
+        formatted: {
+          formattedMorningTime,
+          formattedNightTime,
+          formattedWalkTime,
+        },
+      });
+
+      // 送信するデータの詳細ログ
+      const requestData = {
+        parent_name: parentName,
+        child_name: childName,
+        dog_name: dogName,
+        care_password: adminPin,
+        care_start_date: careStartDate,
+        care_end_date: careEndDate,
+        morning_meal_time: formattedMorningTime,
+        night_meal_time: formattedNightTime,
+        walk_time: formattedWalkTime,
+        care_clear_status: 'ongoing',
+      };
+      console.log('[Step5] 送信データ:', requestData);
+
+      // バリデーション
+      if (!parentName || !childName || !dogName) {
+        setError('家族情報が不完全です');
+        return;
+      }
+
+      if (
+        !careStartDate ||
+        !careEndDate ||
+        !morningMealTime ||
+        !nightMealTime ||
+        !walkTime
+      ) {
+        setError('お世話設定が不完全です');
+        return;
+      }
+
+      if (!adminPin) {
+        setError('管理者PINを入力してください');
+        return;
+      }
+
+      if (adminPin.length !== 4) {
+        setError('PINは4桁で入力してください');
+        return;
+      }
+
+      if (!/^\d{4}$/.test(adminPin)) {
+        setError('PINは数字のみで入力してください');
+        return;
+      }
+
+      if (adminPin !== confirmPin) {
+        setError('PINが一致しません');
+        return;
+      }
+
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        setError('認証情報が取得できません');
+        return;
+      }
+
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+      const res = await fetch(`${API_BASE_URL}/api/care_settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      let data = null;
+      try {
+        data = await res.json();
+        console.log('[Step5] API レスポンス:', data);
+      } catch (e) {
+        console.error('[Step5] JSONパースエラー:', e);
+        data = null;
+      }
+
+      if (!res.ok) {
+        console.error('[Step5] API エラー:', {
+          status: res.status,
+          statusText: res.statusText,
+          data,
+        });
+
+        let errorMessage = 'サーバーエラーが発生しました';
+
+        if (res.status === 422) {
+          // バリデーションエラーの場合
+          if (data && data.detail) {
+            if (Array.isArray(data.detail)) {
+              // Pydantic バリデーションエラーの配列
+              errorMessage = `入力データにエラーがあります:\n${data.detail
+                .map(
+                  (err: any) =>
+                    `${err.loc ? err.loc.join('.') : 'フィールド'}: ${err.msg}`
+                )
+                .join('\n')}`;
+            } else if (typeof data.detail === 'string') {
+              errorMessage = data.detail;
+            } else {
+              errorMessage = JSON.stringify(data.detail, null, 2);
+            }
+          }
+        } else if (data && data.detail) {
+          errorMessage =
+            typeof data.detail === 'string'
+              ? data.detail
+              : JSON.stringify(data.detail);
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      // 成功時の処理
+      localStorage.setItem('careSettingId', String(data.id));
+      localStorage.setItem('lastCareTime', new Date().toISOString());
+      localStorage.setItem(
+        'adminSettings',
+        JSON.stringify({
+          adminPin,
+          createdAt: new Date().toISOString(),
+        })
+      );
+
+      setIsSuccess(true);
+
+      // 成功メッセージを表示してから遷移
+      setTimeout(() => {
+        router.push('/loading-screen');
+      }, 2000);
+    } catch (err: any) {
+      console.error('登録失敗:', err);
+      setError(err.message || '登録中にエラーが発生しました');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (adminPin.length !== 4) {
-      setError('PINは4桁で入力してください');
-      return;
-    }
-
-    if (!/^\d{4}$/.test(adminPin)) {
-      setError('PINは数字のみで入力してください');
-      return;
-    }
-
-    if (adminPin !== confirmPin) {
-      setError('PINが一致しません');
-      return;
-    }
-
-    // 管理者PINを保存
-    const adminSettings = {
-      adminPin,
-      createdAt: new Date().toISOString(),
-    };
-    localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
-
-    // お世話開始時間を記録
-    localStorage.setItem('lastCareTime', new Date().toISOString());
-
-    // ローディング画面に遷移
-    router.push('/loading-screen');
   };
 
   const isFormComplete =
@@ -112,7 +282,7 @@ export default function AdminPinPage() {
                     setAdminPin(value);
                     setError('');
                   }}
-                  className="text-base pr-10 text-center text-2xl tracking-widest"
+                  className="pr-10 text-center text-2xl tracking-widest"
                   maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"
@@ -156,7 +326,7 @@ export default function AdminPinPage() {
                     setConfirmPin(value);
                     setError('');
                   }}
-                  className="text-base pr-10 text-center text-2xl tracking-widest"
+                  className="pr-10 text-center text-2xl tracking-widest"
                   maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"
@@ -184,12 +354,21 @@ export default function AdminPinPage() {
               </div>
             )}
 
-            {isFormComplete && (
+            {isFormComplete && !isSuccess && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-4 w-4 text-green-600" />
                   <p className="text-sm text-green-700">管理者PIN設定完了！</p>
                 </div>
+              </div>
+            )}
+
+            {/* 成功メッセージ */}
+            {isSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <p className="text-sm text-green-700 text-center">
+                  設定完了！わんちゃんとの楽しい時間が始まります
+                </p>
               </div>
             )}
 
@@ -220,9 +399,9 @@ export default function AdminPinPage() {
           <Button
             className="w-2/3 ml-2 bg-orange-500 hover:bg-orange-600 text-sm py-3"
             onClick={handleSubmit}
-            disabled={!isFormComplete}
+            disabled={!isFormComplete || isSubmitting}
           >
-            設定完了
+            {isSubmitting ? '設定中...' : 'お世話を始める'}
           </Button>
         </CardFooter>
       </Card>

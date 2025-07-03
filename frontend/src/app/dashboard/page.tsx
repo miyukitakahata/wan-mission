@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -13,6 +15,13 @@ import {
   Utensils,
   Star,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+
+// 本番環境での Firebase 認証設定手順:
+// 1. Firebase config を設定
+// 2. 上記の import を有効化
+// 3. useEffect 内の認証処理コメントを解除
+// 4. ユーザーログイン状態の管理を実装
 
 // API エンドポイントのベース URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -20,9 +29,45 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function DashboardPage() {
   const router = useRouter();
   // const searchParams = useSearchParams();
-  // To-do
-  // care_setting_id を仮で1とする（本番はユーザーごとに取得）
-  const careSettingId = 1;
+
+  // care_settings の状態管理
+  const [careSettings, setCareSettings] = useState<{
+    id: number;
+    parent_name: string;
+    child_name: string;
+    dog_name: string;
+    care_start_date: string;
+    care_end_date: string;
+  } | null>(null);
+  const [careSettingsLoading, setCareSettingsLoading] = useState(true);
+  const [authUser, setAuthUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const testuser = useAuth(); // 認証情報を取得
+
+  console.log('[NamePage] User:', testuser.currentUser);
+
+  // Firebase 認証ヘッダーを取得する関数
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const token = await user.getIdToken();
+        headers.Authorization = `Bearer ${token}`;
+        console.log('[Dashboard] Firebase token を取得しました');
+      } else {
+        throw new Error('ユーザーが未ログイン状態です');
+      }
+    } catch (authError) {
+      console.error('[Dashboard] Firebase 認証エラー:', authError);
+      throw authError;
+    }
+
+    return headers;
+  };
 
   // お世話状態
   const [careLog, setCareLog] = useState({
@@ -31,54 +76,190 @@ export default function DashboardPage() {
     walked: false,
     care_log_id: null,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  // クライアント側でのみ日付を使用
+  const [mounted, setMounted] = useState(false);
 
-  // お世話状態をAPIから取得
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Firebase認証状態を監視
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log(
+        '[Dashboard] 認証状態変更:',
+        user ? 'ログイン済み' : '未ログイン'
+      );
+      setAuthUser(user);
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // care_settings を取得（認証完了後）
+  useEffect(() => {
+    if (authLoading || !authUser) {
+      console.log('[Dashboard] 認証待ちまたは未認証のためAPIコール延期');
+      return;
+    }
+
+    const fetchCareSettings = async () => {
+      setCareSettingsLoading(true);
+      try {
+        const headers = await getAuthHeaders();
+
+        const res = await fetch(`${API_BASE_URL}/api/care_settings/me`, {
+          method: 'GET',
+          headers,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCareSettings({
+            id: data.id,
+            parent_name: data.parent_name,
+            child_name: data.child_name,
+            dog_name: data.dog_name,
+            care_start_date: data.care_start_date,
+            care_end_date: data.care_end_date,
+          });
+          console.log('[Dashboard] care_settings取得成功:', data);
+        } else if (res.status === 404) {
+          console.log(
+            '[Dashboard] care_settings が見つかりません（新規ユーザー）'
+          );
+          // 新規ユーザーの場合、onboarding にリダイレクト
+          router.push('/onboarding');
+        } else {
+          console.error(`[Dashboard] care_settings取得失敗: ${res.status}`);
+        }
+      } catch (error) {
+        console.error('[Dashboard] care_settings取得エラー:', error);
+      } finally {
+        setCareSettingsLoading(false);
+      }
+    };
+
+    fetchCareSettings();
+  }, [authLoading, authUser, router]);
+
+  // お世話状態をAPIから取得（care_settings取得後に実行）
+  useEffect(() => {
+    if (!careSettings?.id || !mounted) return; // care_settings がない場合、またはマウント前は実行しない
+
     const fetchCareLog = async () => {
       setLoading(true);
       try {
+        const today = new Date().toISOString().split('T')[0];
+        const headers = await getAuthHeaders();
+
         const res = await fetch(
-          `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettingId}`
+          `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettings.id}&date=${today}`,
+          {
+            method: 'GET',
+            headers,
+          }
         );
-        const data = await res.json();
-        setCareLog({
-          fed_morning: data.fed_morning,
-          fed_night: data.fed_night,
-          walked: data.walked,
-          care_log_id: data.care_log_id || null,
-        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setCareLog({
+            fed_morning: data.fed_morning,
+            fed_night: data.fed_night,
+            walked: data.walked,
+            care_log_id: data.care_log_id || null,
+          });
+          console.log('[Dashboard] 今日のcare_log取得成功:', data);
+        } else {
+          console.error(`[Dashboard] care_log取得失敗: ${res.status}`);
+        }
       } catch (error) {
-        console.error('Error fetching care log:', error);
+        console.error('[Dashboard] care_log取得エラー:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCareLog();
-  }, [router]);
 
-  // To-do
-  // 開発のため、一旦コメントアウトします。
+    fetchCareLog();
+  }, [careSettings?.id, mounted]); // careSettings.id と mounted に依存
+
   // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
-  // useEffect(() => {
-  //   const checkYesterdayWalk = async () => {
-  //     const yesterday = new Date();
-  //     yesterday.setDate(yesterday.getDate() - 1);
-  //     const dateStr = yesterday.toISOString().slice(0, 10);
-  //     try {
-  //       const res = await fetch(
-  //         `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettingId}&date=${dateStr}`
-  //       );
-  //       const data = await res.json();
-  //       if (data && data.care_log_id && !data.walked) {
-  //         router.push('/sad-departure');
-  //       }
-  //     } catch (e) {
-  //       console.error('昨日の散歩確認エラー', e);
-  //     }
-  //   };
-  //   checkYesterdayWalk();
-  // }, [router]);
+  // COMMENTED OUT: 昨日散歩確認機能を一時的に無効化
+  /*
+  useEffect(() => {
+    if (!careSettings?.id || !mounted) return; // care_settings がない場合、またはマウント前は実行しない
+
+    const checkYesterdayWalk = async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const dateStr = yesterday.toISOString().slice(0, 10);
+
+      try {
+        console.log(
+          `[Dashboard] 昨日の散歩確認開始: careSettingId=${careSettings.id}, date=${dateStr}`
+        );
+
+        // Firebase 認証ヘッダーを取得
+        let authHeaders: Record<string, string>;
+        try {
+          authHeaders = await getAuthHeaders();
+        } catch (authError) {
+          console.error('[Dashboard] 認証失敗:', authError);
+          return; // 認証エラーの場合は処理を中断
+        }
+
+        // fetch バックエンド API
+        const res = await fetch(
+          `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettings.id}&date=${dateStr}`,
+          {
+            method: 'GET',
+            headers: authHeaders,
+          }
+        );
+
+        if (!res.ok) {
+          console.error(`[Dashboard] API 呼び出し失敗: status=${res.status}`);
+
+          // 認証エラーの場合の特別な処理
+          if (res.status === 401) {
+            console.error(
+              '[Dashboard] 認証エラー: Firebase token が無効または期限切れです'
+            );
+            // to-do: 必要に応じてログイン画面にリダイレクト
+            // router.push('/login');
+            return;
+          }
+
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log(`[Dashboard] 後端レスポンス:`, data);
+
+        // 昨日のcare_logが存在し、散歩が未実施の場合
+        if (data && data.care_log_id && !data.walked) {
+          console.log(
+            '[Dashboard] 昨日散歩未実施のため sad-departure にリダイレクト'
+          );
+          router.push('/sad-departure');
+        }
+        // 昨日のcare_logが存在しない散歩が未実施の場合
+        else if (data && !data.care_log_id && !data.walked) {
+          console.log(
+            '[Dashboard] 昨日記録なし(散歩未実施)のため sad-departure にリダイレクト'
+          );
+          router.push('/sad-departure');
+        }
+      } catch (error) {
+        console.error('[Dashboard] 昨日の散歩確認エラー:', error);
+      }
+    };
+
+    checkYesterdayWalk();
+  }, [careSettings?.id, mounted, router]); // careSettings.id, mounted, router に依存
+  */
 
   // ミッション定義
   const missions = [
@@ -110,17 +291,16 @@ export default function DashboardPage() {
   const handleDogClick = async () => {
     try {
       // Firebase認証トークンを取得
-      //   const auth = getAuth();
-      //   const user = auth.currentUser;
-      // if (!user) {
-      //     throw new Error('ログインが必要です');
-      //   }
-      // const idToken = await user.getIdToken();
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('ログインが必要です');
+      }
+      const idToken = await user.getIdToken();
       const res = await fetch(`${API_BASE_URL}/api/message_logs/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${idToken}` // 認証トークンを追加
+          Authorization: `Bearer ${idToken}`, // 認証トークンを追加
         },
       });
       if (!res.ok) {
@@ -142,6 +322,9 @@ export default function DashboardPage() {
     }
 
     try {
+      // 認証ヘッダーを取得
+      const headers = await getAuthHeaders();
+
       // care_log_id がなければ新規作成
       let careLogId = careLog.care_log_id;
       if (!careLogId) {
@@ -149,7 +332,7 @@ export default function DashboardPage() {
         const today = new Date().toISOString().slice(0, 10);
         const res = await fetch(`${API_BASE_URL}/api/care_logs/`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             date: today,
             fed_morning: missionId === 'morning-food',
@@ -173,7 +356,7 @@ export default function DashboardPage() {
           `${API_BASE_URL}/api/care_logs/${careLogId}`,
           {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(updateBody),
           }
         );
@@ -186,21 +369,28 @@ export default function DashboardPage() {
         console.log('PATCH成功', { careLogId, missionId, data: dataPatch });
       }
       // 更新後、再取得
+      const today = new Date().toISOString().split('T')[0];
+
       const res2 = await fetch(
-        `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettingId}`
+        `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettings?.id}&date=${today}`,
+        {
+          method: 'GET',
+          headers,
+        }
       );
       if (!res2.ok) {
         const text = await res2.text();
         console.error('取得後失敗', res2.status, text);
+      } else {
+        const data2 = await res2.json();
+        console.log('取得後', data2);
+        setCareLog({
+          fed_morning: data2.fed_morning,
+          fed_night: data2.fed_night,
+          walked: data2.walked,
+          care_log_id: data2.care_log_id || null,
+        });
       }
-      const data2 = await res2.json();
-      console.log('取得後', data2);
-      setCareLog({
-        fed_morning: data2.fed_morning,
-        fed_night: data2.fed_night,
-        walked: data2.walked,
-        care_log_id: data2.care_log_id || null,
-      });
     } catch (error) {
       console.error('お世話タスク更新エラー:', error);
     }
@@ -209,14 +399,26 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* 読み込み中表示 */}
-      {loading ? (
+      {authLoading ||
+      !authUser ||
+      !careSettings?.id ||
+      loading ||
+      careSettingsLoading ? (
         <div className="flex justify-center items-center h-64">
-          <p>読み込み中...</p>
+          <p>
+            {(() => {
+              if (authLoading) return '認証確認中...';
+              if (!authUser) return '認証が必要です';
+              if (!careSettings?.id) return 'ユーザー情報を取得中...';
+              return '読み込み中...';
+            })()}
+          </p>
         </div>
       ) : (
         <>
           {/* ヘッダーナビゲーション */}
-          <div className="bg-white shadow-sm p-4">
+          {/* <div className="bg-white shadow-sm p-4"> */}
+          <div className="bg-white shadow-sm p-4 sticky top-0 z-30">
             <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
               <Button
                 variant="outline"
@@ -264,19 +466,33 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* 犬の画像 */}
+                    {/* 犬の画像 → 動画 */}
                     <div className="flex flex-col items-center">
-                      <Button
+                      {/* <Button
                         variant="ghost"
                         className="relative w-28 h-28 p-0 hover:scale-105 transition-transform duration-200"
                         onClick={handleDogClick}
-                      >
-                        <Image
+                      > */}
+                      {/* <Image
                           src="/images/cute-puppy.png"
                           alt="わんちゃん"
                           fill
                           style={{ objectFit: 'contain' }}
                           priority
+                        />
+                      </Button> */}
+                      <Button
+                        variant="ghost"
+                        className="relative w-60 h-60 max-w-xs max-h-xs p-0 hover:scale-105 transition-transform duration-200 rounded-full overflow-hidden"
+                        onClick={handleDogClick}
+                      >
+                        <video
+                          src="/animations/dog-idle.mp4"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full h-full object-contain"
                         />
                       </Button>
                       <p className="text-xs text-gray-500 mt-1">

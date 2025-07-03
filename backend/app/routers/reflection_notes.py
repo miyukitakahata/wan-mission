@@ -55,7 +55,7 @@ async def create_reflection_note(
         print("作成結果:", result)
         return result
     except Exception as e:
-        print("DBエラー詳細:", e)
+        print("🔥DBエラー詳細:", e)
         raise HTTPException(
             status_code=500, detail="DB登録時にエラーが発生しました"
         ) from e

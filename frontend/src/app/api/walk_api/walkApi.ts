@@ -1,15 +1,19 @@
-// fetchでバックエンドの /api/walk を叩く関数（cl改善版対応）
+// fetchでバックエンドの /api/care_logs を叩く関数（cl改善版対応）
 
 // 下記のコメントは開発中のみ、削除する予定
 // 主な役割：バックエンド API との通信、散歩記録の保存・取得
-// saveWalkRecord：今回の散歩距離、時間、結果などのデータをバックエンドへ送信する。
+// saveWalkRecord：今回の散歩距離、時間、結果などのデータをcare_logsへ送信する。
 // determineWalkSuccess：距離に基づいて目標達成可否を判定する。
 // cl改善版対応：累積距離システム、動的しきい値、時間窓検証を使用した高精度GPS追跡データ
 
+// 認証ヘッダーを生成するヘルパー関数
+const getAuthHeader = (token?: string): HeadersInit => ({
+  'Content-Type': 'application/json',
+  ...(token && { Authorization: `Bearer ${token}` }),
+});
 // 散步データの型定義（cl改善版対応）
 export interface WalkData {
   id?: string;
-  userId?: string;
   date: string;
   distance: number; // メートル単位
   duration: number; // 秒単位
@@ -31,75 +35,84 @@ export interface WalkData {
 export interface WalkResult {
   success: boolean;
   message: string;
-  data?: WalkData;
+  data?: any;
   error?: string;
-}
-
-// 散步ミッションの型定義
-export interface WalkMission {
-  id: string;
-  title: string;
-  description: string;
-  targetDistance: number; // メートル単位
-  targetDuration: number; // 秒単位
-  reward?: string;
-  isCompleted: boolean;
 }
 
 // API エンドポイントのベース URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 散步記録を保存する関数（cl改善版データ対応）
-export const saveWalkRecord = async (walkData: any): Promise<WalkResult> => {
-  try {
-    // cl改善版GPS計算による高精度データであることを記録
-    const enhancedWalkData = {
-      ...walkData,
-      calculationMethod: 'balanced',
-      timestamp: new Date().toISOString(),
-    };
+// 散步成功判定のロジック（cl改善版対応）
+// 距離のみで1000 m 以上は成功
+// cl改善版GPS計算による高精度データを使用
+export const determineWalkSuccess = (
+  distance: number,
+  _duration: number,
+  targetDistance?: number,
+  _targetDuration?: number
+): boolean => {
+  // デフォルトの目標距離（設定されていない場合）
+  const defaultTargetDistance = 1000; // 1000メートル
 
-    const response = await fetch(`${API_BASE_URL}/api/walk_missions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(enhancedWalkData),
-    });
+  const actualTargetDistance = targetDistance || defaultTargetDistance;
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+  // cl改善版GPS計算による高精度距離データで判定（1000メートル以上で成功）
+  const isSuccess = distance >= actualTargetDistance;
 
-    const result = await response.json();
-    return {
-      success: true,
-      message: '散歩記録が正常に保存されました（cl改善版GPS使用）',
-      data: result,
-    };
-  } catch (error) {
-    console.error('散歩記録保存エラー:', error);
-    return {
-      success: false,
-      message: '散歩記録の保存に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
+  console.log('[WalkAPI] 散歩成功判定（cl改善版）:', {
+    distance: `${distance}m`,
+    targetDistance: `${actualTargetDistance}m`,
+    isSuccess,
+    calculationMethod: 'balanced',
+  });
+
+  return isSuccess;
 };
 
-// 散歩記録を更新するAPI
-export const updateWalkRecord = async (
-  id: number,
-  walkData: Partial<WalkData>
+// 散歩記録を更新する関数（既存のcare_logを更新）
+const updateWalkRecord = async (
+  walkData: any,
+  careSettingId: number,
+  token?: string
 ): Promise<WalkResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/walk_missions/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(walkData),
-    });
+    // 認証ヘッダーを取得
+    const headers = getAuthHeader(token);
+
+    console.log(
+      `[WalkAPI] updateWalkRecord: care_setting_id: ${careSettingId}`
+    );
+
+    const todayResponse = await fetch(
+      `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettingId}&date=${walkData.date}`,
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+
+    if (!todayResponse.ok) {
+      throw new Error(`今日の記録取得エラー: ${todayResponse.status}`);
+    }
+
+    const todayData = await todayResponse.json();
+
+    if (!todayData.care_log_id) {
+      throw new Error('更新対象のcare_logが見つかりません');
+    }
+
+    // PATCHで散歩記録を更新
+    const response = await fetch(
+      `${API_BASE_URL}/api/care_logs/${todayData.care_log_id}`,
+      {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          walk_result: walkData.walk_result,
+          walk_total_distance_m: walkData.walk_total_distance_m,
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -121,186 +134,60 @@ export const updateWalkRecord = async (
   }
 };
 
-// ユーザーの散步履歴を取得する関数
-export const getWalkHistory = async (userId?: string): Promise<WalkResult> => {
-  try {
-    const url = userId
-      ? `${API_BASE_URL}/api/walk-missions/history?userId=${userId}`
-      : `${API_BASE_URL}/api/walk-missions/history`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // 必要に応じて認証ヘッダーを追加
-        // "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return {
-      success: true,
-      message: '散步履歴を正常に取得しました',
-      data: result,
-    };
-  } catch (error) {
-    console.error('散步履歴取得エラー:', error);
-    return {
-      success: false,
-      message: '散步履歴の取得に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-};
-
-// 散步ミッション一覧を取得する関数
-export const getWalkMissions = async (): Promise<WalkResult> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/walk-missions`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // 必要に応じて認証ヘッダーを追加
-        // "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return {
-      success: true,
-      message: '散步ミッションを正常に取得しました',
-      data: result,
-    };
-  } catch (error) {
-    console.error('散步ミッション取得エラー:', error);
-    return {
-      success: false,
-      message: '散步ミッションの取得に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-};
-
-// 特定の散步ミッションを取得する関数
-export const getWalkMission = async (
-  missionId: string
+// 散步記録を保存する関数（care_logsに統合）
+export const saveWalkRecord = async (
+  walkData: any,
+  careSettingId: number,
+  token?: string
 ): Promise<WalkResult> => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/walk-missions/${missionId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // 必要に応じて認証ヘッダーを追加
-          // "Authorization": `Bearer ${token}`,
-        },
-      }
+    // 認証ヘッダーを取得
+    const headers = getAuthHeader(token);
+
+    console.log(`[WalkAPI] saveWalkRecord: care_setting_id: ${careSettingId}`);
+
+    // 散歩の成功判定
+    const walkSuccess = determineWalkSuccess(
+      walkData.distance,
+      walkData.duration
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return {
-      success: true,
-      message: '散步ミッションを正常に取得しました',
-      data: result,
+    // care_logs API用のデータ構造に変換（care_setting_idを追加）
+    const careLogData = {
+      care_setting_id: careSettingId,
+      date: walkData.date,
+      walk_result: walkSuccess,
+      walk_total_distance_m: Math.round(walkData.distance),
     };
-  } catch (error) {
-    console.error('散步ミッション取得エラー:', error);
-    return {
-      success: false,
-      message: '散步ミッションの取得に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-};
 
-// 散步ミッションを完了としてマークする関数
-export const completeWalkMission = async (
-  missionId: string,
-  walkData: WalkData
-): Promise<WalkResult> => {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/walk-missions/${missionId}/complete`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // 必要に応じて認証ヘッダーを追加
-          // "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(walkData),
-      }
-    );
+    console.log('[WalkAPI] care_logsに散歩データを保存:', careLogData);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return {
-      success: true,
-      message: '散步ミッションが正常に完了しました',
-      data: result,
-    };
-  } catch (error) {
-    console.error('散步ミッション完了エラー:', error);
-    return {
-      success: false,
-      message: '散步ミッションの完了に失敗しました',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
-  }
-};
-
-// 散步統計を取得する関数
-export const getWalkStats = async (
-  userId?: string,
-  period?: string
-): Promise<WalkResult> => {
-  try {
-    const params = new URLSearchParams();
-    if (userId) params.append('userId', userId);
-    if (period) params.append('period', period);
-
-    const url = `${API_BASE_URL}/api/walk-missions/stats${params.toString() ? `?${params.toString()}` : ''}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        // 必要に応じて認証ヘッダーを追加
-        // "Authorization": `Bearer ${token}`,
-      },
+    const response = await fetch(`${API_BASE_URL}/api/care_logs`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(careLogData),
     });
 
     if (!response.ok) {
+      // 既存の記録がある場合はPATCHで更新を試行
+      if (response.status === 400) {
+        console.log('[WalkAPI] 既存記録があるため更新APIを使用');
+        return await updateWalkRecord(careLogData, careSettingId, token);
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
     return {
       success: true,
-      message: '散步統計を正常に取得しました',
+      message: '散歩記録が正常に保存されました（care_logs使用）',
       data: result,
     };
   } catch (error) {
-    console.error('散步統計取得エラー:', error);
+    console.error('散歩記録保存エラー:', error);
     return {
       success: false,
-      message: '散步統計の取得に失敗しました',
+      message: '散歩記録の保存に失敗しました',
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
@@ -340,33 +227,6 @@ export const getWalksFromLocalStorage = (): WalkData[] => {
     console.error('ローカルストレージ取得エラー:', error);
     return [];
   }
-};
-
-// 散步成功判定のロジック（cl改善版対応）
-// 距離のみで1000 m 以上は成功
-// cl改善版GPS計算による高精度データを使用
-export const determineWalkSuccess = (
-  distance: number,
-  _duration: number,
-  targetDistance?: number,
-  _targetDuration?: number
-): boolean => {
-  // デフォルトの目標距離（設定されていない場合）
-  const defaultTargetDistance = 1000; // 1000メートル
-
-  const actualTargetDistance = targetDistance || defaultTargetDistance;
-
-  // cl改善版GPS計算による高精度距離データで判定（1000メートル以上で成功）
-  const isSuccess = distance >= actualTargetDistance;
-
-  console.log('[WalkAPI] 散歩成功判定（cl改善版）:', {
-    distance: `${distance}m`,
-    targetDistance: `${actualTargetDistance}m`,
-    isSuccess,
-    calculationMethod: 'balanced',
-  });
-
-  return isSuccess;
 };
 
 // cl改善版GPS品質チェック関数

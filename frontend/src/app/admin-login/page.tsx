@@ -1,7 +1,6 @@
 'use client';
 
 import type React from 'react';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { auth } from '@/lib/firebase/config';
 
+// 管理者ログインページ
 export default function AdminLoginPage() {
   const router = useRouter();
   const [pin, setPin] = useState('');
@@ -22,56 +23,62 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // フォーム送信時のPIN認証処理
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // エラーをリセット
 
     if (!pin) {
       setError('PINを入力してください');
       return;
     }
-
     if (pin.length !== 4) {
       setError('PINは4桁で入力してください');
       return;
     }
 
-    // ローカルストレージから管理者PINとログインPINを取得
-    // TODO_DBから取得したデータを表示するページ
-    const adminSettings = JSON.parse(
-      localStorage.getItem('adminSettings') || '{}'
-    );
-    const loginSettings = JSON.parse(
-      localStorage.getItem('loginSettings') || '{}'
-    );
-
-    const {adminPin} = adminSettings;
-    const loginPin = loginSettings.pin;
-
-    // どちらのPINも設定されていない場合
-    if (!adminPin && !loginPin) {
-      setError('認証用のPINが設定されていません');
-      return;
-    }
-
-    // 管理者PINまたはログインPINのいずれかと一致するかチェック
-    const isValidPin =
-      (adminPin && pin === adminPin) || (loginPin && pin === loginPin);
-
-    if (isValidPin) {
-      // PIN認証成功
-      router.push('/admin');
-    } else {
-      // PIN認証失敗
-      setAttempts((prev) => prev + 1);
-      setError('PINが正しくありません');
-      setPin('');
-
-      // 3回失敗したらダッシュボードに戻る
-      if (attempts >= 2) {
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        setError('ログイン情報が見つかりません');
+        return;
       }
+
+      const idToken = await user.getIdToken(); // Firebase IDトークン取得
+
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${API_BASE_URL}/api/care_settings/verify_pin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`, // 認証トークンを送信
+        },
+        body: JSON.stringify({ input_password: pin }),
+      });
+
+      if (!res.ok) {
+        throw new Error('APIエラー');
+      }
+
+      const result = await res.json();
+      if (result.verified) {
+        // 認証成功
+        router.push('/admin');
+      } else {
+        // 認証失敗
+        setAttempts((prev) => prev + 1);
+        setError('PINが正しくありません');
+        setPin('');
+        // 3回失敗したらダッシュボードに戻る
+        if (attempts >= 2) {
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 2000);
+        }
+      }
+    } catch (err) {
+      console.error('PIN認証エラー:', err);
+      setError('PIN認証中にエラーが発生しました');
     }
   };
 
@@ -108,7 +115,7 @@ export default function AdminLoginPage() {
                     setPin(value);
                     setError('');
                   }}
-                  className="text-base pr-10 text-center text-2xl tracking-widest"
+                  className="text-2xl pr-10 text-center tracking-widest"
                   maxLength={4}
                   inputMode="numeric"
                   pattern="[0-9]*"

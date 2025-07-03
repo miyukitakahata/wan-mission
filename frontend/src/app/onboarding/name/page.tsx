@@ -15,32 +15,37 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Users, Heart } from 'lucide-react'; // lucide-reactアイコン
+import { useAuth } from '@/context/AuthContext';
 
 export default function NamePage() {
   // DB：care_settingsテーブルに対応
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [parentName, setParentName] = useState('');
   const [childName, setChildName] = useState('');
-  const [petName, setPetName] = useState(''); // 親名前、子ども名前、ペット名前未入力
+  const [dogName, setdogName] = useState(''); // 親名前、子ども名前、ペット名前未入力
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[NamePage] User:', user.currentUser);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (parentName.trim() && childName.trim() && petName.trim()) {
+    if (parentName.trim() && childName.trim() && dogName.trim()) {
       // 家族情報を保存
       const familyData = {
         parentName: parentName.trim(),
         childName: childName.trim(),
-        petName: petName.trim(),
+        dogName: dogName.trim(),
       };
       localStorage.setItem('familyInfo', JSON.stringify(familyData));
+      console.log('[NamePage] Saving family info:', familyData);
 
-      router.push('/onboarding/third-step');
+      router.push('/onboarding/fourth-step');
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8">
-      <Card className="w-full max-w-sm shadow-lg">
+      <Card className="bg-white w-full max-w-sm shadow-lg">
         <CardHeader className="flex flex-col items-center space-y-2 pb-2">
           <div className="h-16 w-16 rounded-full bg-orange-100 flex items-center justify-center">
             <Users className="h-10 w-10 text-orange-500" />
@@ -89,17 +94,17 @@ export default function NamePage() {
             </div>
             <div className="space-y-2">
               <Label
-                htmlFor="petName"
+                htmlFor="dogName"
                 className="text-base flex items-center gap-2"
               >
                 <Heart className="h-4 w-4 text-red-500" />
                 ペットの名前
               </Label>
               <Input
-                id="petName"
+                id="dogName"
                 placeholder="ポチ"
-                value={petName}
-                onChange={(e) => setPetName(e.target.value)}
+                value={dogName}
+                onChange={(e) => setdogName(e.target.value)}
                 required
                 className="text-base"
               />
@@ -127,7 +132,7 @@ export default function NamePage() {
             className="w-2/3 ml-2 bg-orange-500 hover:bg-orange-600 text-sm py-3"
             onClick={handleSubmit}
             disabled={
-              !parentName.trim() || !childName.trim() || !petName.trim()
+              !parentName.trim() || !childName.trim() || !dogName.trim()
             }
           >
             次へ
