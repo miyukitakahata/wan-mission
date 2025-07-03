@@ -1,10 +1,11 @@
 // src/app/cancel/page.tsx
+
 import { useAuth } from '@/context/AuthContext'; // 認証情報を取得するカスタムフック
 
 export default function CancelPage() {
   const user = useAuth(); // 認証情報を取得
 
-  console.log('[NamePage] User:', user.currentUser);
+  console.log('[CancelPage] User:', user.currentUser);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

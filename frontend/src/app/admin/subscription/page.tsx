@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Crown, MessageCircle, Heart, ArrowLeft } from 'lucide-react';
-import { getAuth } from 'firebase/auth'; // Firebaseの認証をインポート
+import { useAuth } from '@/context/AuthContext';
+//import { getAuth } from 'firebase/auth'; // Firebaseの認証をインポート
 
 // ログイン済みのユーザーID（Firebase UID）を取得
 // const auth = getAuth();
@@ -14,9 +15,13 @@ import { getAuth } from 'firebase/auth'; // Firebaseの認証をインポート
 const firebaseUid = 'test-firebase-uid';
 // firebaseUidで決済できるか確認
 
+
 export default function SubscriptionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[SubscriptionPage] User:', user.currentUser);
 
   const features = [
     {

@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { auth } from '@/lib/firebase/config';
+import { useAuth } from '@/context/AuthContext
 
 // 管理者ログインページ
 export default function AdminLoginPage() {
@@ -22,6 +23,9 @@ export default function AdminLoginPage() {
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
+    const user = useAuth(); // 認証情報を取得
+
+  console.log('[AdminLoginPage] User:', user.currentUser);
 
   // フォーム送信時のPIN認証処理
   const handleSubmit = async (e: React.FormEvent) => {

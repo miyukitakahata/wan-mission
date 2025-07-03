@@ -1,4 +1,5 @@
 // src/app/success/page.tsx
+
 import { useAuth } from '@/context/AuthContext'; // 認証情報を取得するカスタムフック
 
 export default function SuccessPage() {

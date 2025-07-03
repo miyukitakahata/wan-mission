@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import { useCareLogs } from '@/hooks/useCareLogs';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminPage() {
   // TODO_DBから取得したデータを表示するページ
@@ -39,6 +40,9 @@ export default function AdminPage() {
   const [consecutiveDays, setConsecutiveDays] = useState<number | null>(null);
   const [targetDays, setTargetDays] = useState<number>(0);
   const [childName, setChildName] = useState<string>('');
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[AdminPage] User:', user.currentUser);
 
   // データを取得したらchildNameとconsecutiveDaysとtargetDaysを更新
   useEffect(() => {

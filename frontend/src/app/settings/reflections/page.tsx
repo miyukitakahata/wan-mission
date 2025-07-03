@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Heart } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/AuthContext';
 
 type ReflectionNote = {
   id: number;
@@ -21,6 +22,9 @@ export default function ReflectionsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
   const [reflectionData, setReflectionData] = useState<ReflectionNote[]>([]);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[ReflectionsPage] User:', user.currentUser);
 
   useEffect(() => {
     const fetchReflectionNotes = async () => {
