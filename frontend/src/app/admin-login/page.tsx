@@ -13,8 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { auth } from '@/lib/firebase/config';
-import { useAuth } from '@/context/AuthContext
+import { useAuth } from '@/context/AuthContext';
 
 // 管理者ログインページ
 export default function AdminLoginPage() {
@@ -23,7 +22,7 @@ export default function AdminLoginPage() {
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
-    const user = useAuth(); // 認証情報を取得
+  const user = useAuth(); // 認証情報を取得
 
   console.log('[AdminLoginPage] User:', user.currentUser);
 
@@ -42,13 +41,12 @@ export default function AdminLoginPage() {
     }
 
     try {
-      const user = auth.currentUser;
-      if (!user) {
+      if (!user.currentUser) {
         setError('ログイン情報が見つかりません');
         return;
       }
 
-      const idToken = await user.getIdToken(); // Firebase IDトークン取得
+      const idToken = await user.currentUser.getIdToken(); // Firebase IDトークン取得
 
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${API_BASE_URL}/api/care_settings/verify_pin`, {

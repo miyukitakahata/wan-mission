@@ -49,7 +49,12 @@ export default function CareSettingsPage() {
 
   useEffect(() => {
     setMounted(true);
-    setToday(new Date().toISOString().split('T')[0]);
+    // 日本時間の今日の日付を取得（UTC+9）
+    const now = new Date();
+    const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const todayJST = jstDate.toISOString().split('T')[0];
+    setToday(todayJST);
+    console.log('[CareSettingsPage] JST今日の日付:', todayJST);
   }, []);
 
   // 指定した時間範囲で30分刻みの時間リストを生成する関数

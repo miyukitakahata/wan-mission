@@ -1,7 +1,8 @@
 'use client';
 
 import { formatInTimeZone } from 'date-fns-tz';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 // バックエンドからどんなデータ型でもらうのかを定義
 export interface CareLogToday {
@@ -18,14 +19,24 @@ export function useCareLogs(careSettingId: number) {
   const [loading, setLoading] = useState(true);
   // エラーが起きたらここにメッセージを入れる
   const [error, setError] = useState('');
+  // Firebase認証情報を取得
+  const { currentUser } = useAuth();
 
   // 実際にバックエンドからデータを取ってくる関数
-  const fetchCareLogs = async () => {
+  const fetchCareLogs = useCallback(async () => {
     // 最初にローディング中の状態にする（読み込み開始）
     setLoading(true);
     setError('');
     try {
       console.log('[useCareLogs] fetchCareLogs start');
+
+      // Firebase認証チェック
+      if (!currentUser) {
+        throw new Error('認証が必要です');
+      }
+
+      // Firebase IDトークンを取得
+      const idToken = await currentUser.getIdToken();
 
       // 日本時間の「今日」を文字列にする
       const todayJapan = formatInTimeZone(
@@ -39,7 +50,10 @@ export function useCareLogs(careSettingId: number) {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/care_logs/by_date?care_setting_id=${careSettingId}&date=${todayJapan}`,
         {
-          credentials: 'include', // 認証Cookieが必要なら
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
         }
       );
 
@@ -69,14 +83,15 @@ export function useCareLogs(careSettingId: number) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, careSettingId]);
 
   // 画面が最初に表示されたタイミングで、一度だけ fetchCareLogs を実行
+  // currentUserが利用可能になってから実行
   useEffect(() => {
-    if (careSettingId) {
+    if (careSettingId && currentUser) {
       fetchCareLogs();
     }
-  }, [careSettingId]);
+  }, [careSettingId, currentUser, fetchCareLogs]);
 
   // 更新した際に再度データを取得できるようにするため、refetch関数も定義
   return { careLog, loading, error, refetch: fetchCareLogs };

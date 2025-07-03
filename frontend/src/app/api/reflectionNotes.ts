@@ -1,5 +1,7 @@
-export const createReflectionNote = async (content: string) => {
-  const res = await fetch('http://localhost:8000/api/reflection_notes', {
+const createReflectionNote = async (content: string) => {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const res = await fetch(`${API_BASE_URL}/api/reflection_notes`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -13,3 +15,5 @@ export const createReflectionNote = async (content: string) => {
 
   return res.json();
 };
+
+export default createReflectionNote;

@@ -3,13 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, FileText, Heart } from 'lucide-react'; // lucide-reactアイコン
+import { ArrowLeft } from 'lucide-react'; // lucide-reactアイコン
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { createReflectionNote } from '@/hooks/reflectionNotesPost';
-import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ReflectionWritingPage() {
@@ -113,7 +111,7 @@ export default function ReflectionWritingPage() {
           </div>
 
           {/* 犬のシルエット */}
-          <div className="w-40 h-40 flex items-center justify-center">
+          {/* <div className="w-40 h-40 flex items-center justify-center">
             <Image
               src="/images/sad-dog-silhouette.png"
               alt="悲しそうな犬のシルエット"
@@ -121,6 +119,17 @@ export default function ReflectionWritingPage() {
               height={160}
               style={{ objectFit: 'contain' }}
               priority
+            />
+          </div> */}
+          <div className="w-full max-w-sm space-y-4 bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+            {/* <div className="w-60 h-60 flex items-center justify-center"> */}
+            <video
+              src="/animations/sad.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-contain"
             />
           </div>
 

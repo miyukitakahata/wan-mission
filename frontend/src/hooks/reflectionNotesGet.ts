@@ -8,7 +8,9 @@ export type ReflectionNote = {
 };
 
 export const getReflectionNotes = async (): Promise<ReflectionNote[]> => {
-  const res = await fetch('http://localhost:8000/api/reflection_notes');
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes`
+  );
   if (!res.ok) {
     throw new Error('Failed to fetch reflection notes');
   }

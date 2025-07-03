@@ -378,154 +378,183 @@ export class GPSTracker {
       this.positionHistory = [];
       this.lastRecordedPosition = null;
 
-      const options: PositionOptions = {
-        enableHighAccuracy: true, // 高精度モード
-        timeout: 15000, // 15秒タイムアウト
-        maximumAge: 0, // キャッシュされた位置情報を使用しない
-      };
+      // 最初は高精度モードを試行
+      this.tryGetPosition(true, resolve);
+    });
+  }
 
-      // 現在位置を取得
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log('[GPSTracker] 初期位置取得成功', {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-          });
+  // 位置取得を試行するヘルパーメソッド
+  private tryGetPosition(
+    highAccuracy: boolean,
+    resolve: (value: boolean) => void
+  ): void {
+    const options: PositionOptions = {
+      enableHighAccuracy: highAccuracy,
+      timeout: highAccuracy ? 15000 : 30000, // 低精度の場合は30秒
+      maximumAge: highAccuracy ? 0 : 300000, // 低精度の場合は5分間のキャッシュを許可
+    };
 
-          this.currentPosition = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            timestamp: position.timestamp,
-          };
-          // 開始位置を設定
-          this.startPosition = { ...this.currentPosition };
-          // 初回は前回位置をnullにして、最初の移動から計算開始
-          this.previousPosition = null;
-          // 位置履歴に追加
-          this.updatePositionHistory(this.currentPosition);
+    console.log(
+      `[GPSTracker] 位置取得試行: ${highAccuracy ? '高精度' : '低精度'}モード`,
+      options
+    );
 
-          if (this.onPositionUpdate) {
-            this.onPositionUpdate(this.currentPosition);
-          }
+    // 現在位置を取得
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('[GPSTracker] 初期位置取得成功', {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
 
-          // watchPosition開始前のデバッグログ
-          console.log('[GPSTracker] watchPosition開始...');
-          this.positionUpdateCount = 0;
+        this.currentPosition = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          timestamp: position.timestamp,
+        };
+        // 開始位置を設定
+        this.startPosition = { ...this.currentPosition };
+        // 初回は前回位置をnullにして、最初の移動から計算開始
+        this.previousPosition = null;
+        // 位置履歴に追加
+        this.updatePositionHistory(this.currentPosition);
 
-          // 位置情報の監視を開始（cl改善版設定）
-          this.watchId = navigator.geolocation.watchPosition(
-            (watchPosition) => {
-              this.positionUpdateCount += 1;
-              console.log(
-                `[GPSTracker] watchPositionコールバック呼び出し #${this.positionUpdateCount}`,
-                {
-                  lat: watchPosition.coords.latitude,
-                  lng: watchPosition.coords.longitude,
-                  accuracy: watchPosition.coords.accuracy,
-                  timestamp: new Date(
-                    watchPosition.timestamp
-                  ).toLocaleTimeString(),
-                }
-              );
+        if (this.onPositionUpdate) {
+          this.onPositionUpdate(this.currentPosition);
+        }
 
-              // 前回位置を保存
-              this.previousPosition = this.currentPosition;
+        // watchPosition開始前のデバッグログ
+        console.log('[GPSTracker] watchPosition開始...');
+        this.positionUpdateCount = 0;
 
-              this.currentPosition = {
-                latitude: watchPosition.coords.latitude,
-                longitude: watchPosition.coords.longitude,
+        // 位置情報の監視を開始（cl改善版設定）
+        this.watchId = navigator.geolocation.watchPosition(
+          (watchPosition) => {
+            this.positionUpdateCount += 1;
+            console.log(
+              `[GPSTracker] watchPositionコールバック呼び出し #${this.positionUpdateCount}`,
+              {
+                lat: watchPosition.coords.latitude,
+                lng: watchPosition.coords.longitude,
                 accuracy: watchPosition.coords.accuracy,
-                timestamp: watchPosition.timestamp,
-              };
-
-              // 位置履歴に追加
-              this.updatePositionHistory(this.currentPosition);
-
-              if (this.onPositionUpdate) {
-                this.onPositionUpdate(this.currentPosition);
+                timestamp: new Date(
+                  watchPosition.timestamp
+                ).toLocaleTimeString(),
               }
+            );
 
-              // 距離計算処理（路徑距離）
-              this.calculatePathDistance();
-            },
-            (error) => {
-              console.error('[GPSTracker] watchPositionエラー', {
-                code: error.code,
-                message: error.message,
-                callCount: this.positionUpdateCount,
-              });
+            // 前回位置を保存
+            this.previousPosition = this.currentPosition;
 
-              // watchPositionが失敗した場合、定時更新方式を開始
-              if (!this.usingTimerUpdate) {
-                console.log(
-                  '[GPSTracker] watchPosition失敗、定時更新方式に切り替え'
-                );
-                this.startTimerUpdate();
-              }
+            this.currentPosition = {
+              latitude: watchPosition.coords.latitude,
+              longitude: watchPosition.coords.longitude,
+              accuracy: watchPosition.coords.accuracy,
+              timestamp: watchPosition.timestamp,
+            };
 
-              if (this.onError) {
-                this.onError(
-                  '位置情報の監視に失敗しました（定時更新方式を使用中）'
-                );
-              }
-            },
-            {
-              enableHighAccuracy: true, // 高精度モード
-              timeout: 15000, // 15秒タイムアウト
-              maximumAge: 5000, // 5秒キャッシュ
+            // 位置履歴に追加
+            this.updatePositionHistory(this.currentPosition);
+
+            if (this.onPositionUpdate) {
+              this.onPositionUpdate(this.currentPosition);
             }
-          );
 
-          console.log('[GPSTracker] watchPosition設定完了', {
-            watchId: this.watchId,
-          });
+            // 距離計算処理（路徑距離）
+            this.calculatePathDistance();
+          },
+          (error) => {
+            console.error('[GPSTracker] watchPositionエラー', {
+              code: error.code,
+              message: error.message,
+              callCount: this.positionUpdateCount,
+            });
 
-          // 15秒後にwatchPositionが呼ばれていない場合、定時更新方式に切り替え
-          setTimeout(() => {
-            if (this.positionUpdateCount === 0 && !this.usingTimerUpdate) {
-              console.warn(
-                '[GPSTracker] 15秒間watchPositionが呼ばれていません、定時更新方式に切り替え'
+            // watchPositionが失敗した場合、定時更新方式を開始
+            if (!this.usingTimerUpdate) {
+              console.log(
+                '[GPSTracker] watchPosition失敗、定時更新方式に切り替え'
               );
               this.startTimerUpdate();
             }
-          }, 15000);
 
-          resolve(true);
-        },
-        (error) => {
-          console.error('[GPSTracker] 初期位置取得エラー', {
+            if (this.onError) {
+              this.onError(
+                '位置情報の監視に失敗しました（定時更新方式を使用中）'
+              );
+            }
+          },
+          {
+            enableHighAccuracy: highAccuracy,
+            timeout: highAccuracy ? 15000 : 30000,
+            maximumAge: highAccuracy ? 5000 : 300000,
+          }
+        );
+
+        console.log('[GPSTracker] watchPosition設定完了', {
+          watchId: this.watchId,
+        });
+
+        // 15秒後にwatchPositionが呼ばれていない場合、定時更新方式に切り替え
+        setTimeout(() => {
+          if (this.positionUpdateCount === 0 && !this.usingTimerUpdate) {
+            console.warn(
+              '[GPSTracker] 15秒間watchPositionが呼ばれていません、定時更新方式に切り替え'
+            );
+            this.startTimerUpdate();
+          }
+        }, 15000);
+
+        resolve(true);
+      },
+      (error) => {
+        console.error(
+          `[GPSTracker] 位置取得エラー (${highAccuracy ? '高精度' : '低精度'}モード)`,
+          {
             code: error.code,
             message: error.message,
             userAgent: navigator.userAgent,
-          });
+          }
+        );
 
-          let errorMessage = '位置情報の取得に失敗しました';
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage =
-                '位置情報の許可が拒否されました。設定で許可してください。';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage =
-                '位置情報が利用できません（Wi-Fiや位置情報サービスを確認してください）。';
-              break;
-            case error.TIMEOUT:
-              errorMessage = '位置情報の取得がタイムアウトしました。';
-              break;
-            default:
-              errorMessage = `不明なエラーが発生しました（code: ${error.code}）`;
-              break;
-          }
-          if (this.onError) {
-            this.onError(errorMessage);
-          }
-          resolve(false);
-        },
-        options
-      );
-    });
+        // 高精度モードで失敗した場合、低精度モードを試行
+        if (
+          highAccuracy &&
+          (error.code === error.POSITION_UNAVAILABLE ||
+            error.code === error.TIMEOUT)
+        ) {
+          console.log('[GPSTracker] 高精度モード失敗、低精度モードで再試行');
+          this.tryGetPosition(false, resolve);
+          return;
+        }
+
+        // 最終的に失敗した場合のエラーメッセージ
+        let errorMessage = '位置情報の取得に失敗しました';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage =
+              '位置情報の許可が拒否されました。設定で許可してください。';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage =
+              '位置情報が利用できません（Wi-Fiや位置情報サービスを確認してください）。';
+            break;
+          case error.TIMEOUT:
+            errorMessage = '位置情報の取得がタイムアウトしました。';
+            break;
+          default:
+            errorMessage = `不明なエラーが発生しました（code: ${error.code}）`;
+            break;
+        }
+        if (this.onError) {
+          this.onError(errorMessage);
+        }
+        resolve(false);
+      },
+      options
+    );
   }
 
   // GPS追跡停止（cl改善版）

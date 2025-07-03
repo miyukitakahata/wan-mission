@@ -2,24 +2,38 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-// ユーザーの認証状態を取得するカスタムフック追加
-// import { redirect } from "next/navigation";
+import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
   const router = useRouter();
-  //   ユーザーの情報取得
-  //   const { user } = useAuth();
+  const { currentUser, loading } = useAuth();
 
   useEffect(() => {
-    router.push('/onboarding');
-  }, [router]);
+    // 認証状態の読み込み中は何もしない
+    if (loading) {
+      return;
+    }
 
+    // ログイン済みの場合はダッシュボードへ
+    if (currentUser) {
+      console.log('[Home] ログイン済みユーザー - ダッシュボードにリダイレクト');
+      router.push('/dashboard');
+    } else {
+      // 未ログインの場合はオンボーディングへ
+      console.log('[Home] 未ログインユーザー - オンボーディングにリダイレクト');
+      router.push('/onboarding/welcome');
+    }
+  }, [currentUser, loading, router]);
+
+  // 認証状態の確認中は読み込み表示
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg font-medium">読み込み中...</div>
+      </div>
+    );
+  }
+
+  // リダイレクト処理中
   return null;
 }
-//   if (user) {
-//     redirect("/dashboard");
-//   } else {
-//     redirect("/onboarding");
-//   }
-// }

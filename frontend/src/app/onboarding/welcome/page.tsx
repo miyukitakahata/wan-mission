@@ -10,11 +10,11 @@ import {
   CardHeader,
 } from '@/components/ui/card'; // radixui/
 import { Progress } from '@/components/ui/progress'; // radixui/
-import { useAuth } from '@/context/AuthContext';
+// import { useAuth } from '@/context/AuthContext';
 
-const user = useAuth(); // 認証情報を取得
+// const user = useAuth(); // 認証情報を取得
 
-console.log('[NamePage] User:', user.currentUser);
+// console.log('[NamePage] User:', user.currentUser);
 
 export default function WelcomePage() {
   return (
