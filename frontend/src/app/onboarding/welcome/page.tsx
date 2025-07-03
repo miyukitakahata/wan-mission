@@ -14,7 +14,7 @@ import { Progress } from '@/components/ui/progress'; // radixui/
 export default function WelcomePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 sm:px-6">
-      <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg shadow-lg">
+      <Card className="bg-white w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg shadow-lg">
         <CardHeader className="flex flex-col items-center space-y-2 pb-2">
           <h1 className="text-xl sm:text-2xl font-bold text-center">
             わん🐾みっしょん
@@ -31,7 +31,7 @@ export default function WelcomePage() {
           <div className="py-3 sm:py-4 flex justify-center">
             <div className="relative w-40 h-40 sm:w-56 sm:h-56 md:w-64 md:h-64">
               <Image
-                src="/images/updated-pet-carrier.png"
+                src="/images/firstimage.png"
                 alt="ペットキャリーバッグ"
                 fill
                 style={{ objectFit: 'contain' }}

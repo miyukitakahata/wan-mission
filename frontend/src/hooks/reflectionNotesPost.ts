@@ -18,6 +18,8 @@ export const createReflectionNote = async (content: string) => {
 
   // ユーザーのIDトークンを取得
   const token = await user.getIdToken();
+  console.log('🔥 Firebaseトークン:', token);
+  console.log('🔥 送信データ:', content);
 
   const body: ReflectionNoteCreateRequest = {
     content,
