@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowLeft, User, Heart, Calendar, Loader2, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useCareSettings } from '@/hooks/useCareSettings';
+import useCurrentUser from '@/hooks/useCurrentUser';
 import { useAuth } from '@/context/AuthContext';
 
 export default function UserInfoPage() {
@@ -16,14 +16,12 @@ export default function UserInfoPage() {
   // hooksから取得
   const { careSettings, loading, error, refetch } = useCareSettings();
 
-  // プレミアム会員状態をチェック（実際の実装では、サブスクリプション状態を確認）
-  const [isPremium, setIsPremium] = useState(false);
-  useEffect(() => {
-    const subscriptionData = JSON.parse(
-      localStorage.getItem('subscriptionData') || '{}'
-    );
-    setIsPremium(subscriptionData.isPremium || false);
-  }, []);
+  // プレミアム会員状態をチェック
+  const {
+    user: currentUser,
+    loading: userLoading,
+    error: userError,
+  } = useCurrentUser();
 
   // 日付フォーマット関数
   const formatDate = (dateString: string) => {
@@ -41,7 +39,7 @@ export default function UserInfoPage() {
   };
 
   // ローディング中
-  if (loading) {
+  if (loading || userLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
         <div className="w-full max-w-xs mx-auto">
@@ -64,7 +62,7 @@ export default function UserInfoPage() {
   }
 
   // エラー時
-  if (error) {
+  if (error || userError) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
         <div className="w-full max-w-xs mx-auto">
@@ -158,7 +156,7 @@ export default function UserInfoPage() {
                   </span>
                 </div>
                 <div className="flex items-center">
-                  {isPremium ? (
+                  {currentUser?.current_plan === 'premium' ? (
                     <Badge className="bg-yellow-500 text-white">
                       <Crown className="mr-1 h-3 w-3" />
                       プレミアム会員
