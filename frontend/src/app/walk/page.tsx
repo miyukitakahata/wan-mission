@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 // import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 // import { ArrowLeft, Play, Square, Clock } from 'lucide-react';
 import { ArrowLeft, Clock } from 'lucide-react';
-import { auth } from '@/lib/firebase/config';
+import { useAuth } from '@/context/AuthContext';
 
 import {
   Dialog,
@@ -21,6 +21,7 @@ import DogWalkAnimation from '@/components/ui/dog-walk-animation';
 
 export default function WalkPage() {
   const router = useRouter();
+  const { currentUser, loading } = useAuth(); // 認証情報を取得
   const [isWalking, setIsWalking] = useState(false);
   const [walkTime, setWalkTime] = useState(0);
   const [walkDistance, setWalkDistance] = useState(0);
@@ -44,14 +45,24 @@ export default function WalkPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Firebase認証トークンを取得するヘルパー関数
-  const getFirebaseToken = async (): Promise<string> => {
-    const token = await auth.currentUser?.getIdToken();
-    if (!token) {
+  // Firebase認証トークンを取得するヘルパー関数（リファクタリング）
+  const getFirebaseToken = useCallback(async (): Promise<string> => {
+    if (!currentUser) {
       throw new Error('認証トークンが取得できませんでした');
     }
+    const token = await currentUser.getIdToken();
     return token;
-  };
+  }, [currentUser]);
+
+  // 認証状態をチェックするヘルパー関数
+  const isAuthenticated = (): boolean => !loading && currentUser !== null;
+
+  // 認証状態は下記のreturn文で適切に処理されるため、自動リダイレクトは不要
+  // useEffect(() => {
+  //   if (!loading && !currentUser) {
+  //     router.push('/onboarding/login');
+  //   }
+  // }, [currentUser, loading, router]);
 
   // コンポーネントマウント時にGPSTrackerを設定
   useEffect(() => {
@@ -64,6 +75,35 @@ export default function WalkPage() {
     gpsTracker.setErrorCallback((error: string) => {
       console.error('GPS エラー:', error);
       // setGpsStatus(`エラー: ${error}`);
+
+      // エラーメッセージを日本語に変換
+      let userFriendlyMessage = '';
+      if (error.includes('位置情報の許可が拒否されました')) {
+        userFriendlyMessage =
+          'ばしょのじょうほうの きょかを おねがいします。\n\nせっていがめん → ぷらいばしー → ばしょのじょうほう → このあぷりをONにしてね！';
+      } else if (error.includes('位置情報が利用できません')) {
+        userFriendlyMessage =
+          'ばしょのじょうほうが つかえません。\n\n【かいけつほうほう】\n1. そとやおにわに でてみてね\n2. でんわのせっていで「ばしょさーびす」をONにしてね\n3. ぶらうざのせっていで「ばしょのきょか」をONにしてね\n4. Wi-Fiをきって、もばいるでーたにしてみてね\n5. ぶらうざのきゃっしゅをくりあしてみてね\n\n※しつないや ビルのなかでは GPSが つかいにくいです';
+      } else if (error.includes('タイムアウト')) {
+        userFriendlyMessage =
+          'ばしょのじょうほうの しゅとくに じかんがかかりすぎました。\n\n【ためしてみて】\n1. でんぱのよいばしょに いどうしてね\n2. そとやまどぎわで ためしてみてね\n3. Wi-Fiを きりかえてみてね';
+      } else {
+        userFriendlyMessage =
+          'ばしょのじょうほうで もんだいが おきました。\n\n【ためしてみて】\n1. あぷりをさいきどうしてみてね\n2. ぶらうざをさいきどうしてみてね\n3. でばいすをさいきどうしてみてね';
+      }
+
+      // GPS開始中の場合のみダイアログを表示（現在の状態を参照）
+      setIsWalking((currentIsWalking) => {
+        if (currentIsWalking) {
+          setDialogContent({
+            title: 'ばしょのもんだい',
+            description: `${userFriendlyMessage}\n\n【おしらせ】\nGPSがなおったら、もういちど「おさんぽかいし」をおしてね！`,
+          });
+          setShowDialog(true);
+          return false; // 散歩を停止
+        }
+        return currentIsWalking;
+      });
     });
 
     // 位置更新コールバック設定
@@ -82,42 +122,45 @@ export default function WalkPage() {
 
   useEffect(() => {
     const fetchCareSettingId = async () => {
+      // 認証状態をチェック - loadingが完了してからのみ実行
+      if (loading) {
+        console.log('認証状態確認中...');
+        return;
+      }
+
+      if (!currentUser) {
+        console.log('認証が必要です - ケア設定取得をスキップ');
+        return;
+      }
+
       try {
         const token = await getFirebaseToken();
 
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-        const userRes = await fetch(`${API_BASE_URL}/api/users/me`, {
+
+        // care_settings/meエンドポイントを使用してケア設定を直接取得
+        const careRes = await fetch(`${API_BASE_URL}/api/care_settings/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (!userRes.ok) throw new Error('ユーザー情報取得に失敗しました');
-
-        const user = await userRes.json();
-
-        const careRes = await fetch(
-          `${API_BASE_URL}/api/care_settings?user_id=${user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
         if (!careRes.ok) throw new Error('お世話設定の取得に失敗しました');
 
         const careSetting = await careRes.json();
         setCareSettingId(careSetting.id);
+        console.log('ケア設定ID取得成功:', careSetting.id);
       } catch (err) {
         console.error('[WalkPage] careSettingIdの取得エラー:', err);
         // 認証エラーの場合は適切なエラーメッセージを表示
         if (err instanceof Error && err.message.includes('認証トークン')) {
           console.error('Firebase認証が必要です');
+          // 自動リダイレクトは行わない（UIでハンドリング）
         }
       }
     };
 
     fetchCareSettingId();
-  }, []);
+  }, [currentUser, loading, router, getFirebaseToken]);
 
   const startWalk = async () => {
     setIsWalking(true);
@@ -126,11 +169,49 @@ export default function WalkPage() {
     // setGpsStatus('GPS初期化中...');
 
     try {
-      // GPS追跡開始
+      // 事前に位置情報の許可状態をチェック（参考情報として）
+      let permissionState = 'unknown';
+      if (navigator.permissions) {
+        try {
+          const permission = await navigator.permissions.query({
+            name: 'geolocation',
+          });
+          permissionState = permission.state;
+          console.log('位置情報許可状態:', permission.state);
+
+          // 明確に拒否されている場合は、ユーザーに情報を提供
+          if (permission.state === 'denied') {
+            console.log('位置情報が拒否されていますが、GPS追跡を試行します');
+            setDialogContent({
+              title: 'ばしょのきょかをかくにん',
+              description:
+                'ばしょのじょうほうが きょかされていないようです。\n\nもしきょかのがめんがでたら、「きょか」をおしてね！\n\nきょかされていない場合、せっていがめんでONにしてね！',
+            });
+            setShowDialog(true);
+
+            // 3秒後にダイアログを閉じて、GPS追跡を試行
+            setTimeout(() => {
+              setShowDialog(false);
+            }, 3000);
+
+            // 少し待ってからGPS追跡を試行
+            await new Promise<void>((resolve) => {
+              setTimeout(() => {
+                resolve();
+              }, 1000);
+            });
+          }
+        } catch (permissionError) {
+          console.log('Permission API not supported:', permissionError);
+        }
+      }
+
+      // GPS追跡開始（許可状態に関わらず試行）
+      console.log('GPS追跡開始準備中...');
       const trackingStarted = await gpsTracker.startTracking();
 
       if (trackingStarted) {
-        console.log('GPS追跡開始');
+        console.log('GPS追跡開始成功');
         // setGpsStatus('GPS追跡開始');
 
         // 時間カウンタ開始
@@ -149,10 +230,21 @@ export default function WalkPage() {
         setIsWalking(false);
         console.error('GPS初期化失敗');
         // setGpsStatus('GPS初期化失敗');
+
+        // 許可状態に応じたエラーメッセージを表示
+        let errorTitle = 'ばしょがわからないよ';
+        let errorDescription =
+          'ばしょのじょうほうが うまくとれなかったみたい。\n\n1. ばしょのじょうほうがゆるされているかかくにんしてね\n2. Wi-Fiやもばいるでーたがつながっているかみてね\n3. ばしょさーびすがONになっているかみてね\n\nそれでもだめなら、もういちどためしてみてね！';
+
+        if (permissionState === 'denied') {
+          errorTitle = 'ばしょのきょかがひつよう';
+          errorDescription =
+            'ばしょのじょうほうの きょかが ひつようです。\n\nせっていがめん → ぷらいばしー → ばしょのじょうほう → このあぷりをONにしてね！\n\nそのあと、ぺーじをさいよみこみしてね！';
+        }
+
         setDialogContent({
-          title: 'ばしょがわからないよ',
-          description:
-            'ばしょのじょうほうが うまくとれなかったみたい。もういちどためしてみてね！',
+          title: errorTitle,
+          description: errorDescription,
         });
         setShowDialog(true);
       }
@@ -160,10 +252,27 @@ export default function WalkPage() {
       console.error('散歩開始エラー:', error);
       setIsWalking(false);
       // setGpsStatus('開始エラー');
+      setDialogContent({
+        title: 'えらーがおきました',
+        description:
+          'よくわからないえらーがおきました。\n\n1. あぷりをさいきどうしてみてね\n2. ぶらうざをさいきどうしてみてね\n3. でばいすをさいきどうしてみてね',
+      });
+      setShowDialog(true);
     }
   };
 
   const endWalk = async () => {
+    // 認証状態をチェック
+    if (!isAuthenticated()) {
+      console.error('認証が必要です');
+      setDialogContent({
+        title: 'にんしょうエラー',
+        description: 'ログインしていないため、データを保存できませんでした。',
+      });
+      setShowDialog(true);
+      return;
+    }
+
     // タイマー停止
     if (walkTimer) {
       clearInterval(walkTimer);
@@ -175,13 +284,24 @@ export default function WalkPage() {
     // setGpsStatus('GPS停止');
     setIsWalking(false);
 
+    // 日本時間の日付を取得する関数
+    const getJapanDate = () => {
+      const now = new Date();
+      const japanTime = new Date(
+        now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })
+      );
+      return japanTime.toISOString().split('T')[0];
+    };
+
     // 散歩データを準備
     const walkData = {
-      date: new Date().toISOString().split('T')[0],
+      date: getJapanDate(), // 日本時間の日付を使用
       distance: Math.round(walkDistance),
       duration: walkTime,
       startTime: new Date(Date.now() - walkTime * 1000).toISOString(),
     };
+
+    console.log('散歩データ（日本時間対応）:', walkData);
 
     try {
       if (!careSettingId) {
@@ -237,6 +357,10 @@ export default function WalkPage() {
       });
       localStorage.setItem('walkHistory', JSON.stringify(existingWalks));
 
+      setDialogContent({
+        title: 'おさんぽおつかれさま！',
+        description: `きょり：${Math.round(walkDistance)}m\nじかん：${formatTime(walkTime)}\nサーバーへの保存に失敗しましたが、ローカルに保存されました。`,
+      });
       setShowDialog(true);
     }
   };
@@ -262,6 +386,32 @@ export default function WalkPage() {
     },
     [walkTimer, gpsTracker]
   );
+
+  // 認証状態がローディング中の場合、ローディング画面を表示
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
+        <div className="text-lg text-green-600 font-bold">認証確認中...</div>
+      </div>
+    );
+  }
+
+  // 認証されていない場合、認証が必要な旨を表示
+  if (!currentUser) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
+        <div className="text-lg text-red-600 font-bold mb-4">
+          認証が必要です
+        </div>
+        <Button
+          onClick={() => router.push('/onboarding/login')}
+          className="bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          ログインページへ
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-green-50 px-6 py-8">
@@ -304,10 +454,21 @@ export default function WalkPage() {
           </div> */}
           </div>
 
+          {/* 散歩ミッション達成条件 */}
+          <div className="mb-6 w-full">
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl px-4 py-3">
+              <div className="flex items-center justify-center">
+                <span className="text-sm font-medium text-yellow-800">
+                  🎯 みっしょんたっせい：1000メートルいじょうあるこう！
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* アニメーションエリア */}
           <div className="mb-10 w-full flex justify-center">
             <div
-              className="border-2 border-gray-200 rounded-3xl overflow-hidden shadow-md bg-white flex items-center justify-center"
+              className="border-2 border-gray-200 scale-105 rounded-3xl overflow-hidden shadow-md bg-white flex items-center justify-center"
               style={{ width: 280, height: 200 }}
             >
               <DogWalkAnimation isWalking={isWalking} />

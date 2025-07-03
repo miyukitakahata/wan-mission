@@ -1,7 +1,7 @@
 """お世話記録（care_logs）APIルーターの定義"""
 
 # 標準ライブラリ
-# from datetime import datetime
+from datetime import datetime
 
 # サードパーティライブラリ
 from fastapi import APIRouter, HTTPException, status, Query, Depends
@@ -62,14 +62,20 @@ async def create_care_log(
             )
 
         # 新規作成
+        print(f"[care_logs] POST受信: firebase_uid={firebase_uid}, request={request}")
+        print(f"[care_logs] 新規記録作成: request={request}, date={request.date}")
+        dt = datetime.fromisoformat(request.date)
+        print(f"[care_logs] 日付変換成功: {dt}")
+        formatted_date = dt.strftime("%Y-%m-%d")
+        print(f"[care_logs] フォーマット済み日付: {formatted_date}")
         new_log = await prisma_client.care_logs.create(
             data={
                 "care_setting_id": care_setting.id,
-                "date": request.date,  # そのまま文字列で保存
+                "date": formatted_date,  # そのまま文字列で保存
                 "fed_morning": request.fed_morning,
                 "fed_night": request.fed_night,
-                "walk_result": None,
-                "walk_total_distance_m": None,
+                "walk_result": request.walk_result,
+                "walk_total_distance_m": request.walk_total_distance_m,
             }
         )
 

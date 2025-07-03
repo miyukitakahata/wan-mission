@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 // import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase/config';
@@ -16,19 +16,19 @@ import {
   Star,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-
-// 本番環境での Firebase 認証設定手順:
-// 1. Firebase config を設定
-// 2. 上記の import を有効化
-// 3. useEffect 内の認証処理コメントを解除
-// 4. ユーザーログイン状態の管理を実装
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // API エンドポイントのベース URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DashboardPage() {
   const router = useRouter();
-  // const searchParams = useSearchParams();
 
   // care_settings の状態管理
   const [careSettings, setCareSettings] = useState<{
@@ -42,20 +42,21 @@ export default function DashboardPage() {
   const [careSettingsLoading, setCareSettingsLoading] = useState(true);
   const [authUser, setAuthUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const testuser = useAuth(); // 認証情報を取得
+  const user = useAuth(); // 認証情報を取得
 
-  console.log('[NamePage] User:', testuser.currentUser);
+  console.log('[Dashboard] User:', user.currentUser);
 
   // Firebase 認証ヘッダーを取得する関数
-  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+  const getAuthHeaders = useCallback(async (): Promise<
+    Record<string, string>
+  > => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
     try {
-      const user = auth.currentUser;
-      if (user) {
-        const token = await user.getIdToken();
+      if (user.currentUser) {
+        const token = await user.currentUser.getIdToken();
         headers.Authorization = `Bearer ${token}`;
         console.log('[Dashboard] Firebase token を取得しました');
       } else {
@@ -67,7 +68,7 @@ export default function DashboardPage() {
     }
 
     return headers;
-  };
+  }, [user.currentUser]);
 
   // お世話状態
   const [careLog, setCareLog] = useState({
@@ -79,6 +80,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   // クライアント側でのみ日付を使用
   const [mounted, setMounted] = useState(false);
+  // ダイアログ表示用の state
+  const [showNoCareDialog, setShowNoCareDialog] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -86,12 +89,12 @@ export default function DashboardPage() {
 
   // Firebase認証状態を監視
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       console.log(
         '[Dashboard] 認証状態変更:',
-        user ? 'ログイン済み' : '未ログイン'
+        firebaseUser ? 'ログイン済み' : '未ログイン'
       );
-      setAuthUser(user);
+      setAuthUser(firebaseUser);
       setAuthLoading(false);
     });
 
@@ -131,7 +134,7 @@ export default function DashboardPage() {
             '[Dashboard] care_settings が見つかりません（新規ユーザー）'
           );
           // 新規ユーザーの場合、onboarding にリダイレクト
-          router.push('/onboarding');
+          router.push('/onboarding/welcome');
         } else {
           console.error(`[Dashboard] care_settings取得失敗: ${res.status}`);
         }
@@ -143,7 +146,7 @@ export default function DashboardPage() {
     };
 
     fetchCareSettings();
-  }, [authLoading, authUser, router]);
+  }, [authLoading, authUser, router, getAuthHeaders]);
 
   // お世話状態をAPIから取得（care_settings取得後に実行）
   useEffect(() => {
@@ -152,7 +155,11 @@ export default function DashboardPage() {
     const fetchCareLog = async () => {
       setLoading(true);
       try {
-        const today = new Date().toISOString().split('T')[0];
+        // 日本時間の今日の日付を取得（UTC+9）
+        const now = new Date();
+        const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        const today = jstDate.toISOString().split('T')[0];
+
         const headers = await getAuthHeaders();
 
         const res = await fetch(
@@ -183,11 +190,10 @@ export default function DashboardPage() {
     };
 
     fetchCareLog();
-  }, [careSettings?.id, mounted]); // careSettings.id と mounted に依存
+  }, [careSettings?.id, mounted, getAuthHeaders]); // careSettings.id と mounted に依存
 
+  // お世話開始日に初めてプレーするユーザーは、お世話開始日に前日の記録がなくても、dashboardから反省文まで飛ばないようロジック追加
   // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
-  // COMMENTED OUT: 昨日散歩確認機能を一時的に無効化
-  /*
   useEffect(() => {
     if (!careSettings?.id || !mounted) return; // care_settings がない場合、またはマウント前は実行しない
 
@@ -195,6 +201,20 @@ export default function DashboardPage() {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const dateStr = yesterday.toISOString().slice(0, 10);
+
+      // お世話開始日の確認
+      if (careSettings.care_start_date) {
+        const careStartDate = new Date(careSettings.care_start_date);
+        const yesterdayDate = new Date(dateStr);
+
+        // 昨日がお世話開始日より前の場合は、リダイレクトしない
+        if (yesterdayDate < careStartDate) {
+          console.log(
+            `[Dashboard] 昨日(${dateStr})はお世話開始日(${careSettings.care_start_date})より前のため、リダイレクトしません`
+          );
+          return;
+        }
+      }
 
       try {
         console.log(
@@ -240,17 +260,15 @@ export default function DashboardPage() {
 
         // 昨日のcare_logが存在し、散歩が未実施の場合
         if (data && data.care_log_id && !data.walked) {
-          console.log(
-            '[Dashboard] 昨日散歩未実施のため sad-departure にリダイレクト'
-          );
-          router.push('/sad-departure');
+          console.log('[Dashboard] 昨日散歩未実施のためダイアログを表示');
+          setShowNoCareDialog(true);
         }
         // 昨日のcare_logが存在しない散歩が未実施の場合
         else if (data && !data.care_log_id && !data.walked) {
           console.log(
-            '[Dashboard] 昨日記録なし(散歩未実施)のため sad-departure にリダイレクト'
+            '[Dashboard] 昨日記録なし(散歩未実施)のためダイアログを表示'
           );
-          router.push('/sad-departure');
+          setShowNoCareDialog(true);
         }
       } catch (error) {
         console.error('[Dashboard] 昨日の散歩確認エラー:', error);
@@ -258,8 +276,13 @@ export default function DashboardPage() {
     };
 
     checkYesterdayWalk();
-  }, [careSettings?.id, mounted, router]); // careSettings.id, mounted, router に依存
-  */
+  }, [
+    careSettings?.id,
+    careSettings?.care_start_date,
+    mounted,
+    router,
+    getAuthHeaders,
+  ]);
 
   // ミッション定義
   const missions = [
@@ -288,14 +311,19 @@ export default function DashboardPage() {
 
   const [currentMessage, setCurrentMessage] = useState(dogMessages[0]);
 
+  // ダイアログを閉じて反省文ページに遷移
+  const handleNoCareDialogClose = () => {
+    setShowNoCareDialog(false);
+    router.push('/reflection-writing');
+  };
+
   const handleDogClick = async () => {
     try {
       // Firebase認証トークンを取得
-      const user = auth.currentUser;
       if (!user) {
         throw new Error('ログインが必要です');
       }
-      const idToken = await user.getIdToken();
+      const idToken = await user.currentUser?.getIdToken();
       const res = await fetch(`${API_BASE_URL}/api/message_logs/generate`, {
         method: 'POST',
         headers: {
@@ -329,12 +357,20 @@ export default function DashboardPage() {
       let careLogId = careLog.care_log_id;
       if (!careLogId) {
         // 今日の care_log を新規作成
-        const today = new Date().toISOString().slice(0, 10);
+        const now = new Date();
+
+        // 9時間（ミリ秒単位）を加算
+        const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+
+        console.log('JST日時:', jstDate.toISOString());
+        // const today = new Date().toISOString().slice(0, 10);
+        // console.log(today);
         const res = await fetch(`${API_BASE_URL}/api/care_logs/`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
-            date: today,
+            date: jstDate.toISOString(),
+            // date: today,
             fed_morning: missionId === 'morning-food',
             fed_night: missionId === 'evening-food',
           }),
@@ -369,7 +405,10 @@ export default function DashboardPage() {
         console.log('PATCH成功', { careLogId, missionId, data: dataPatch });
       }
       // 更新後、再取得
-      const today = new Date().toISOString().split('T')[0];
+      const now2 = new Date();
+      const jstDate2 = new Date(now2.getTime() + 9 * 60 * 60 * 1000);
+      const today = jstDate2.toISOString().split('T')[0];
+      console.log('today', today);
 
       const res2 = await fetch(
         `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettings?.id}&date=${today}`,
@@ -483,7 +522,7 @@ export default function DashboardPage() {
                       </Button> */}
                       <Button
                         variant="ghost"
-                        className="relative w-60 h-60 max-w-xs max-h-xs p-0 hover:scale-105 transition-transform duration-200 rounded-full overflow-hidden"
+                        className="relative w-60 h-60 max-w-xs max-h-xs p-0 scale-105 transition-transform duration-200 rounded-full overflow-hidden"
                         onClick={handleDogClick}
                       >
                         <video
@@ -550,6 +589,29 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+      {/* お世話不足ダイアログ */}
+      <Dialog open={showNoCareDialog} onOpenChange={setShowNoCareDialog}>
+        <DialogContent className="bg-white rounded-lg max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl">
+              あれれ、わんちゃんは...
+            </DialogTitle>
+            <DialogDescription className="text-center pt-2 text-base whitespace-pre-line">
+              きのうのおさんぽみっしょんをたっせいしてないから
+              わんちゃんはどこかに行ってしまいました。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={handleNoCareDialogClose}
+              className="bg-black text-white border border-white px-6 py-2 rounded-lg shadow-none hover:bg-gray-800 active:bg-gray-900"
+            >
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

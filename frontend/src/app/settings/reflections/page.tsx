@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowLeft, Calendar, Heart } from 'lucide-react';
+import { ArrowLeft, /* Calendar, */ Heart } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 
@@ -20,7 +20,7 @@ type ReflectionNote = {
 
 export default function ReflectionsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('all');
+  // const [activeTab, setActiveTab] = useState('all'); // カレンダー非表示
   const [reflectionData, setReflectionData] = useState<ReflectionNote[]>([]);
   const user = useAuth(); // 認証情報を取得
 
@@ -29,7 +29,9 @@ export default function ReflectionsPage() {
   useEffect(() => {
     const fetchReflectionNotes = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/reflection_notes');
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes`
+        );
         const data = await res.json();
         setReflectionData(data);
       } catch (err) {
@@ -57,11 +59,11 @@ export default function ReflectionsPage() {
         <Tabs
           defaultValue="all"
           className="w-full"
-          onValueChange={setActiveTab}
+          // onValueChange={setActiveTab} // カレンダー非表示
         >
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-1 mb-4">
             <TabsTrigger value="all">すべての反省文</TabsTrigger>
-            <TabsTrigger value="calendar">カレンダー表示</TabsTrigger>
+            {/* <TabsTrigger value="calendar">カレンダー表示</TabsTrigger> */}
           </TabsList>
           <TabsContent value="all">
             <div className="space-y-4">
@@ -88,7 +90,7 @@ export default function ReflectionsPage() {
               ))}
             </div>
           </TabsContent>
-          <TabsContent value="calendar">
+          {/* <TabsContent value="calendar">
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
@@ -136,7 +138,7 @@ export default function ReflectionsPage() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
         <Button
           className="w-full mt-6 bg-orange-500 hover:bg-orange-600"
