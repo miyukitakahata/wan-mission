@@ -14,6 +14,7 @@ from app.routers.walk_missions import walk_missions_router
 from app.routers.reflection_notes import reflection_notes_router
 from app.routers.message_logs import message_logs_router
 from app.routers.payment import payment_router
+from app.routers.webhook_events import webhook_events_router
 
 
 # Prisma Client を使うための import
@@ -52,6 +53,7 @@ app.include_router(walk_missions_router)
 app.include_router(reflection_notes_router)
 app.include_router(message_logs_router)
 app.include_router(payment_router)
+app.include_router(webhook_events_router)
 
 
 # ルートパス
