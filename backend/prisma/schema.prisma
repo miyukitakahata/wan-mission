@@ -88,4 +88,5 @@ model webhook_events {
   received_at              DateTime? @default(now())
   processed                Boolean   @default(false)
   error_message            String?
+  firebase_uid             String?
 }
