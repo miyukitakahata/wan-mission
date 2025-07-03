@@ -8,7 +8,8 @@ from app.schemas.reflection_notes import (
     ReflectionNoteResponse,
     ReflectionNoteUpdateRequest,
 )
-from app.routers.care_settings import verify_firebase_token  # Firebase認証ダミー関数
+
+from app.dependencies import verify_firebase_token
 
 # 反省文用のAPIルーターを作成
 reflection_notes_router = APIRouter(
@@ -100,7 +101,7 @@ async def get_reflection_notes(firebase_uid: str = Depends(verify_firebase_token
         ) from e
 
 
-# ③ 反省文の承認状態更新API（保護者が承認）
+# 反省文の承認状態更新API（保護者が承認）
 @reflection_notes_router.patch(
     "/{note_id}",
     response_model=ReflectionNoteResponse,

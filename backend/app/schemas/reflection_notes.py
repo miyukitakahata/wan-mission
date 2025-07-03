@@ -19,3 +19,8 @@ class ReflectionNoteResponse(BaseModel):
 
     class Config:
         from_attributes = True  # ORMモード
+
+
+# PATCH /api/reflection_notes のレスポンスモデル
+class ReflectionNoteUpdateRequest(BaseModel):
+    approved_by_parent: Optional[bool] = None
