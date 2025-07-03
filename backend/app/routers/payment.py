@@ -5,19 +5,28 @@ from app.services import stripe_service
 from fastapi.responses import JSONResponse
 from app.schemas.payment import CheckoutSessionCreateRequest
 
+# token追加
+from app.dependencies import verify_firebase_token
+
+
 payment_router = APIRouter(prefix="/api/payments", tags=["payments"])
 
 
+# @payment_router.post("/create-checkout-session")
+# async def create_checkout_session(request_data: CheckoutSessionCreateRequest):
 @payment_router.post("/create-checkout-session")
-async def create_checkout_session(request_data: CheckoutSessionCreateRequest):
+async def create_checkout_session(
+    request_data: CheckoutSessionCreateRequest,
+    firebase_uid: str = Depends(verify_firebase_token),  # ← サーバー側で安全に取得
+):
     """
     フロントが呼ぶ「Checkoutセッション作成API」
     → Stripe決済ページへのURLを返す
     """
     try:
         # リクエストデータからFirebase UIDを取得
-        firebase_uid = request_data.firebase_uid
         print(f"[INFO] フロントから受け取ったFirebase UID: {firebase_uid}")
+        # firebase_uid = request_data.firebase_uid
 
         # StripeのCheckoutセッションを作成
         session_url = stripe_service.create_checkout_session(firebase_uid)
