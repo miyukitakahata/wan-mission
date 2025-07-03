@@ -15,10 +15,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dog, Mail, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[ForgotPasswordPage] User:', user.currentUser);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

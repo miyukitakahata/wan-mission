@@ -5,12 +5,16 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Heart, Sparkles } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function WelcomeBackPage() {
   const router = useRouter();
   const [animationStage, setAnimationStage] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
   const [showButton, setShowButton] = useState(false);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[WelcomeBackPage] User:', user.currentUser);
 
   useEffect(() => {
     // アニメーションのタイムライン

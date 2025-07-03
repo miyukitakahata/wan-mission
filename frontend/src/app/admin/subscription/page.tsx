@@ -5,10 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Crown, MessageCircle, Heart, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SubscriptionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[SubscriptionPage] User:', user.currentUser);
 
   const features = [
     {

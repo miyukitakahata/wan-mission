@@ -3,10 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dog } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoadingScreen() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[LoadingScreen] User:', user.currentUser);
 
   useEffect(() => {
     // ローディングの進行状況を更新
@@ -51,7 +55,7 @@ export default function LoadingScreen() {
           <div
             className="bg-orange-500 h-2.5 rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${progress}%` }}
-           />
+          />
         </div>
 
         <p className="text-base text-orange-600 font-medium animate-pulse">
@@ -62,15 +66,15 @@ export default function LoadingScreen() {
           <div
             className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: '0ms' }}
-           />
+          />
           <div
             className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: '150ms' }}
-           />
+          />
           <div
             className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
             style={{ animationDelay: '300ms' }}
-           />
+          />
         </div>
       </div>
     </div>
