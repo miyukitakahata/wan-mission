@@ -15,6 +15,7 @@ import {
   Utensils,
   Star,
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 // 本番環境での Firebase 認証設定手順:
 // 1. Firebase config を設定
@@ -41,6 +42,9 @@ export default function DashboardPage() {
   const [careSettingsLoading, setCareSettingsLoading] = useState(true);
   const [authUser, setAuthUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const testuser = useAuth(); // 認証情報を取得
+
+  console.log('[NamePage] User:', testuser.currentUser);
 
   // Firebase 認証ヘッダーを取得する関数
   const getAuthHeaders = async (): Promise<Record<string, string>> => {

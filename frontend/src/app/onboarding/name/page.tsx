@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Users, Heart } from 'lucide-react'; // lucide-reactアイコン
+import { useAuth } from '@/context/AuthContext';
 
 export default function NamePage() {
   // DB：care_settingsテーブルに対応
@@ -22,6 +23,9 @@ export default function NamePage() {
   const [parentName, setParentName] = useState('');
   const [childName, setChildName] = useState('');
   const [dogName, setdogName] = useState(''); // 親名前、子ども名前、ペット名前未入力
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[NamePage] User:', user.currentUser);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +45,7 @@ export default function NamePage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8">
-      <Card className="w-full max-w-sm shadow-lg">
+      <Card className="bg-white w-full max-w-sm shadow-lg">
         <CardHeader className="flex flex-col items-center space-y-2 pb-2">
           <div className="h-16 w-16 rounded-full bg-orange-100 flex items-center justify-center">
             <Users className="h-10 w-10 text-orange-500" />
