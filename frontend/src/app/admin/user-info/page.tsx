@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ArrowLeft, User, Heart, Calendar, Loader2, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useCareSettings } from '@/hooks/useCareSettings';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserInfoPage() {
   const router = useRouter();
-
+  const user = useAuth(); // 認証情報を取得
+  console.log('[UserInfoPage] User:', user.currentUser);
   // hooksから取得
   const { careSettings, loading, error, refetch } = useCareSettings();
 

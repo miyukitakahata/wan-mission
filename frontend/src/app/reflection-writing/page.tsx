@@ -10,12 +10,16 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { createReflectionNote } from '@/hooks/reflectionNotesPost';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ReflectionWritingPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [reflection, setReflection] = useState('');
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[ReflectionWritingPage] User:', user.currentUser);
 
   const handleSubmit = async () => {
     if (reflection.trim() && title.trim()) {

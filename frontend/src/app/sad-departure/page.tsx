@@ -1,7 +1,12 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+
+const user = useAuth(); // 認証情報を取得
+
+console.log('[NamePage] User:', user.currentUser);
 
 // DB:reflection_notesテーブルに対応
 // このページで反省文登録が完結するなら、送るボタンで登録
@@ -20,7 +25,7 @@ export default function SadDeparturePage() {
         <Button
           variant="outline"
           className="px-12 py-3 rounded-full bg-white border-2 border-gray-300 text-gray-800 text-sm font-medium shadow-sm hover:bg-gray-50"
-          onClick={() => router.push("/reflection-writing")}
+          onClick={() => router.push('/reflection-writing')}
         >
           反省文
         </Button>
@@ -80,7 +85,7 @@ export default function SadDeparturePage() {
         {/* おくるボタン */}
         <Button
           className="w-32 bg-purple-400 hover:bg-purple-500 text-white py-3 rounded-full shadow-md text-sm font-medium"
-          onClick={() => router.push("/reflection-writing")}
+          onClick={() => router.push('/reflection-writing')}
         >
           おくる
         </Button>

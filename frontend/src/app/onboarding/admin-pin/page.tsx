@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Shield, Eye, EyeOff, Lock } from 'lucide-react'; // lucide-reactアイコン
+import { useAuth } from '@/context/AuthContext';
 
 export default function AdminPinPage() {
   // DB：care_settingのcare_passwordに対応
@@ -25,6 +26,9 @@ export default function AdminPinPage() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false); // 送信中状態
   const [isSuccess, setIsSuccess] = useState(false); // 成功状態
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[AdminPinPage] User:', user.currentUser);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);

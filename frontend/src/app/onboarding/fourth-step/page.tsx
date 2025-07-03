@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CareSettingsPage() {
   // DB：care_settingテーブルに対応
@@ -37,6 +38,9 @@ export default function CareSettingsPage() {
   const [eveningMealTime, setEveningMealTime] = useState('');
   const [walkTime, setWalkTime] = useState('');
   const [error, setError] = useState('');
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[CareSettingsPage] User:', user.currentUser);
 
   // 今日の日付（YYYY-MM-DD形式、最小日付用）
   // クライアント側でのみ日付を設定

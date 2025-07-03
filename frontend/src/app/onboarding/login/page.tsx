@@ -20,6 +20,7 @@ import {
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
+import { useAuth } from '@/context/AuthContext';
 
 export default function OnboardingLoginPage() {
   // DB：usersテーブルに対応
@@ -28,6 +29,9 @@ export default function OnboardingLoginPage() {
   const [showPin, setShowPin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(true);
   const [password, setPassword] = useState('');
+  const user = useAuth(); // 認証情報を取得
+
+  console.log('[OnboardingLoginPage] User:', user.currentUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
