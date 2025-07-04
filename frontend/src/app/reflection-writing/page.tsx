@@ -32,7 +32,7 @@ export default function ReflectionWritingPage() {
         localStorage.setItem('dogReturned', 'true');
 
         setTimeout(() => {
-          router.push('/welcome-back');
+          router.push('/admin-login');
         }, 1000);
       } catch (error) {
         alert('保存に失敗しました。ネットワークを確認してください。');

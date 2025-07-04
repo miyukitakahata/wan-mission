@@ -257,3 +257,55 @@ async def get_care_log_by_date(
             status_code=500,
             detail="指定日の記録取得中にエラーが発生しました",
         ) from e
+
+
+# GET /api/care_logs/list のルーター（特定care_setting_idの全care_logs取得用）
+@care_logs_router.get(
+    "/list",
+    status_code=status.HTTP_200_OK,
+)
+async def get_care_logs_list(
+    care_setting_id: int = Query(...),
+    firebase_uid: str = Depends(verify_firebase_token),
+):
+    """
+    特定care_setting_idの全care_logsを取得するAPI
+    """
+    try:
+        print(f"[care_logs] GET list受信: care_setting_id={care_setting_id}")
+
+        # care_setting_id が本人のものか確認
+        care_setting = await prisma_client.care_settings.find_first(
+            where={"id": care_setting_id, "user": {"firebase_uid": firebase_uid}}
+        )
+        if not care_setting:
+            raise HTTPException(status_code=403, detail="不正な care_setting_id です")
+
+        # 全care_logsを取得
+        care_logs = await prisma_client.care_logs.find_many(
+            where={"care_setting_id": care_setting_id},
+            order={"date": "asc"},
+        )
+
+        print(f"[care_logs] 取得したcare_logs数: {len(care_logs)}")
+
+        # 必要な情報のみ返却
+        result = []
+        for log in care_logs:
+            result.append(
+                {
+                    "id": log.id,
+                    "date": log.date,
+                    "walk_result": log.walk_result,
+                    "care_setting_id": log.care_setting_id,
+                }
+            )
+
+        return {"care_logs": result}
+
+    except Exception as e:
+        print(f"[care_logs] GET list エラー詳細: {type(e).__name__}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="care_logs一覧取得中にエラーが発生しました",
+        ) from e
