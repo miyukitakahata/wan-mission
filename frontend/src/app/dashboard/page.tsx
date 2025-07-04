@@ -307,7 +307,7 @@ export default function DashboardPage() {
   ];
 
   // わんちゃんのひとこと
-  const dogMessages = ['きょうもいっしょにあそぼうね！'];
+  const dogMessages = ['わん！'];
 
   const [currentMessage, setCurrentMessage] = useState(dogMessages[0]);
 
