@@ -4,11 +4,14 @@
 
 import { getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase/config'; // → "[DEFAULT]" ならOK
-import { ReflectionNoteCreateRequest } from '@/types/reflection';
-// すでにFirebase初期化していると仮定
+
+// 反省文作成リクエストの型定義
+interface ReflectionNoteCreateRequest {
+  content: string;
+}
 
 // 反省文を新規作成
-export const createReflectionNote = async (content: string) => {
+const createReflectionNote = async (content: string) => {
   const auth = getAuth(firebaseApp);
   const user = auth.currentUser;
 
@@ -18,8 +21,8 @@ export const createReflectionNote = async (content: string) => {
 
   // ユーザーのIDトークンを取得
   const token = await user.getIdToken();
-  console.log('🔥 Firebaseトークン:', token);
-  console.log('🔥 送信データ:', content);
+  console.log('Firebaseトークン:', token);
+  console.log('反省文の内容:', content);
 
   const body: ReflectionNoteCreateRequest = {
     content,
@@ -40,23 +43,22 @@ export const createReflectionNote = async (content: string) => {
     }
   );
 
-  let data;
-  try {
-    // 一度だけ JSON を読み取り、ログにも使う
-    data = await res.json();
-    console.log('🔥レスポンス内容', data);
-  } catch (err) {
-    console.error('🔥JSONの読み取りに失敗しました:', err);
-    throw new Error('サーバーから無効なレスポンスが返されました');
-  }
-
-  // console.log('🔥レスポンスステータス', res.status);
-  // console.log('🔥レスポンス内容', await res.text());
-
   // レスポンスが正常でない場合はエラーを投げる
   if (!res.ok) {
     throw new Error('Failed to create reflection note');
   }
-  // 作成した反省文のデータを返す
-  return res.json();
+
+  let data;
+  try {
+    // 一度だけ JSON を読み取り
+    data = await res.json();
+    console.log('レスポンス内容', data);
+    return data; // 読み取ったデータをそのまま返す
+  } catch (err) {
+    console.error('JSONの読み取りに失敗しました:', err);
+    throw new Error('サーバーから無効なレスポンスが返されました');
+  }
 };
+
+// デフォルトエクスポート
+export default createReflectionNote;

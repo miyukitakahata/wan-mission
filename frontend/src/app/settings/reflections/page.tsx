@@ -211,6 +211,7 @@ export default function ReflectionsPage() {
       console.log('Step 5: reflection_notes個別承認中...');
 
       // 全ての反省文を取得
+      console.log('反省文取得開始...');
       const allReflectionRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes`,
         {
@@ -219,10 +220,17 @@ export default function ReflectionsPage() {
         }
       );
 
+      console.log(
+        '反省文取得レスポンス:',
+        allReflectionRes.status,
+        allReflectionRes.statusText
+      );
+
       if (!allReflectionRes.ok) {
         throw new Error(`反省文取得失敗: ${allReflectionRes.status}`);
       }
 
+      console.log('反省文レスポンスボディ読み取り開始...');
       const allReflectionNotes = await allReflectionRes.json();
       console.log('全反省文:', allReflectionNotes);
 
@@ -236,27 +244,39 @@ export default function ReflectionsPage() {
       const approvePromises = unapprovedNotes.map(async (note: any) => {
         console.log(`承認中: reflection_note_id=${note.id}`);
 
-        const approveRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes/${note.id}`,
-          {
-            method: 'PATCH',
-            headers: {
-              ...headers,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              approved_by_parent: true,
-            }),
+        try {
+          const approveRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/reflection_notes/${note.id}`,
+            {
+              method: 'PATCH',
+              headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                approved_by_parent: true,
+              }),
+            }
+          );
+
+          console.log(
+            `承認レスポンス (ID:${note.id}):`,
+            approveRes.status,
+            approveRes.statusText
+          );
+
+          if (!approveRes.ok) {
+            throw new Error(`反省文承認失敗: ${approveRes.status}`);
           }
-        );
 
-        if (!approveRes.ok) {
-          throw new Error(`反省文承認失敗: ${approveRes.status}`);
+          console.log(`承認レスポンスボディ読み取り開始 (ID:${note.id})...`);
+          const approvedNote = await approveRes.json();
+          console.log(`承認成功: reflection_note_id=${note.id}`, approvedNote);
+          return approvedNote;
+        } catch (error) {
+          console.error(`個別承認エラー (ID:${note.id}):`, error);
+          throw error;
         }
-
-        const approvedNote = await approveRes.json();
-        console.log(`承認成功: reflection_note_id=${note.id}`, approvedNote);
-        return approvedNote;
       });
 
       const approvedNotes = await Promise.all(approvePromises);
@@ -271,9 +291,10 @@ export default function ReflectionsPage() {
 
       // 成功後にダイアログを表示
       setDialogContent({
-        title: 'しょうにんかんりょう！',
-        description: 'おせわ再開します。ホーム画面に戻ります。',
+        title: '承認が完了しました',
+        description: 'お世話を再開します。ホーム画面に戻ります。',
       });
+
       setShowDialog(true);
     } catch (error) {
       console.error('承認処理に失敗しました:', error);
