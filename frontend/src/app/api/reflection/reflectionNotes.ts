@@ -9,8 +9,13 @@ const createReflectionNote = async (content: string) => {
     body: JSON.stringify({ content }),
   });
 
+  const data = await res.json(); // 最初に１度だけ読み込む
+
   if (!res.ok) {
-    throw new Error('Failed to create reflection note');
+    // throw new Error('Failed to create reflection note');
+    throw new Error(
+      `Failed to create reflection note: ${data.detail || 'Unknown error'}`
+    );
   }
 
   return res.json();

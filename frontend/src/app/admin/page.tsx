@@ -16,6 +16,7 @@ import {
 import { useCareSettings } from '@/hooks/useCareSettings';
 import { useCareLogs } from '@/hooks/useCareLogs';
 import { useAuth } from '@/context/AuthContext';
+import { getAuth, signOut } from 'firebase/auth';
 
 export default function AdminPage() {
   // TODO_DBから取得したデータを表示するページ
@@ -43,6 +44,19 @@ export default function AdminPage() {
   const user = useAuth(); // 認証情報を取得
 
   console.log('[AdminPage] User:', user.currentUser);
+
+  // ログアウト処理
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        localStorage.clear();
+        router.push('/onboarding/login');
+      })
+      .catch((error) => {
+        console.error('Firebaseログアウト失敗:', error);
+      });
+  };
 
   // データを取得したらchildNameとconsecutiveDaysとtargetDaysを更新
   useEffect(() => {
@@ -172,6 +186,16 @@ export default function AdminPage() {
           </Button>
           <h1 className="text-xl font-bold">管理者画面</h1>
         </div>
+
+        {/* 右上のログアウトボタン */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="absolute top-4 right-4 bg-white border-red-300 hover:bg-red-50 text-gray-700 hover:text-red-600 px-2 py-1 h-auto text-xs rounded-md"
+          onClick={handleLogout}
+        >
+          ログアウト🐾
+        </Button>
 
         {/* 家族会議で決めた目標 */}
         {renderGoalCard()}

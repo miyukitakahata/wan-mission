@@ -40,8 +40,18 @@ export const createReflectionNote = async (content: string) => {
     }
   );
 
-  console.log('🔥レスポンスステータス', res.status);
-  console.log('🔥レスポンス内容', await res.text());
+  let data;
+  try {
+    // 一度だけ JSON を読み取り、ログにも使う
+    data = await res.json();
+    console.log('🔥レスポンス内容', data);
+  } catch (err) {
+    console.error('🔥JSONの読み取りに失敗しました:', err);
+    throw new Error('サーバーから無効なレスポンスが返されました');
+  }
+
+  // console.log('🔥レスポンスステータス', res.status);
+  // console.log('🔥レスポンス内容', await res.text());
 
   // レスポンスが正常でない場合はエラーを投げる
   if (!res.ok) {
