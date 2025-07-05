@@ -232,19 +232,23 @@ export default function AdminPage() {
             <span className="text-orange-800">反省文を見る</span>
           </Button>
 
-          {/* 目標達成！ */}
-          <div className="bg-green-50 rounded-lg p-4 border border-green-200 shadow-sm">
-            <p className="text-sm text-green-700 mb-3 text-center">
-              目標達成！
-            </p>
-            <Button
-              className="w-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center py-4"
-              onClick={() => router.push('/goal-clear')}
-            >
-              <Trophy className="mr-2 h-5 w-5" />
-              クリアおめでとう
-            </Button>
-          </div>
+          {/* 目標達成！（条件付き表示） */}
+          {consecutiveDays !== null &&
+            targetDays > 0 &&
+            consecutiveDays >= targetDays && (
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200 shadow-sm">
+                <p className="text-sm text-green-700 mb-3 text-center">
+                  目標達成！
+                </p>
+                <Button
+                  className="w-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center py-4"
+                  onClick={() => router.push('/admin/goal-clear')}
+                >
+                  <Trophy className="mr-2 h-5 w-5" />
+                  クリアおめでとう
+                </Button>
+              </div>
+            )}
 
           {/* 戻るボタン */}
           <Button
