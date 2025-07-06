@@ -107,6 +107,7 @@ async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)
     ログインユーザーのケア設定取得API
     """
     try:
+        print("✅ firebase_uid:", firebase_uid)
         # Firebase UID からユーザー取得
         user = await prisma_client.users.find_unique(
             where={"firebase_uid": firebase_uid}
@@ -118,6 +119,9 @@ async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)
         care_setting = await prisma_client.care_settings.find_first(
             where={"user_id": user.id}
         )
+
+        print("✅ care_setting:", care_setting)
+
         if not care_setting:
             raise HTTPException(status_code=404, detail="Care setting not found")
 

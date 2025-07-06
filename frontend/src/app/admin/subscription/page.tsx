@@ -60,7 +60,7 @@ export default function SubscriptionPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            // firebase_uid: firebaseUid,
+            firebase_uid: firebaseUid,
           }),
         }
       );

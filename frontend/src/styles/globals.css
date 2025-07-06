@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+body.rounded-font {
+  font-family: 'M PLUS Rounded 1c', sans-serif !important;
 }
 
 @layer utilities {
