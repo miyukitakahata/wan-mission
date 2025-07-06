@@ -92,17 +92,17 @@ export default function WalkPage() {
           'ばしょのじょうほうで もんだいが おきました。\n\n【ためしてみて】\n1. あぷりをさいきどうしてみてね\n2. ぶらうざをさいきどうしてみてね\n3. でばいすをさいきどうしてみてね';
       }
 
-      // GPS開始中の場合のみダイアログを表示（現在の状態を参照）
+      // GPS開始中の場合のみダイアログを表示（散歩状態は維持）
       setIsWalking((currentIsWalking) => {
         if (currentIsWalking) {
           setDialogContent({
             title: 'ばしょのもんだい',
-            description: `${userFriendlyMessage}\n\n【おしらせ】\nGPSがなおったら、もういちど「おさんぽかいし」をおしてね！`,
+            description: `${userFriendlyMessage}\n\n【おしらせ】\nじかんは そのまま けいぞくします。\nGPSがなおったら、きょりも きろくされるよ！`,
           });
           setShowDialog(true);
-          return false; // 散歩を停止
+          // 散歩状態は維持し、タイマーも継続させる
         }
-        return currentIsWalking;
+        return currentIsWalking; // 散歩状態を維持
       });
     });
 

@@ -20,7 +20,7 @@ export default function GoalClearPage() {
     // 5秒後に自動でダッシュボードに戻る
     const timeout = setTimeout(() => {
       router.push('/dashboard');
-    }, 5000);
+    }, 10000);
 
     return () => clearTimeout(timeout);
   }, [router]);
@@ -32,14 +32,21 @@ export default function GoalClearPage() {
         <div className="relative mb-8">
           {showAnimation && (
             <>
-              {[...Array(6)].map((_, i) => (
+              {[
+                { id: 'sparkle-1', top: 20, left: 10, delay: 0 },
+                { id: 'sparkle-2', top: 35, left: 25, delay: 0.3 },
+                { id: 'sparkle-3', top: 50, left: 40, delay: 0.6 },
+                { id: 'sparkle-4', top: 65, left: 55, delay: 0.9 },
+                { id: 'sparkle-5', top: 80, left: 70, delay: 1.2 },
+                { id: 'sparkle-6', top: 95, left: 85, delay: 1.5 },
+              ].map((sparkle) => (
                 <Sparkles
-                  key={i}
+                  key={sparkle.id}
                   className="absolute h-8 w-8 text-yellow-400 animate-pulse"
                   style={{
-                    top: `${20 + i * 15}%`,
-                    left: `${10 + i * 15}%`,
-                    animationDelay: `${i * 0.3}s`,
+                    top: `${sparkle.top}%`,
+                    left: `${sparkle.left}%`,
+                    animationDelay: `${sparkle.delay}s`,
                   }}
                 />
               ))}
@@ -57,9 +64,15 @@ export default function GoalClearPage() {
           <CardContent className="p-8">
             <div className="space-y-4">
               <div className="flex justify-center space-x-1 mb-4">
-                {[...Array(5)].map((_, i) => (
+                {[
+                  { id: 'star-1' },
+                  { id: 'star-2' },
+                  { id: 'star-3' },
+                  { id: 'star-4' },
+                  { id: 'star-5' },
+                ].map((star) => (
                   <Star
-                    key={i}
+                    key={star.id}
                     className="h-6 w-6 text-yellow-400 fill-current"
                   />
                 ))}
@@ -72,14 +85,15 @@ export default function GoalClearPage() {
               <p className="text-lg text-gray-700 mb-4">
                 おめでとうございます！
                 <br />
-                今日の目標を達成しました！
+                目標を達成しました！
               </p>
 
               <div className="bg-orange-100 rounded-lg p-4 mb-6">
                 <p className="text-sm text-orange-800">
                   わんちゃんもとても喜んでいます！
                   <br />
-                  明日も一緒に頑張りましょう！
+                  よくがんばったね！！ わんちゃんを本当にむかえるか
+                  ママとパパに話してみよう！
                 </p>
               </div>
 
@@ -87,13 +101,15 @@ export default function GoalClearPage() {
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-full text-lg font-bold"
                 onClick={() => router.push('/dashboard')}
               >
-                続ける
+                おせわつづける
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <p className="text-sm text-gray-600 mt-4">5秒後に自動的に戻ります...</p>
+        <p className="text-sm text-gray-600 mt-4">
+          10秒後に自動的に戻ります...
+        </p>
       </div>
     </div>
   );

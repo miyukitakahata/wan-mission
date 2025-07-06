@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft } from 'lucide-react'; // lucide-reactアイコン
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { createReflectionNote } from '@/hooks/reflectionNotesPost';
+import createReflectionNote from '@/hooks/reflectionNotesPost';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ReflectionWritingPage() {
@@ -32,7 +32,7 @@ export default function ReflectionWritingPage() {
         localStorage.setItem('dogReturned', 'true');
 
         setTimeout(() => {
-          router.push('/welcome-back');
+          router.push('/admin-login');
         }, 1000);
       } catch (error) {
         alert('保存に失敗しました。ネットワークを確認してください。');

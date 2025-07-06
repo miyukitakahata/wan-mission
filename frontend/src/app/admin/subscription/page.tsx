@@ -6,14 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Crown, MessageCircle, Heart, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-// import { getAuth } from 'firebase/auth'; // Firebaseの認証をインポート
-
-// ログイン済みのユーザーID（Firebase UID）を取得
-// const auth = getAuth();
-// const user = auth.currentUser;
-// const firebaseUid = user ? user.uid : null;
-const firebaseUid = 'test-firebase-uid';
-// firebaseUidで決済できるか確認
 
 export default function SubscriptionPage() {
   const router = useRouter();
@@ -43,6 +35,7 @@ export default function SubscriptionPage() {
   const handleCheckout = async () => {
     setLoading(true);
     try {
+      console.log('firebaseUidを確認:', user.currentUser?.uid);
       const token = await user.currentUser?.getIdToken(); // FirebaseのIDトークンを取得
 
       if (!token) {
@@ -59,6 +52,7 @@ export default function SubscriptionPage() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
+
           body: JSON.stringify({
             firebase_uid: firebaseUid,
           }),
