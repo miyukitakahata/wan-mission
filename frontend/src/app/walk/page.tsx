@@ -415,7 +415,7 @@ export default function WalkPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 [&_*]:text-[18px]">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 [&_*]:text-[18px] bg-yellow-50">
       <div className="flex flex-col h-screen max-w-[390px] mx-auto overflow-hidden">
         {/* ヘッダー */}
         <div className="mb-10 flex items-center p-3 h-14 flex-shrink-0">
@@ -431,11 +431,13 @@ export default function WalkPage() {
 
         {/* メインコンテンツ */}
         <div className="mb-10 w-full max-w-xs">
-          <Card className="mb-4 border-orange-200">
+          <Card className="mb-4 border-3 border-gray-500">
             <CardHeader className="pb-3">
               <h2 className="text-sm font-bold flex items-center justify-center">
                 <span className="text-orange-800">
-                  🎯 みっしょんたっせい：1000メートルいじょうあるこう！
+                  🎯 みっしょんたっせい：
+                  <br />
+                  1000メートルいじょうあるこう！
                 </span>
               </h2>
             </CardHeader>
@@ -457,7 +459,7 @@ export default function WalkPage() {
           {/* アニメーションエリア */}
           <div className="mb-10 w-full flex justify-center">
             <Card
-              className="scale-105 w-full max-w-xs overflow-hidden flex items-center justify-center border-orange-200"
+              className="scale-105 w-full max-w-xs overflow-hidden flex items-center justify-center border-3 border-gray-500"
               style={{ height: 200 }}
             >
               <DogWalkAnimation isWalking={isWalking} />
