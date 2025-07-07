@@ -46,7 +46,6 @@
 **/coverage/
 **/.coverage
 **/htmlcov/
-gps_test.html
 
 # prisma
 **/generated/client
@@ -54,7 +53,8 @@ gps_test.html
 **/backend/prisma/prisma-client
 
 # Firebase Admin SDK
-**/backend/firebase/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
+**/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
+
 
 
 

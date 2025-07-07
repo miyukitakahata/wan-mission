@@ -47,8 +47,8 @@ export default function AdminPinPage() {
       const familyInfo = JSON.parse(familyInfoStr);
       const careSettings = JSON.parse(careSettingsStr);
 
-      console.log('[Step5] familyInfo:', familyInfo);
-      console.log('[Step5] careSettings:', careSettings);
+      console.log('[Step4] familyInfo:', familyInfo);
+      console.log('[Step4] careSettings:', careSettings);
 
       const { parentName, childName, dogName } = familyInfo;
 
@@ -75,7 +75,7 @@ export default function AdminPinPage() {
         }
 
         // その他の形式の場合はデフォルト値
-        console.warn('[Step5] 不正な時間形式:', timeStr);
+        console.warn('[Step4] 不正な時間形式:', timeStr);
         return '00:00';
       };
 
@@ -84,7 +84,7 @@ export default function AdminPinPage() {
         if (!dateStr) return '';
 
         // 日付文字列をそのまま使用（ユーザーが選択した日付は日本時間の日付として扱う）
-        console.log('[Step5] JST基準日付:', dateStr);
+        console.log('[Step4] JST基準日付:', dateStr);
         return dateStr;
       };
 
@@ -97,7 +97,7 @@ export default function AdminPinPage() {
       const formattedStartDate = formatDateForJST(careStartDate);
       const formattedEndDate = formatDateForJST(careEndDate);
 
-      console.log('[Step5] 時間データ変換:', {
+      console.log('[Step4] 時間データ変換:', {
         original: { morningMealTime, nightMealTime, walkTime },
         formatted: {
           formattedMorningTime,
@@ -106,7 +106,7 @@ export default function AdminPinPage() {
         },
       });
 
-      console.log('[Step5] 日期データ変換:', {
+      console.log('[Step4] 日期データ変換:', {
         original: { careStartDate, careEndDate },
         formatted: { formattedStartDate, formattedEndDate },
       });
@@ -124,7 +124,7 @@ export default function AdminPinPage() {
         walk_time: formattedWalkTime,
         care_clear_status: 'ongoing',
       };
-      console.log('[Step5] 送信データ:', requestData);
+      console.log('[Step4] 送信データ:', requestData);
 
       // バリデーション
       if (!parentName || !childName || !dogName) {
@@ -183,14 +183,14 @@ export default function AdminPinPage() {
       let data = null;
       try {
         data = await res.json();
-        console.log('[Step5] API レスポンス:', data);
+        console.log('[Step4] API レスポンス:', data);
       } catch (e) {
-        console.error('[Step5] JSONパースエラー:', e);
+        console.error('[Step4] JSONパースエラー:', e);
         data = null;
       }
 
       if (!res.ok) {
-        console.error('[Step5] API エラー:', {
+        console.error('[Step4] API エラー:', {
           status: res.status,
           statusText: res.statusText,
           data,
@@ -412,7 +412,7 @@ export default function AdminPinPage() {
         <CardFooter className="flex justify-between pb-6">
           <Button
             variant="outline"
-            onClick={() => router.push('/onboarding/third-step')}
+            onClick={() => router.push('/onboarding/first-settings')}
             className="w-1/3 text-sm py-3"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

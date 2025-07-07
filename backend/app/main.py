@@ -1,10 +1,14 @@
 """FastAPIメインアプリケーションのエントリーポイント"""
 
-from fastapi.middleware.cors import CORSMiddleware
-
+import os
 from contextlib import asynccontextmanager
+
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from dotenv import load_dotenv
+
+# .envファイルから環境変数を読み込む
+load_dotenv()
 
 # ルーターの import
 from app.routers.user import user_router
@@ -33,17 +37,15 @@ async def lifespan(_: FastAPI):
 # lifespanを使ったFastAPIインスタンス
 app = FastAPI(lifespan=lifespan)
 
+origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 # CORSの設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # ← Next.js開発サーバーのURL
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# .envファイルから環境変数を読み込む
-load_dotenv()
 
 # ルーターを登録
 app.include_router(user_router)

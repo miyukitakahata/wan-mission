@@ -12,6 +12,8 @@ import {
   FileText,
   User,
   CreditCard,
+  LogOut,
+  Home,
 } from 'lucide-react';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import { useCareLogs } from '@/hooks/useCareLogs';
@@ -51,7 +53,7 @@ export default function AdminPage() {
     signOut(auth)
       .then(() => {
         localStorage.clear();
-        router.push('/onboarding/login');
+        router.push('/onboarding/welcome');
       })
       .catch((error) => {
         console.error('Firebaseログアウト失敗:', error);
@@ -68,23 +70,47 @@ export default function AdminPage() {
       );
       setChildName(careSettings.child_name);
 
-      // 連続日数の差を計算
+      // 簡易版の連続達成日数計算
+      // 開始日から今日までの経過日数を計算
       const startDate = new Date(careSettings.care_start_date);
-      const today = new Date(); // 今日の日付
-      const diffTime = Math.abs(today.getTime() - startDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // 開始日を含めるために1日追加
+      const today = new Date();
 
-      setConsecutiveDays(diffDays);
+      // 日付の正規化（時刻を00:00:00に設定）
+      startDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
+      const diffTime = today.getTime() - startDate.getTime();
+      const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // 開始日を含む
+
+      if (careLog && careLog.care_log_id !== null) {
+        // 今日のお世話記録がある場合、経過日数を連続日数とする
+        // TODO: 将来的には過去の記録も確認して真の連続性をチェック
+        setConsecutiveDays(daysPassed);
+      } else if (daysPassed > 1) {
+        // 2日目以降で今日の記録がない場合は、昨日までの日数
+        setConsecutiveDays(daysPassed - 1);
+      } else {
+        // 初日で記録がない場合は0
+        setConsecutiveDays(0);
+      }
 
       // 目標日数を設定
       const endDate = new Date(careSettings.care_end_date);
-      const targetDiffTime = Math.abs(endDate.getTime() - startDate.getTime());
+
+      // 日付の正規化（時刻を00:00:00に設定）
+      const normalizedStartDate = new Date(startDate);
+      const normalizedEndDate = new Date(endDate);
+      normalizedStartDate.setHours(0, 0, 0, 0);
+      normalizedEndDate.setHours(0, 0, 0, 0);
+
+      const targetDiffTime =
+        normalizedEndDate.getTime() - normalizedStartDate.getTime();
       const targetDiffDays =
-        Math.ceil(targetDiffTime / (1000 * 60 * 60 * 24)) + 1; // 開始日を含めるために1日追加
+        Math.floor(targetDiffTime / (1000 * 60 * 60 * 24)) + 1; // 開始日を含む
 
       setTargetDays(targetDiffDays);
     }
-  }, [careSettings]);
+  }, [careSettings, careLog]); // careLogも依存に追加
 
   // =========================
   // 目標カードだけ分岐レンダリング
@@ -92,7 +118,7 @@ export default function AdminPage() {
   const renderGoalCard = () => {
     if (settingsLoading || logsLoading) {
       return (
-        <Card className="mb-4 shadow-lg">
+        <Card className="mb-4 border-orange-200">
           <CardContent>
             <p className="text-center text-gray-500 py-4">読み込み中...</p>
           </CardContent>
@@ -102,7 +128,7 @@ export default function AdminPage() {
 
     if (settingsError || logsError) {
       return (
-        <Card className="mb-4 shadow-lg">
+        <Card className="mb-4 border-orange-200">
           <CardContent>
             <p className="text-center text-red-500 py-4">
               エラーが発生しました
@@ -114,7 +140,7 @@ export default function AdminPage() {
 
     if (!careSettings || consecutiveDays === null || childName === '') {
       return (
-        <Card className="mb-4 shadow-lg">
+        <Card className="mb-4 border-orange-200">
           <CardContent>
             <p className="text-center text-gray-500 py-4">データがありません</p>
           </CardContent>
@@ -124,7 +150,7 @@ export default function AdminPage() {
 
     if (!careLog || careLog.care_log_id === null) {
       return (
-        <Card className="mb-4 shadow-lg border border-orange-200 bg-orange-50">
+        <Card className="mb-4 border-orange-200">
           <CardContent>
             <p className="text-center text-orange-800 py-4">
               今日はまだお世話記録がありません
@@ -136,11 +162,13 @@ export default function AdminPage() {
 
     // ここまで来たらすべてのデータOK(careLogがあるならreturnできる)
     return (
-      <Card className="mb-4 shadow-lg">
+      <Card className="mb-4 border-orange-200">
         <CardHeader className="pb-3">
           <h2 className="text-lg font-bold flex items-center">
             <Target className="mr-2 h-5 w-5 text-orange-500" />
-            {childName}さん、{consecutiveDays}日達成中！
+            {consecutiveDays > 0
+              ? `${childName}さん、${consecutiveDays}日達成中！`
+              : `${childName}さん、今日もがんばろう！`}
           </h2>
         </CardHeader>
         <CardContent>
@@ -187,16 +215,6 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold">管理者画面</h1>
         </div>
 
-        {/* 右上のログアウトボタン */}
-        <Button
-          variant="outline"
-          size="sm"
-          className="absolute top-4 right-4 bg-white border-red-300 hover:bg-red-50 text-gray-700 hover:text-red-600 px-2 py-1 h-auto text-xs rounded-md"
-          onClick={handleLogout}
-        >
-          ログアウト🐾
-        </Button>
-
         {/* 家族会議で決めた目標 */}
         {renderGoalCard()}
 
@@ -226,7 +244,7 @@ export default function AdminPage() {
           <Button
             variant="outline"
             className="w-full flex items-center justify-center py-4 border-orange-200 hover:bg-orange-50"
-            onClick={() => router.push('/settings/reflections')}
+            onClick={() => router.push('/admin/reflections')}
           >
             <FileText className="mr-2 h-5 w-5 text-orange-600" />
             <span className="text-orange-800">反省文を見る</span>
@@ -235,6 +253,7 @@ export default function AdminPage() {
           {/* 目標達成！（条件付き表示） */}
           {consecutiveDays !== null &&
             targetDays > 0 &&
+            consecutiveDays > 0 &&
             consecutiveDays >= targetDays && (
               <div className="bg-green-50 rounded-lg p-4 border border-green-200 shadow-sm">
                 <p className="text-sm text-green-700 mb-3 text-center">
@@ -253,10 +272,21 @@ export default function AdminPage() {
           {/* 戻るボタン */}
           <Button
             variant="outline"
-            className="w-full mt-6 border-orange-200 hover:bg-orange-50 text-orange-800"
+            className="w-full flex items-center justify-center py-4 border-orange-200 hover:bg-orange-50"
             onClick={() => router.push('/dashboard')}
           >
-            トップページに戻る
+            <Home className="mr-2 h-5 w-5 text-orange-600" />
+            <span className="text-orange-800">トップページに戻る</span>
+          </Button>
+
+          {/* ログアウトボタン */}
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center py-4 border-orange-200 hover:bg-orange-50"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-5 w-5 text-orange-600" />
+            <span className="text-orange-800">ログアウト</span>
           </Button>
         </div>
       </div>

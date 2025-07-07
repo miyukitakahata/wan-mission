@@ -1,20 +1,22 @@
+// Todo: 未使用削除予定
+
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 
-const user = useAuth(); // 認証情報を取得
-
-console.log('[NamePage] User:', user.currentUser);
-
 // DB:reflection_notesテーブルに対応
 // このページで反省文登録が完結するなら、送るボタンで登録
+
 export default function SadDeparturePage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
 
+  const user = useAuth(); // 認証情報を取得（コンポーネント内で呼び出し）
+  console.log('[SadDeparturePage] User:', user.currentUser);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200 px-4 sm:px-6 py-6">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-6">
       <div className="w-full max-w-xs sm:max-w-sm flex flex-col items-center text-center space-y-8">
         {/* タイトル */}
         <h1 className="text-base sm:text-lg font-medium text-gray-800 px-4">

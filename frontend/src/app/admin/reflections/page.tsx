@@ -314,8 +314,8 @@ export default function ReflectionsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 sm:px-6 py-6">
-      <div className="w-full max-w-xl mx-auto">
-        {/* max-w-lg → max-w-xl に変更 */}
+      <div className="w-full max-w-xs mx-auto">
+        {/* max-w-lg → max-w-xs に変更 */}
         <div className="flex items-center mb-4">
           <Button
             variant="ghost"
