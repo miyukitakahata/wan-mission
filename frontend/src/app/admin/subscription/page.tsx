@@ -52,6 +52,10 @@ export default function SubscriptionPage() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
+
+          body: JSON.stringify({
+            firebase_uid: firebaseUid,
+          }),
         }
       );
       const data = await res.json();

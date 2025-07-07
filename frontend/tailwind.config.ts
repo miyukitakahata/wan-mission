@@ -20,6 +20,9 @@ const config: Config = {
       },
     },
     extend: {
+      fontfamily: {
+        rounded: ['"M PLUS Rounded 1c"', 'sans-serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

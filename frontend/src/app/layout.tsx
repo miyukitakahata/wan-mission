@@ -1,7 +1,15 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { M_PLUS_Rounded_1c } from 'next/font/google';
+
 import ThemeProvider from '@/components/theme-provider';
+
+const rounded = M_PLUS_Rounded_1c({
+  subsets: ['latin'],
+  weight: ['400'], // 必要に応じて '700' なども追加可能
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'わん🐾みっしょん - ペットおせわアプリ',
