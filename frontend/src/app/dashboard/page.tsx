@@ -436,7 +436,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen [&_*]:text-[18px]">
       {/* 背景色個別指定 */}
       {/* 読み込み中表示 */}
       {authLoading ||
@@ -459,7 +459,7 @@ export default function DashboardPage() {
           {/* ヘッダーナビゲーション */}
           {/* <div className="bg-white shadow-sm p-4"> */}
           {/* 背景色個別指定 */}
-          <div className="bg-white shadow-sm p-4 sticky top-0 z-30">
+          <div className="relative bg-white shadow-sm p-4 sticky top-0 z-30">
             <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
               <Button
                 variant="outline"
@@ -485,6 +485,12 @@ export default function DashboardPage() {
                 <Settings className="h-5 w-5 mb-1" />
                 <span className="text-xs">かんりしゃ</span>
               </Button>
+            </div>
+            {/* ↓雲のフチ */}
+            <div className="absolute -bottom-4 left-0 w-full flex justify-center space-x-2">
+              <div className="w-8 h-8 bg-white rounded-full shadow" />
+              <div className="w-10 h-10 bg-white rounded-full shadow" />
+              <div className="w-8 h-8 bg-white rounded-full shadow" />
             </div>
           </div>
 
@@ -537,7 +543,7 @@ export default function DashboardPage() {
                         />
                       </Button>
                       <p className="text-xs text-gray-500 mt-1">
-                        タップして話しかけよう！
+                        タップしてね！
                       </p>
                     </div>
                   </div>
