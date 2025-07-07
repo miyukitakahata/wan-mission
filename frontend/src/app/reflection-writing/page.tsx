@@ -44,7 +44,7 @@ export default function ReflectionWritingPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white px-6 py-8">
+    <div className="flex flex-col min-h-screen px-6 py-8">
       <div className="w-full max-w-xs mx-auto">
         {/* ヘッダー */}
         <div className="flex items-center mb-8">

@@ -41,9 +41,9 @@ export default function UserInfoPage() {
   // ローディング中
   if (loading || userLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6 ">
         <div className="w-full max-w-xs mx-auto">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-6 ">
             <Button
               variant="ghost"
               onClick={() => router.back()}
@@ -109,7 +109,7 @@ export default function UserInfoPage() {
         </div>
 
         {/* 家族情報 */}
-        <Card className="mb-4 shadow-lg">
+        <Card className="mb-4 border-orange-200">
           <CardHeader className="pb-3">
             <h2 className="text-lg font-bold flex items-center">
               <User className="mr-2 h-5 w-5 text-orange-500" />
@@ -176,7 +176,7 @@ export default function UserInfoPage() {
         </Card>
 
         {/* お世話期間 */}
-        <Card className="mb-6 shadow-lg">
+        <Card className="mb-4 border-orange-200">
           <CardHeader className="pb-3">
             <h2 className="text-lg font-bold flex items-center">
               <Calendar className="mr-2 h-5 w-5 text-orange-500" />

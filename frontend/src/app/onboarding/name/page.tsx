@@ -39,7 +39,7 @@ export default function NamePage() {
       localStorage.setItem('familyInfo', JSON.stringify(familyData));
       console.log('[NamePage] Saving family info:', familyData);
 
-      router.push('/onboarding/fourth-step');
+      router.push('/onboarding/first-settings'); // 次のページへ遷移
     }
   };
 
@@ -53,7 +53,7 @@ export default function NamePage() {
           <h1 className="text-2xl font-bold text-center">ご家族の情報</h1>
           <Progress value={60} className="w-full" />
           <p className="text-center text-base text-muted-foreground">
-            ステップ 3/5
+            ステップ 2/4
           </p>
         </CardHeader>
         <CardContent className="pt-4">
