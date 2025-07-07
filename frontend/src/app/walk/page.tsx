@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { GPSTracker } from '@/app/api/geo/geoLocation';
 import { saveWalkRecord } from '@/app/api/walk_api/walkApi';
 import DogWalkAnimation from '@/components/ui/dog-walk-animation';
@@ -391,7 +392,7 @@ export default function WalkPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="text-lg">認証確認中...</div>
+        <div className="text-lg text-orange-600 font-bold">認証確認中...</div>
       </div>
     );
   }
@@ -399,13 +400,13 @@ export default function WalkPage() {
   // 認証されていない場合、認証が必要な旨を表示
   if (!currentUser) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
+      <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="text-lg text-red-600 font-bold mb-4">
           認証が必要です
         </div>
         <Button
           onClick={() => router.push('/onboarding/login')}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
+          className="bg-orange-500 hover:bg-orange-600 text-white"
         >
           ログインページへ
         </Button>
@@ -417,67 +418,55 @@ export default function WalkPage() {
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8">
       <div className="flex flex-col h-screen max-w-[390px] mx-auto overflow-hidden">
         {/* ヘッダー */}
-        <div className="mb-10 flex items-center p-3 bg-white h-14 flex-shrink-0">
+        <div className="mb-10 flex items-center p-3 h-14 flex-shrink-0">
           <Button
             variant="ghost"
             onClick={() => router.push('/dashboard')}
-            className="mr-2 p-2"
+            className="mr-2 p-2 hover:bg-orange-50"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-5 w-5 text-orange-600" />
           </Button>
-          <h1 className="text-lg font-bold">おさんぽ</h1>
+          <h1 className="text-lg font-bold text-orange-800">おさんぽ</h1>
         </div>
 
         {/* メインコンテンツ */}
         <div className="mb-10 w-full max-w-xs">
-          <div className="mb-10 bg-white rounded-3xl px-8 py-5 border-2 border-green-200 flex flex-col justify-center items-center">
-            {/* 距離＋時間：縦並びセンター */}
-            <div className="flex flex-col items-center justify-center w-full">
-              {/* 距離 */}
-              <span className="text-base font-bold text-green-800">
-                {Math.round(walkDistance)} メートル
-              </span>
-              {/* 時間 */}
-              <span className="flex items-center text-base text-gray-800 font-bold mt-2">
-                <Clock className="h-5 w-5 text-blue-500 mr-1" />
-                {formatTime(walkTime)}
-              </span>
-            </div>
-            {/* 2行目 */}
-            {/* <div className="flex flex-row items-center justify-between w-full"> */}
-            {/* 状態 */}
-            {/* <span className="text-base text-green-600 font-medium">
-              {isWalking ? 'お散歩中' : 'お散歩前'} */}
-            {/* </span> */}
-            {/* GPS */}
-            {/* <span className="text-xs text-gray-500">{gpsStatus}</span>
-          </div> */}
-          </div>
-
-          {/* 散歩ミッション達成条件 */}
-          <div className="mb-6 w-full">
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl px-4 py-3">
-              <div className="flex items-center justify-center">
-                <span className="text-sm font-medium text-yellow-800">
+          <Card className="mb-4 border-orange-200">
+            <CardHeader className="pb-3">
+              <h2 className="text-sm font-bold flex items-center justify-center">
+                <span className="text-orange-800">
                   🎯 みっしょんたっせい：1000メートルいじょうあるこう！
                 </span>
+              </h2>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center w-full">
+                {/* 距離 */}
+                <span className="text-base font-bold text-orange-800">
+                  {Math.round(walkDistance)} メートル
+                </span>
+                {/* 時間 */}
+                <span className="flex items-center text-base text-orange-800 font-bold mt-2">
+                  <Clock className="h-5 w-5 text-orange-600 mr-1" />
+                  {formatTime(walkTime)}
+                </span>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* アニメーションエリア */}
           <div className="mb-10 w-full flex justify-center">
-            <div
-              className="border-2 border-gray-200 scale-105 rounded-3xl overflow-hidden shadow-md bg-white flex items-center justify-center"
-              style={{ width: 280, height: 200 }}
+            <Card
+              className="scale-105 w-full max-w-xs overflow-hidden flex items-center justify-center border-orange-200"
+              style={{ height: 200 }}
             >
               <DogWalkAnimation isWalking={isWalking} />
-            </div>
+            </Card>
           </div>
 
           {/* お散歩前 or お散歩中 状態テキスト（中央寄せ） */}
           <div className="mb-8 w-full flex flex-col items-center justify-center">
-            <span className="text-lg text-green-600 font-bold">
+            <span className="text-base text-orange-800 font-bold">
               {isWalking ? 'おさんぽちゅう' : 'おさんぽまえ'}
             </span>
             {/* <span className="text-xs text-gray-500 mt-1">{gpsStatus}</span> */}
@@ -486,7 +475,7 @@ export default function WalkPage() {
           {/* 開始ボタン */}
           {!isWalking && (
             <Button
-              className="w-full max-w-xs bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl shadow-xl text-xl font-bold mb-4"
+              className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-sm py-2 mb-4"
               onClick={startWalk}
             >
               おさんぽかいし
@@ -496,7 +485,7 @@ export default function WalkPage() {
           {/* 終了ボタン */}
           {isWalking && (
             <Button
-              className="w-full max-w-xs bg-red-500 hover:bg-red-600 text-white py-5 rounded-2xl shadow-xl text-xl font-bold mt-4"
+              className="w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-sm py-2 mb-4"
               onClick={endWalk}
             >
               おさんぽおわり
@@ -506,9 +495,9 @@ export default function WalkPage() {
 
         {/* ダイアログ部分 */}
         <Dialog open={showDialog} onOpenChange={handleDialogClose}>
-          <DialogContent className="bg-white rounded-lg max-w-sm mx-auto">
+          <DialogContent className="bg-white max-w-sm mx-auto">
             <DialogHeader>
-              <DialogTitle className="text-center text-xl">
+              <DialogTitle className="text-center text-xl text-orange-800">
                 {dialogContent.title}
               </DialogTitle>
               <DialogDescription className="text-center pt-2 text-base whitespace-pre-line">
@@ -518,7 +507,7 @@ export default function WalkPage() {
             <div className="flex justify-center mt-4">
               <Button
                 onClick={handleDialogClose}
-                className="bg-black text-white border border-white px-6 py-2 rounded-lg shadow-none hover:bg-gray-800 active:bg-gray-900"
+                className="bg-orange-500 text-white border border-orange-600 px-6 py-2 shadow-none hover:bg-orange-600 active:bg-orange-700"
               >
                 OK
               </Button>
