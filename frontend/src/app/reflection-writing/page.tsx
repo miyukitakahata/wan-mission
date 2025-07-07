@@ -44,7 +44,7 @@ export default function ReflectionWritingPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white px-6 py-8">
+    <div className="flex flex-col min-h-screen bg-white px-6 py-8 [&_*]:text-[18px]">
       <div className="w-full max-w-xs mx-auto">
         {/* ヘッダー */}
         <div className="flex items-center mb-8">
@@ -62,13 +62,13 @@ export default function ReflectionWritingPage() {
           {/* タイトル */}
           <div className="text-center space-y-2 px-4">
             <p className="text-base font-medium text-gray-800 leading-relaxed">
-              わんちゃんはさびしくなって、どこかへ行ってしまいました。
+              わんちゃん さびしくて どこかへ。
             </p>
             <p className="text-base font-medium text-gray-800 leading-relaxed">
-              次はもっと仲よくすごせるように、
+              つぎは もっと なかよく しようね。
             </p>
             <p className="text-base font-medium text-gray-800 leading-relaxed">
-              反省のきもちを書いてみよう。
+              はんせいの きもちを かこう。
             </p>
           </div>
 
@@ -84,7 +84,7 @@ export default function ReflectionWritingPage() {
               <Input
                 id="title"
                 type="text"
-                placeholder="例：お散歩をさぼってしまいました"
+                placeholder="れい：おさんぽをさぼりました"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="mt-1"
@@ -96,11 +96,11 @@ export default function ReflectionWritingPage() {
                 htmlFor="reflection"
                 className="text-sm font-medium text-gray-700"
               >
-                反省文
+                はんせいぶん
               </Label>
               <Textarea
                 id="reflection"
-                placeholder="わんちゃんへの気持ちや反省を書いてください..."
+                placeholder="ごめんねのきもちをかいてね..."
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
                 className="mt-1 min-h-24"

@@ -436,7 +436,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen [&_*]:text-[18px]">
       {/* 背景色個別指定 */}
       {/* 読み込み中表示 */}
       {authLoading ||

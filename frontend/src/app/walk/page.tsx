@@ -415,7 +415,7 @@ export default function WalkPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 [&_*]:text-[18px]">
       <div className="flex flex-col h-screen max-w-[390px] mx-auto overflow-hidden">
         {/* ヘッダー */}
         <div className="mb-10 flex items-center p-3 h-14 flex-shrink-0">
