@@ -390,8 +390,8 @@ export default function WalkPage() {
   // 認証状態がローディング中の場合、ローディング画面を表示
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
-        <div className="text-lg text-green-600 font-bold">認証確認中...</div>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-lg">認証確認中...</div>
       </div>
     );
   }
@@ -414,10 +414,10 @@ export default function WalkPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-green-50 px-6 py-8">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8">
       <div className="flex flex-col h-screen max-w-[390px] mx-auto overflow-hidden">
         {/* ヘッダー */}
-        <div className="mb-10 flex items-center p-3 bg-green-50 h-14 flex-shrink-0">
+        <div className="mb-10 flex items-center p-3 bg-white h-14 flex-shrink-0">
           <Button
             variant="ghost"
             onClick={() => router.push('/dashboard')}

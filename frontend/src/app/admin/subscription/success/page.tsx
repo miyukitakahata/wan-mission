@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export default function PaymentSuccess() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-green-50 p-4">
+    <div className="min-h-screen">
       <div className="max-w-sm mx-auto">
         {/* Success Card */}
         <Card className="mb-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm">

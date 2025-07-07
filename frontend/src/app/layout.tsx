@@ -3,6 +3,8 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { M_PLUS_Rounded_1c } from 'next/font/google';
 
+import ThemeProvider from '@/components/theme-provider';
+
 const rounded = M_PLUS_Rounded_1c({
   subsets: ['latin'],
   weight: ['400'], // 必要に応じて '700' なども追加可能
@@ -49,14 +51,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
-      <body className={rounded.className}>
-        <AuthProvider>{children}</AuthProvider>
+    <html lang="ja" suppressHydrationWarning>
+      <body>
+        <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+          >
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
 }
-
 // Kodaiさんのlayout.tsx
 // authProviderを追加してある
 // import type React from "react";

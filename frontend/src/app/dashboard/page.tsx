@@ -436,7 +436,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen">
+      {/* 背景色個別指定 */}
       {/* 読み込み中表示 */}
       {authLoading ||
       !authUser ||
@@ -457,6 +458,7 @@ export default function DashboardPage() {
         <>
           {/* ヘッダーナビゲーション */}
           {/* <div className="bg-white shadow-sm p-4"> */}
+          {/* 背景色個別指定 */}
           <div className="bg-white shadow-sm p-4 sticky top-0 z-30">
             <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
               <Button
@@ -491,7 +493,7 @@ export default function DashboardPage() {
             <div className="w-full max-w-xs mx-auto space-y-6">
               {/* 犬のアニメーション・ひとこと */}
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-white">
                   <div className="flex flex-col items-center space-y-4">
                     {/* ひとこと吹き出し */}
                     <div className="relative bg-white border-2 border-gray-300 rounded-full px-8 py-3 shadow-lg max-w-[260px]">
@@ -560,7 +562,7 @@ export default function DashboardPage() {
                         <Button
                           key={mission.id}
                           variant="ghost"
-                          className={`w-full h-12 flex items-center justify-start text-left px-4 ${
+                          className={`w-full h-12 flex items-center justify-start text-left px-4 bg-white ${
                             isCompleted
                               ? 'bg-green-50 text-green-800'
                               : 'hover:bg-gray-50'
@@ -589,7 +591,6 @@ export default function DashboardPage() {
           </div>
         </>
       )}
-
       {/* お世話不足ダイアログ */}
       <Dialog open={showNoCareDialog} onOpenChange={setShowNoCareDialog}>
         <DialogContent className="bg-white rounded-lg max-w-sm mx-auto">
