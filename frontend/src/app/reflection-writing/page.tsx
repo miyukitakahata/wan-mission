@@ -44,9 +44,10 @@ export default function ReflectionWritingPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white px-6 py-8 [&_*]:text-[18px]">
+    <div className="flex flex-col min-h-screen bg-cyan-50 px-6 py-12 [&_*]:text-[18px]">
       <div className="w-full max-w-xs mx-auto">
         {/* ヘッダー */}
+        {/*
         <div className="flex items-center mb-8">
           <Button
             variant="ghost"
@@ -56,6 +57,7 @@ export default function ReflectionWritingPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </div>
+        */}
 
         {/* メインコンテンツ */}
         <div className="flex flex-col items-center space-y-8">
@@ -71,9 +73,8 @@ export default function ReflectionWritingPage() {
               はんせいの きもちを かこう。
             </p>
           </div>
-
           {/* 反省文記入フォーム */}
-          <div className="w-full max-w-sm space-y-4 bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+          <div className="w-full max-w-sm space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
             <div>
               <Label
                 htmlFor="title"
@@ -96,7 +97,7 @@ export default function ReflectionWritingPage() {
                 htmlFor="reflection"
                 className="text-sm font-medium text-gray-700"
               >
-                反省文
+                はんせいぶん
               </Label>
               <Textarea
                 id="reflection"
@@ -109,7 +110,6 @@ export default function ReflectionWritingPage() {
               />
             </div>
           </div>
-
           {/* 犬のシルエット */}
           {/* <div className="w-40 h-40 flex items-center justify-center">
             <Image
@@ -121,7 +121,7 @@ export default function ReflectionWritingPage() {
               priority
             />
           </div> */}
-          <div className="w-full max-w-sm space-y-4 bg-white rounded-lg p-4 border-2 border-gray-300 shadow-sm">
+          <div className="w-full max-w-sm space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
             {/* <div className="w-60 h-60 flex items-center justify-center"> */}
             <video
               src="/animations/sad.mp4"
@@ -135,7 +135,7 @@ export default function ReflectionWritingPage() {
 
           {/* おくる（送信）ボタン */}
           <Button
-            className={`w-32 text-white py-3 rounded-full shadow-md text-sm font-medium ${
+            className={`text-white py-2 px-6 shadow-md text-sm font-medium ${
               reflection.trim() && title.trim() && !isSubmitting
                 ? 'bg-purple-400 hover:bg-purple-500'
                 : 'bg-gray-300 cursor-not-allowed'

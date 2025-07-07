@@ -477,7 +477,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
                   onClick={() => router.push('/dashboard')}
                 >
                   <Heart className="h-5 w-5 mb-1" />
@@ -485,7 +485,7 @@ export default function DashboardPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
                   onClick={() => router.push('/walk')}
                 >
                   <Footprints className="h-5 w-5 mb-1" />
@@ -493,7 +493,7 @@ export default function DashboardPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
                   onClick={() => router.push('/admin-login')}
                 >
                   <Settings className="h-5 w-5 mb-1" />
@@ -560,7 +560,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* 今日のお世話ミッション */}
-              <Card className="border-3 border-gray-500 rounded-2xl">
+              <Card className="border-3 border-gray-500 rounded-2xl text-gray-800">
                 <CardHeader className="pb-3">
                   <h2 className="text-lg font-bold flex items-center">
                     <Star className="mr-2 h-5 w-5 text-yellow-500" />
