@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import ThemeProvider from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'わん🐾みっしょん - ペットおせわアプリ',
@@ -42,14 +43,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja" suppressHydrationWarning>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+          >
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
 }
-
 // Kodaiさんのlayout.tsx
 // authProviderを追加してある
 // import type React from "react";
