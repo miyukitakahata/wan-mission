@@ -6,9 +6,11 @@ type Props = {
 
 // DogWalkAnimationをfunction宣言で記述
 function DogWalkAnimation({ isWalking }: Props) {
+  const S3_BUCKET_URL = process.env.NEXT_PUBLIC_S3_BUCKET_URL;
+
   const videoSrc = isWalking
-    ? '/animations/walking-dog-2.mp4'
-    : '/animations/dog-idle.mp4';
+    ? `${S3_BUCKET_URL}/animations/walking-dog-2.mp4`
+    : `${S3_BUCKET_URL}/animations/dog-idle.mp4`;
 
   return (
     <div className="w-full h-full flex items-center justify-center relative">

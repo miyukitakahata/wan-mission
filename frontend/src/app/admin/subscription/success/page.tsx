@@ -31,7 +31,7 @@ export default function PaymentSuccess() {
 
             {/* Dog illustration placeholder */}
             <Image
-              src="/images/success.png"
+              src={`${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/images/success.png`}
               alt="Success"
               width={400}
               height={400}

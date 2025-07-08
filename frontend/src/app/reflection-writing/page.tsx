@@ -124,7 +124,7 @@ export default function ReflectionWritingPage() {
           <div className="w-full max-w-xs space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
             {/* <div className="w-60 h-60 flex items-center justify-center"> */}
             <video
-              src="/animations/sad.mp4"
+              src={`${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/animations/sad.mp4`}
               autoPlay
               loop
               muted
