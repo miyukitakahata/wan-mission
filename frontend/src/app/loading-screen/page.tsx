@@ -36,7 +36,7 @@ export default function LoadingScreen() {
   }, [router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">
       <div className="w-full max-w-xs text-center">
         <div className="mb-8 flex flex-col items-center">
           <div className="relative">

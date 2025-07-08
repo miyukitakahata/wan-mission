@@ -200,7 +200,7 @@ export default function AdminPage() {
   console.log('adminページでcareLog確認:', careLog);
   console.log('adminページでcareSettings確認:', careSettings);
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs">
         {/* 家族会議で決めた目標 */}
         {renderGoalCard()}

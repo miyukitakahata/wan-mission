@@ -36,7 +36,7 @@ export default function WelcomeBackPage() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 overflow-hidden">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8 overflow-hidden">
       <div className="w-full max-w-xs flex flex-col items-center text-center relative">
         {/* キラキラエフェクト */}
         <div className="absolute inset-0 pointer-events-none">

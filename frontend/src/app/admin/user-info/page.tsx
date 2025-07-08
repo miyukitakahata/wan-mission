@@ -41,7 +41,7 @@ export default function UserInfoPage() {
   // ローディング中
   if (loading || userLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
         <div className="w-full max-w-xs">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
@@ -54,7 +54,7 @@ export default function UserInfoPage() {
   // エラー時
   if (error || userError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
         <div className="w-full max-w-xs">
           <Card className="bg-red-50 border-red-200">
             <CardContent className="p-4 text-center">
@@ -74,7 +74,7 @@ export default function UserInfoPage() {
 
   // データが正常に取得できた場合
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs">
         {/* 家族情報 */}
         <Card className="mb-4 border-orange-200">

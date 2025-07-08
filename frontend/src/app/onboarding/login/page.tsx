@@ -118,7 +118,7 @@ export default function OnboardingLoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">
       <Card className="w-full max-w-xs shadow-lg">
         <CardHeader className="flex flex-col items-center space-y-2 pb-2">
           <div className="h-16 w-16 rounded-full bg-orange-100 flex items-center justify-center">

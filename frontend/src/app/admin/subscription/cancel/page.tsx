@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export default function PaymentCancel() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs">
         {/* Cancel Card */}
         <Card className="mb-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
@@ -35,6 +35,7 @@ export default function PaymentCancel() {
               alt="Cancel"
               width={400}
               height={400}
+              className="mb-6"
             />
 
             {/* Info message */}
@@ -55,7 +56,8 @@ export default function PaymentCancel() {
         <div className="space-y-3">
           <Button
             asChild
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-2xl h-14 text-lg font-medium shadow-lg"
+            variant="outline"
+            className="w-full border-orange-200 hover:bg-orange-50 text-orange-800"
           >
             <Link href="/">
               <Home className="w-5 h-5 mr-2" />
