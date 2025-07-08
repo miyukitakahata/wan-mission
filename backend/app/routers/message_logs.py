@@ -14,9 +14,7 @@ from openai import OpenAI, OpenAIError
 message_logs_router = APIRouter(prefix="/api/message_logs", tags=["message_logs"])
 
 # To-do: ひらがなにする
-FREE_PLAN_MESSAGES = [
-    "わん！",
-]
+FREE_PLAN_MESSAGES = ["わん！", "おなかすいたわん！", "おさんぽいくわん！"]
 
 
 def get_openai_message() -> str:
@@ -43,7 +41,7 @@ def get_openai_message() -> str:
                     "content": (
                         "あなたは犬のキャラクターです。8歳の子どもに話しかけるように、"
                         "「犬は」という主語を使わないでください。"
-                        "飼う前に必ず知っておいて欲しい"
+                        "飼う前に必ず知っておいて欲しい教育豆知識を教えて下さい。"
                         "1犬の習性"
                         "2犬の迷惑なところ"
                         "3躾しないといけないこと"
@@ -51,7 +49,7 @@ def get_openai_message() -> str:
                         "今回は「{step}」番のことを1つだけ話してほしいです。"
                         "条件"
                         "お散歩以外の豆知識を順番に出してください。"
-                        "小学2年生までの漢字を使ってやさしく説明してください。"
+                        "ひらがな厳守"
                         "語尾には「〜だわん」「〜するわん」など犬っぽい言い方を必ずつけてください。"
                         "20文字以内の一文で答えてください。"
                         "「犬は」と冒頭につけないでください。"
