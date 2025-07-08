@@ -1,15 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
-import { M_PLUS_Rounded_1c } from 'next/font/google';
-
 import ThemeProvider from '@/components/theme-provider';
-
-const rounded = M_PLUS_Rounded_1c({
-  subsets: ['latin'],
-  weight: ['400'], // 必要に応じて '700' なども追加可能
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'わん🐾みっしょん - ペットおせわアプリ',
@@ -68,30 +60,3 @@ export default function RootLayout({
     </html>
   );
 }
-// Kodaiさんのlayout.tsx
-// authProviderを追加してある
-// import type React from "react";
-// import { ThemeProvider } from "@/components/theme-provider";
-// // imoprt AuthProvider
-
-// export default function OnboardingLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   return (
-//     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
-//       <ThemeProvider
-//         attribute="class"
-//         defaultTheme="light"
-//         enableSystem={false}
-//       >
-//         <AuthProvider>
-//           <main className="container mx-auto max-w-md px-4 py-8">
-//             {children}
-//           </main>
-//         </AuthProvider>
-//       </ThemeProvider>
-//     </div>
-//   );
-// }

@@ -76,7 +76,7 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
       <div className="w-full max-w-xs">
         {/* プレミアムプラン紹介カード */}
         <Card className="mb-6 shadow-lg border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50">

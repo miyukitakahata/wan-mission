@@ -367,9 +367,7 @@ export default function DashboardPage() {
   ];
 
   // わんちゃんのひとこと
-  const dogMessages = ['わん！'];
-
-  const [currentMessage, setCurrentMessage] = useState(dogMessages[0]);
+  const [currentMessage, setCurrentMessage] = useState('わん！');
 
   // ダイアログを閉じて反省文ページに遷移
   const handleNoCareDialogClose = () => {
@@ -377,7 +375,7 @@ export default function DashboardPage() {
     router.push('/reflection-writing');
   };
 
-  const handleDogClick = async () => {
+  const handleDogClick = useCallback(async () => {
     try {
       // Firebase認証トークンを取得
       if (!currentUser) {
@@ -398,8 +396,16 @@ export default function DashboardPage() {
       setCurrentMessage(data.message);
     } catch (error) {
       console.error('犬メッセージ取得エラー:', error);
+      setCurrentMessage('わん！'); // エラー時のフォールバック
     }
-  };
+  }, [currentUser]);
+
+  // 初期メッセージを自動取得
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      handleDogClick(); // 初回の犬のひとことを自動取得
+    }
+  }, [authLoading, currentUser, handleDogClick]);
 
   // お世話タスク完了時の処理
   const handleMissionComplete = async (missionId: string) => {
