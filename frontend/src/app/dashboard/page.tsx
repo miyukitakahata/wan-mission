@@ -541,7 +541,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
                   onClick={() => router.push('/dashboard')}
                 >
                   <Heart className="h-5 w-5 mb-1" />
@@ -549,7 +549,7 @@ export default function DashboardPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
                   onClick={() => router.push('/walk')}
                 >
                   <Footprints className="h-5 w-5 mb-1" />
@@ -557,7 +557,7 @@ export default function DashboardPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
                   onClick={() => router.push('/admin-login')}
                 >
                   <Settings className="h-5 w-5 mb-1" />
