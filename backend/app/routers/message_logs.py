@@ -40,7 +40,6 @@ def get_openai_message(child_name: str) -> str:
                 {
                     "role": "system",
                     "content": (
-<<<<<<< HEAD
                         # 情報
                         "あなたは犬のキャラクターです。8歳の子ども「{child_name}」に話しかけるように答えてください。"
                         # 【今回のタスク】
