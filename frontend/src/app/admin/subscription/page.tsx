@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Crown, MessageCircle, Heart, ArrowLeft } from 'lucide-react';
+import { Crown, MessageCircle, Heart } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SubscriptionPage() {
@@ -54,7 +54,7 @@ export default function SubscriptionPage() {
           },
 
           body: JSON.stringify({
-            firebase_uid: firebaseUid,
+            firebase_uid: user.currentUser?.uid,
           }),
         }
       );
@@ -75,20 +75,8 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
-      <div className="w-full max-w-xs mx-auto">
-        {/* ヘッダー */}
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mr-2"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-bold">サブスクリプション</h1>
-        </div>
-
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="w-full max-w-xs">
         {/* プレミアムプラン紹介カード */}
         <Card className="mb-6 shadow-lg border-2 border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50">
           <CardHeader className="pb-3 text-center">

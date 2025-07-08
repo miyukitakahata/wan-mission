@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowLeft, /* Calendar, */ Heart } from 'lucide-react';
+import { /* Calendar, */ Heart } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -313,19 +313,8 @@ export default function ReflectionsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 sm:px-6 py-6">
-      <div className="w-full max-w-xs mx-auto">
-        {/* max-w-lg → max-w-xs に変更 */}
-        <div className="flex items-center mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mr-2"
-          >
-            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-          <h1 className="text-xl sm:text-2xl font-bold">反省文一覧</h1>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 sm:px-6 py-6">
+      <div className="w-full max-w-xs">
         <Tabs
           defaultValue="all"
           className="w-full"
@@ -456,7 +445,7 @@ export default function ReflectionsPage() {
 
       {/* ダイアログ部分 */}
       <Dialog open={showDialog} onOpenChange={handleDialogClose}>
-        <DialogContent className="bg-white rounded-lg max-w-sm mx-auto">
+        <DialogContent className="bg-white rounded-lg max-w-xs mx-auto">
           <DialogHeader>
             <DialogTitle className="text-center text-xl">
               {dialogContent.title}
