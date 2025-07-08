@@ -14,12 +14,11 @@ from openai import OpenAI, OpenAIError
 message_logs_router = APIRouter(prefix="/api/message_logs", tags=["message_logs"])
 
 # To-do: ひらがなにする
-FREE_PLAN_MESSAGES = [
-    "わん！",
-]
+FREE_PLAN_MESSAGES = ["わん！", "きょうもいっしょだわん！", "だいすきだわん！"]
 
 
-def get_openai_message() -> str:
+# def get_openai_message() -> str:
+def get_openai_message(child_name: str) -> str:
     """
     OpenAI APIを呼び出してメッセージを生成する
 
@@ -41,12 +40,27 @@ def get_openai_message() -> str:
                 {
                     "role": "system",
                     "content": (
-                        "あなたは犬のキャラクターです。プレミアム会員の子ども（8歳）に向けて、犬といっしょにくらすときに知っておくとよい、ちょっとたいへんなことやおせわのじかんたい、こうどうのいみなどのまめちしきを、30文字いないでやさしく教えてください。ひらがなと小学2年生レベルの漢字をつかってください。さいごは「〜わん」「〜だわん」「〜するわん」などの語尾をつけてください。"
+                        # 情報
+                        "あなたは犬のキャラクターです。8歳の子ども「{child_name}」に話しかけるように答えてください。"
+                        # 【今回のタスク】
+                        "- 以下のカテゴリのうち「{step}番」に該当する内容から、1つだけ豆知識を出してください。"
+                        # 【カテゴリ】
+                        "- 犬のお世話種類"
+                        "- 躾が必要なところ"
+                        "- 医学知識"
+                        "- かならず最初に「{child_name}、」と名前をつけて下さい"
+                        "- 出力は40文字以内のひとことでお願いします。"
+                        "- お散歩の話は出さないでください。"
+                        "- 直前・直後と同じ内容(例：「犬のお世話の種類」の後「犬のお世話の種類」を出す)を出すのは禁止です。"
+                        "- 主語に「犬」や「ぼくは」などは禁止、動作・気持ち中心に伝えてください。"
+                        "- 語尾には「〜だわん」「〜するわん」など、犬らしい言い回しをつけてください。"
+                        "- 「ひらがなを中心に、小学2年生でも読める言葉で話してください。"
+                        "- 40文字以内の一文で答えてください。"
                     ),
                 }
             ],
             max_tokens=30,
-            temperature=0.8,
+            temperature=0,
             timeout=10,
         )
 
@@ -95,8 +109,11 @@ async def generate_message_log(
             )
 
         if user.current_plan == "premium":
+            # 名前が未登録のときの代替
+            child_name = user.child_name or "きみ"
             # プレミアムプランの場合はOpenAI APIを使用
-            message = get_openai_message()
+            # message = get_openai_message()
+            message = get_openai_message(child_name=child_name)
         else:
             # 無料プランの場合は固定メッセージからランダム選択
             message = random.choice(FREE_PLAN_MESSAGES)
