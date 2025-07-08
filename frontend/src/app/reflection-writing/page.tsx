@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft } from 'lucide-react'; // lucide-reactアイコン
+// import { ArrowLeft } from 'lucide-react'; // lucide-reactアイコン
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import createReflectionNote from '@/hooks/reflectionNotesPost';

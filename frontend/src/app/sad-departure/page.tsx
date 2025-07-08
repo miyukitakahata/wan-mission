@@ -16,7 +16,7 @@ export default function SadDeparturePage() {
   console.log('[SadDeparturePage] User:', user.currentUser);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200 px-4 sm:px-6 py-6 [&_*]:text-[18px]">
       <div className="w-full max-w-xs sm:max-w-sm flex flex-col items-center text-center space-y-8">
         {/* タイトル */}
         <h1 className="text-base sm:text-lg font-medium text-gray-800 px-4">
