@@ -54,7 +54,7 @@ export default function SubscriptionPage() {
           },
 
           body: JSON.stringify({
-            firebase_uid: firebaseUid,
+            firebase_uid: user.currentUser?.uid,
           }),
         }
       );
