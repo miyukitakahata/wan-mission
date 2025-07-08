@@ -130,7 +130,7 @@ export default function CareSettingsPage() {
           <h1 className="text-2xl font-bold text-center">お世話設定</h1>
           <Progress value={80} className="w-full" />
           <p className="text-center text-base text-muted-foreground">
-            ステップ 4/5
+            ステップ 3/4
           </p>
         </CardHeader>
         <CardContent className="pt-4">
