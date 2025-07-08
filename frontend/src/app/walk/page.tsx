@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-// import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-// import { ArrowLeft, Play, Square, Clock } from 'lucide-react';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { Clock, Heart, Footprints, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 import {
@@ -415,23 +413,57 @@ export default function WalkPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 [&_*]:text-[18px] bg-yellow-50">
-      <div className="flex flex-col h-screen max-w-[390px] mx-auto overflow-hidden">
-        {/* ヘッダー */}
-        <div className="mb-10 flex items-center p-3 h-14 flex-shrink-0">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/dashboard')}
-            className="mr-2 p-2 hover:bg-orange-50"
-          >
-            <ArrowLeft className="h-5 w-5 text-cyan-700" />
-          </Button>
-          <h1 className="text-lg font-bold text-cyan-700">おさんぽ</h1>
+    <div className="flex flex-col min-h-screen bg-yellow-50 [&_*]:text-[18px]">
+      {/* ヘッダーナビゲーション */}
+      <div className="relative">
+        {/* 雲の背景レイヤー */}
+        <div className="absolute -bottom-4 left-0 w-full flex min-w-max space-x-[-14px]">
+          {Array.from({ length: 40 }).map((_, i) => (
+            <div
+              key={i}
+              className={`${
+                i % 2 === 0 ? 'w-16 h-40' : 'w-20 h-40'
+              } bg-cyan-400 rounded-full`}
+            />
+          ))}
         </div>
 
-        {/* メインコンテンツ */}
-        <div className="mb-10 w-full max-w-xs">
-          <Card className="mb-4 rounded-2xl border-3 border-gray-500">
+        {/* ボタンレイヤー */}
+        <div className="relative z-10 p-4">
+          <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+            <Button
+              variant="outline"
+              className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
+              onClick={() => router.push('/dashboard')}
+            >
+              <Heart className="h-5 w-5 mb-1" />
+              <span className="text-xs">おせわ</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
+              onClick={() => router.push('/walk')}
+            >
+              <Footprints className="h-5 w-5 mb-1" />
+              <span className="text-xs">おさんぽ</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
+              onClick={() => router.push('/admin-login')}
+            >
+              <Settings className="h-5 w-5 mb-1" />
+              <span className="text-xs">かんりしゃ</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* メインコンテンツ */}
+      <div className="px-4 py-6">
+        <div className="w-full max-w-xs mx-auto space-y-6">
+          {/* ミッション達成カード */}
+          <Card className="bg-white rounded-2xl border-3 border-gray-500">
             <CardHeader className="pb-3">
               <h2 className="text-sm font-bold flex items-center justify-center">
                 <span className="text-nowrap text-cyan-700">
@@ -456,67 +488,78 @@ export default function WalkPage() {
             </CardContent>
           </Card>
 
-          {/* アニメーションエリア */}
-          <div className="mb-10 w-full flex justify-center">
-            <Card
-              className="w-full max-w-xs overflow-hidden flex items-center justify-center border-3 border-gray-500"
-              style={{ height: 200 }}
-            >
-              <DogWalkAnimation isWalking={isWalking} />
-            </Card>
-          </div>
+          {/* 犬のアニメーション・状態表示 */}
+          <Card className="bg-white rounded-2xl border-3 border-gray-500">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center space-y-4">
+                {/* 状態表示吹き出し */}
+                <div className="relative bg-white border-2 border-gray-300 rounded-full px-8 py-3 shadow-lg max-w-[260px]">
+                  <p className="text-center text-sm font-medium text-gray-800">
+                    {isWalking ? 'おさんぽちゅう' : 'おさんぽまえ'}
+                  </p>
+                  {/* 吹き出しの尻尾（下向き） */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                    <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-white" />
+                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-5 border-transparent border-t-gray-300" />
+                  </div>
+                </div>
 
-          {/* お散歩前 or お散歩中 状態テキスト（中央寄せ） */}
-          <div className="mb-8 w-full flex flex-col items-center justify-center">
-            <span className="text-base text-cyan-700 font-bold">
-              {isWalking ? 'おさんぽちゅう' : 'おさんぽまえ'}
-            </span>
-            {/* <span className="text-xs text-gray-500 mt-1">{gpsStatus}</span> */}
-          </div>
+                {/* 犬のアニメーション */}
+                <div className="flex flex-col items-center">
+                  <div className="w-60 h-60 max-w-xs max-h-xs flex items-center justify-center">
+                    <DogWalkAnimation isWalking={isWalking} />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* 開始ボタン */}
-          {!isWalking && (
-            <Button
-              className="w-full max-w-xs bg-cyan-500 hover:bg-cyan-600 text-sm py-2 mb-4 font-medium"
-              onClick={startWalk}
-            >
-              おさんぽかいし
-            </Button>
-          )}
-
-          {/* 終了ボタン */}
-          {isWalking && (
-            <Button
-              className="w-full max-w-xs bg-cyan-500 hover:bg-cyan-600 text-sm py-2 mb-4 font-medium"
-              onClick={endWalk}
-            >
-              おさんぽおわり
-            </Button>
-          )}
-        </div>
-
-        {/* ダイアログ部分 */}
-        <Dialog open={showDialog} onOpenChange={handleDialogClose}>
-          <DialogContent className="bg-white max-w-sm mx-auto">
-            <DialogHeader>
-              <DialogTitle className="text-center text-xl text-cyan-700">
-                {dialogContent.title}
-              </DialogTitle>
-              <DialogDescription className="text-center pt-2 text-base whitespace-pre-line">
-                {dialogContent.description}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center mt-4">
+          {/* 散歩ボタン */}
+          <div className="space-y-3">
+            {/* 開始ボタン */}
+            {!isWalking && (
               <Button
-                onClick={handleDialogClose}
-                className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 shadow-none active:cyan-700"
+                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-3 text-lg font-medium rounded-xl"
+                onClick={startWalk}
               >
-                OK
+                おさんぽかいし
               </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            )}
+
+            {/* 終了ボタン */}
+            {isWalking && (
+              <Button
+                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-3 text-lg font-medium rounded-xl"
+                onClick={endWalk}
+              >
+                おさんぽおわり
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* ダイアログ部分 */}
+      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+        <DialogContent className="bg-white max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl text-cyan-700">
+              {dialogContent.title}
+            </DialogTitle>
+            <DialogDescription className="text-center pt-2 text-base whitespace-pre-line">
+              {dialogContent.description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={handleDialogClose}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 shadow-none active:cyan-700"
+            >
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
