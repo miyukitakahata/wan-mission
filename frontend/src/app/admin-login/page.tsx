@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-6 py-8">
-      <Card className="w-full max-w-sm shadow-lg">
+      <Card className="w-full max-w-xs shadow-lg">
         <CardHeader className="flex flex-col items-center space-y-2 pb-2">
           <div className="h-16 w-16 rounded-full bg-orange-100 flex items-center justify-center">
             <Shield className="h-10 w-10 text-orange-500" />
@@ -176,8 +176,8 @@ export default function AdminLoginPage() {
               <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-xs text-blue-800">
-                  管理者PINまたはログイン時に設定したPINで認証できます。
-                  管理者画面では、お世話の設定変更、統計確認、ゲームリセットなどができます。
+                  管理者PINで認証できます。
+                  管理者画面では、お世話の設定変更、統計確認、記録のリセットなどができます。
                 </p>
               </div>
             </div>

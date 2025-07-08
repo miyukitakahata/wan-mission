@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
-  ArrowLeft,
   Target,
   Trophy,
   FileText,
@@ -201,20 +200,8 @@ export default function AdminPage() {
   console.log('adminページでcareLog確認:', careLog);
   console.log('adminページでcareSettings確認:', careSettings);
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
-      <div className="w-full max-w-xs mx-auto">
-        {/* ヘッダー */}
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mr-2"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-bold">管理者画面</h1>
-        </div>
-
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="w-full max-w-xs">
         {/* 家族会議で決めた目標 */}
         {renderGoalCard()}
 
@@ -276,7 +263,7 @@ export default function AdminPage() {
             onClick={() => router.push('/dashboard')}
           >
             <Home className="mr-2 h-5 w-5 text-orange-600" />
-            <span className="text-orange-800">トップページに戻る</span>
+            <span className="text-orange-800">ホーム画面に戻る</span>
           </Button>
 
           {/* ログアウトボタン */}

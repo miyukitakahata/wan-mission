@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowLeft, User, Heart, Calendar, Loader2, Crown } from 'lucide-react';
+import { User, Heart, Calendar, Loader2, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import useCurrentUser from '@/hooks/useCurrentUser';
@@ -41,18 +41,8 @@ export default function UserInfoPage() {
   // ローディング中
   if (loading || userLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6 ">
-        <div className="w-full max-w-xs mx-auto">
-          <div className="flex items-center mb-6 ">
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
-              className="mr-2"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold">ユーザー情報</h1>
-          </div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+        <div className="w-full max-w-xs">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
           </div>
@@ -64,18 +54,8 @@ export default function UserInfoPage() {
   // エラー時
   if (error || userError) {
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
-        <div className="w-full max-w-xs mx-auto">
-          <div className="flex items-center mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
-              className="mr-2"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-bold">ユーザー情報</h1>
-          </div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+        <div className="w-full max-w-xs">
           <Card className="bg-red-50 border-red-200">
             <CardContent className="p-4 text-center">
               <p className="text-red-600">{error}</p>
@@ -94,20 +74,8 @@ export default function UserInfoPage() {
 
   // データが正常に取得できた場合
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
-      <div className="w-full max-w-xs mx-auto">
-        {/* ヘッダー */}
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mr-2"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-bold">ユーザー情報</h1>
-        </div>
-
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="w-full max-w-xs">
         {/* 家族情報 */}
         <Card className="mb-4 border-orange-200">
           <CardHeader className="pb-3">
