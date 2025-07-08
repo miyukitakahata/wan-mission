@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 // import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase/config';
-import { onAuthStateChanged } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -29,6 +27,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { currentUser, loading: authLoading } = useAuth(); // useAuthコンテキストのみ使用
 
   // care_settings の状態管理
   const [careSettings, setCareSettings] = useState<{
@@ -40,35 +39,17 @@ export default function DashboardPage() {
     care_end_date: string;
   } | null>(null);
   const [careSettingsLoading, setCareSettingsLoading] = useState(true);
-  const [authUser, setAuthUser] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const user = useAuth(); // 認証情報を取得
 
-  console.log('[Dashboard] User:', user.currentUser);
+  console.log('[Dashboard] User:', currentUser);
 
-  // Firebase 認証ヘッダーを取得する関数
-  const getAuthHeaders = useCallback(async (): Promise<
-    Record<string, string>
-  > => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    try {
-      if (user.currentUser) {
-        const token = await user.currentUser.getIdToken();
-        headers.Authorization = `Bearer ${token}`;
-        console.log('[Dashboard] Firebase token を取得しました');
-      } else {
-        throw new Error('ユーザーが未ログイン状態です');
-      }
-    } catch (authError) {
-      console.error('[Dashboard] Firebase 認証エラー:', authError);
-      throw authError;
+  // Firebase認証トークンを取得するヘルパー関数（walk/page.tsx のパターンを採用）
+  const getFirebaseToken = useCallback(async (): Promise<string> => {
+    if (!currentUser) {
+      throw new Error('認証トークンが取得できませんでした');
     }
-
-    return headers;
-  }, [user.currentUser]);
+    const token = await currentUser.getIdToken();
+    return token;
+  }, [currentUser]);
 
   // お世話状態
   const [careLog, setCareLog] = useState({
@@ -87,23 +68,10 @@ export default function DashboardPage() {
     setMounted(true);
   }, []);
 
-  // Firebase認証状態を監視
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log(
-        '[Dashboard] 認証状態変更:',
-        firebaseUser ? 'ログイン済み' : '未ログイン'
-      );
-      setAuthUser(firebaseUser);
-      setAuthLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   // care_settings を取得（認証完了後）
   useEffect(() => {
-    if (authLoading || !authUser) {
+    if (authLoading || !currentUser) {
+      // authLoading と currentUser を使用
       console.log('[Dashboard] 認証待ちまたは未認証のためAPIコール延期');
       return;
     }
@@ -111,7 +79,11 @@ export default function DashboardPage() {
     const fetchCareSettings = async () => {
       setCareSettingsLoading(true);
       try {
-        const headers = await getAuthHeaders();
+        const token = await getFirebaseToken();
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        };
 
         const res = await fetch(`${API_BASE_URL}/api/care_settings/me`, {
           method: 'GET',
@@ -146,7 +118,7 @@ export default function DashboardPage() {
     };
 
     fetchCareSettings();
-  }, [authLoading, authUser, router, getAuthHeaders]);
+  }, [authLoading, currentUser, router, getFirebaseToken]); // currentUser と getFirebaseToken に依存
 
   // お世話状態をAPIから取得（care_settings取得後に実行）
   useEffect(() => {
@@ -160,7 +132,11 @@ export default function DashboardPage() {
         const jstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
         const today = jstDate.toISOString().split('T')[0];
 
-        const headers = await getAuthHeaders();
+        const token = await getFirebaseToken();
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        };
 
         const res = await fetch(
           `${API_BASE_URL}/api/care_logs/today?care_setting_id=${careSettings.id}&date=${today}`,
@@ -190,7 +166,7 @@ export default function DashboardPage() {
     };
 
     fetchCareLog();
-  }, [careSettings?.id, mounted, getAuthHeaders]); // careSettings.id と mounted に依存
+  }, [careSettings?.id, mounted, getFirebaseToken]); // careSettings.id と mounted に依存
 
   // お世話開始日に初めてプレーするユーザーは、お世話開始日に前日の記録がなくても、dashboardから反省文まで飛ばないようロジック追加
   // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
@@ -198,19 +174,44 @@ export default function DashboardPage() {
     if (!careSettings?.id || !mounted) return; // care_settings がない場合、またはマウント前は実行しない
 
     const checkYesterdayWalk = async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const dateStr = yesterday.toISOString().slice(0, 10);
+      // 本日の時間を取得
+      const currentday = new Date();
+      // 昨日 = 本日の時間 - 1日（24時間）
+      const yesterday = new Date(currentday.getTime() - 24 * 60 * 60 * 1000);
+      // JST時間に変換（+9時間）
+      const jstYesterdayDate = new Date(
+        yesterday.getTime() + 9 * 60 * 60 * 1000
+      );
+      // 昨日の日付文字列を取得
+      const yesterdayDateStr = jstYesterdayDate.toISOString().slice(0, 10);
+      console.log(
+        'yesterdayDateStr:jstYesterdayDate.toISOString().slice(0, 10)',
+        yesterdayDateStr
+      );
 
       // お世話開始日の確認
       if (careSettings.care_start_date) {
         const careStartDate = new Date(careSettings.care_start_date);
-        const yesterdayDate = new Date(dateStr);
+        const yesterdayDate = new Date(yesterdayDateStr);
 
         // 昨日がお世話開始日より前の場合は、リダイレクトしない
         if (yesterdayDate < careStartDate) {
           console.log(
-            `[Dashboard] 昨日(${dateStr})はお世話開始日(${careSettings.care_start_date})より前のため、リダイレクトしません`
+            `[Dashboard] 昨日(${yesterdayDateStr})はお世話開始日(${careSettings.care_start_date})より前のため、リダイレクトしません`
+          );
+          return;
+        }
+      }
+
+      // お世話終了日の確認
+      if (careSettings.care_end_date) {
+        const careEndDate = new Date(careSettings.care_end_date);
+        const yesterdayDate = new Date(yesterdayDateStr);
+
+        // 昨日がお世話終了日より後の場合は、リダイレクトしない
+        if (yesterdayDate > careEndDate) {
+          console.log(
+            `[Dashboard] 昨日(${yesterdayDateStr})はお世話終了日(${careSettings.care_end_date})より後のため、リダイレクトしません`
           );
           return;
         }
@@ -218,13 +219,17 @@ export default function DashboardPage() {
 
       try {
         console.log(
-          `[Dashboard] 昨日の散歩確認開始: careSettingId=${careSettings.id}, date=${dateStr}`
+          `[Dashboard] 昨日の散歩確認開始: careSettingId=${careSettings.id}, date=${yesterdayDateStr}`
         );
 
         // Firebase 認証ヘッダーを取得
         let authHeaders: Record<string, string>;
         try {
-          authHeaders = await getAuthHeaders();
+          const token = await getFirebaseToken();
+          authHeaders = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          };
         } catch (authError) {
           console.error('[Dashboard] 認証失敗:', authError);
           return; // 認証エラーの場合は処理を中断
@@ -232,7 +237,7 @@ export default function DashboardPage() {
 
         // fetch バックエンド API
         const res = await fetch(
-          `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettings.id}&date=${dateStr}`,
+          `${API_BASE_URL}/api/care_logs/by_date?care_setting_id=${careSettings.id}&date=${yesterdayDateStr}`,
           {
             method: 'GET',
             headers: authHeaders,
@@ -262,12 +267,66 @@ export default function DashboardPage() {
         if (data && data.care_log_id && !data.walked) {
           console.log('[Dashboard] 昨日散歩未実施のためダイアログを表示');
           setShowNoCareDialog(true);
+          return;
         }
-        // 昨日のcare_logが存在しない散歩が未実施の場合
-        else if (data && !data.care_log_id && !data.walked) {
+
+        // 昨日のcare_logが存在しない場合は自動作成してからダイアログ表示
+        if (data && !data.care_log_id && !data.walked) {
           console.log(
-            '[Dashboard] 昨日記録なし(散歩未実施)のためダイアログを表示'
+            '[Dashboard] 昨日記録なし、自動作成してからダイアログを表示'
           );
+
+          try {
+            // 既存のjstYesterdayDate変数を使用
+            const yesterdayISO = jstYesterdayDate.toISOString();
+
+            console.log(
+              '[Dashboard] 昨日のcare_log自動作成開始:',
+              yesterdayISO
+            );
+
+            // 昨日のcare_logを作成
+            const token = await getFirebaseToken();
+            const createRes = await fetch(`${API_BASE_URL}/api/care_logs/`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                date: yesterdayISO,
+                fed_morning: false,
+                fed_night: false,
+                walk_result: false,
+              }),
+            });
+
+            if (createRes.ok) {
+              const createdData = await createRes.json();
+              console.log(
+                '[Dashboard] 昨日のcare_log自動作成成功:',
+                createdData.id
+              );
+            } else if (createRes.status === 409 || createRes.status === 400) {
+              // 409エラー（既存記録）は無視
+              console.log('[Dashboard] 昨日のcare_log既存のため作成スキップ');
+            } else {
+              // その他のエラーはログ出力
+              const errorText = await createRes.text();
+              console.error(
+                '[Dashboard] 昨日のcare_log作成失敗:',
+                createRes.status,
+                errorText
+              );
+            }
+          } catch (createError) {
+            console.error(
+              '[Dashboard] 昨日のcare_log自動作成エラー:',
+              createError
+            );
+          }
+
+          // care_log作成結果に関わらずダイアログを表示
           setShowNoCareDialog(true);
         }
       } catch (error) {
@@ -279,9 +338,10 @@ export default function DashboardPage() {
   }, [
     careSettings?.id,
     careSettings?.care_start_date,
+    careSettings?.care_end_date,
     mounted,
     router,
-    getAuthHeaders,
+    getFirebaseToken,
   ]);
 
   // ミッション定義
@@ -320,10 +380,10 @@ export default function DashboardPage() {
   const handleDogClick = async () => {
     try {
       // Firebase認証トークンを取得
-      if (!user) {
+      if (!currentUser) {
         throw new Error('ログインが必要です');
       }
-      const idToken = await user.currentUser?.getIdToken();
+      const idToken = await currentUser.getIdToken();
       const res = await fetch(`${API_BASE_URL}/api/message_logs/generate`, {
         method: 'POST',
         headers: {
@@ -351,7 +411,11 @@ export default function DashboardPage() {
 
     try {
       // 認証ヘッダーを取得
-      const headers = await getAuthHeaders();
+      const token = await getFirebaseToken();
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
 
       // care_log_id がなければ新規作成
       let careLogId = careLog.care_log_id;
@@ -440,7 +504,7 @@ export default function DashboardPage() {
       {/* 背景色個別指定 */}
       {/* 読み込み中表示 */}
       {authLoading ||
-      !authUser ||
+      !currentUser ||
       !careSettings?.id ||
       loading ||
       careSettingsLoading ? (
@@ -448,7 +512,7 @@ export default function DashboardPage() {
           <p>
             {(() => {
               if (authLoading) return '認証確認中...';
-              if (!authUser) return '認証が必要です';
+              if (!currentUser) return '認証が必要です';
               if (!careSettings?.id) return 'ユーザー情報を取得中...';
               return '読み込み中...';
             })()}
