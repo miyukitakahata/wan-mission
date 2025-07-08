@@ -31,7 +31,7 @@ export default function PaymentCancel() {
 
             {/* Dog illustration placeholder */}
             <Image
-              src="/images/cancel.png"
+              src={`${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/images/cancel.png`}
               alt="Cancel"
               width={400}
               height={400}
