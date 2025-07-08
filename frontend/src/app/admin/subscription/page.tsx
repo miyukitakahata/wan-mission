@@ -35,7 +35,6 @@ export default function SubscriptionPage() {
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const firebaseUid = user.currentUser?.uid; // 明示的にfirebaseUidを定義
       console.log('firebaseUidを確認:', user.currentUser?.uid);
       const token = await user.currentUser?.getIdToken(); // FirebaseのIDトークンを取得
 
