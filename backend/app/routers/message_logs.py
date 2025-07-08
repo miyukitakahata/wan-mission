@@ -40,6 +40,7 @@ def get_openai_message(child_name: str) -> str:
                 {
                     "role": "system",
                     "content": (
+<<<<<<< HEAD
                         # 情報
                         "あなたは犬のキャラクターです。8歳の子ども「{child_name}」に話しかけるように答えてください。"
                         # 【今回のタスク】
@@ -57,7 +58,7 @@ def get_openai_message(child_name: str) -> str:
                         "- 「ひらがなを中心に、小学2年生でも読める言葉で話してください。"
                         "- 40文字以内の一文で答えてください。"
                     ),
-                }
+                },
             ],
             max_tokens=30,
             temperature=0,

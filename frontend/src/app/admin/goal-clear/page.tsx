@@ -17,7 +17,7 @@ export default function GoalClearPage() {
   useEffect(() => {
     setShowAnimation(true);
 
-    // 5秒後に自動でダッシュボードに戻る
+    // 10秒後に自動でダッシュボードに戻る
     const timeout = setTimeout(() => {
       router.push('/dashboard');
     }, 10000);
@@ -92,8 +92,9 @@ export default function GoalClearPage() {
                 <p className="text-sm text-orange-800">
                   わんちゃんもとても喜んでいます！
                   <br />
-                  よくがんばったね！！ わんちゃんを本当にむかえるか
-                  ママとパパに話してみよう！
+                  ここまで本当によくがんばりました！
+                  <br />
+                  これから家族みんなで、わんちゃんを本当に迎えるかどうか話し合ってみましょう。
                 </p>
               </div>
 
@@ -101,7 +102,7 @@ export default function GoalClearPage() {
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-full text-lg font-bold"
                 onClick={() => router.push('/dashboard')}
               >
-                おせわつづける
+                お世話つづける
               </Button>
             </div>
           </CardContent>
