@@ -436,7 +436,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen [&_*]:text-[18px]">
+    <div className="flex flex-col min-h-screen bg-yellow-50 [&_*]:text-[18px]">
       {/* 背景色個別指定 */}
       {/* 読み込み中表示 */}
       {authLoading ||
@@ -459,32 +459,47 @@ export default function DashboardPage() {
           {/* ヘッダーナビゲーション */}
           {/* <div className="bg-white shadow-sm p-4"> */}
           {/* 背景色個別指定 */}
-          <div className="bg-white shadow-sm p-4 sticky top-0 z-30">
-            <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-              <Button
-                variant="outline"
-                className="flex flex-col items-center justify-center py-3 px-2 h-16"
-                onClick={() => router.push('/dashboard')}
-              >
-                <Heart className="h-5 w-5 mb-1" />
-                <span className="text-xs">おせわ</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="flex flex-col items-center justify-center py-3 px-2 h-16"
-                onClick={() => router.push('/walk')}
-              >
-                <Footprints className="h-5 w-5 mb-1" />
-                <span className="text-xs">おさんぽ</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="flex flex-col items-center justify-center py-3 px-2 h-16"
-                onClick={() => router.push('/admin-login')}
-              >
-                <Settings className="h-5 w-5 mb-1" />
-                <span className="text-xs">かんりしゃ</span>
-              </Button>
+          <div className="relative">
+            {/* ↓雲の背景レイヤー */}
+            <div className="absolute -bottom-4 left-0 w-full flex min-w-max space-x-[-14px]">
+              {Array.from({ length: 40 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`${
+                    i % 2 === 0 ? 'w-16 h-40' : 'w-20 h-40'
+                  } bg-cyan-400 rounded-full`}
+                />
+              ))}
+            </div>
+
+            {/* ボタンレイヤー */}
+            <div className="relative z-10 p-4">
+              <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
+                  onClick={() => router.push('/dashboard')}
+                >
+                  <Heart className="h-5 w-5 mb-1" />
+                  <span className="text-xs">おせわ</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
+                  onClick={() => router.push('/walk')}
+                >
+                  <Footprints className="h-5 w-5 mb-1" />
+                  <span className="text-xs">おさんぽ</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800"
+                  onClick={() => router.push('/admin-login')}
+                >
+                  <Settings className="h-5 w-5 mb-1" />
+                  <span className="text-xs">かんりしゃ</span>
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -492,8 +507,8 @@ export default function DashboardPage() {
           <div className="px-4 py-6">
             <div className="w-full max-w-xs mx-auto space-y-6">
               {/* 犬のアニメーション・ひとこと */}
-              <Card>
-                <CardContent className="p-6 bg-white">
+              <Card className="bg-white rounded-2xl border-3 border-gray-500">
+                <CardContent className="p-6">
                   <div className="flex flex-col items-center space-y-4">
                     {/* ひとこと吹き出し */}
                     <div className="relative bg-white border-2 border-gray-300 rounded-full px-8 py-3 shadow-lg max-w-[260px]">
@@ -537,7 +552,7 @@ export default function DashboardPage() {
                         />
                       </Button>
                       <p className="text-xs text-gray-500 mt-1">
-                        タップして話しかけよう！
+                        タップしてね！
                       </p>
                     </div>
                   </div>
@@ -545,7 +560,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* 今日のお世話ミッション */}
-              <Card>
+              <Card className="border-3 border-gray-500 rounded-2xl text-gray-800">
                 <CardHeader className="pb-3">
                   <h2 className="text-lg font-bold flex items-center">
                     <Star className="mr-2 h-5 w-5 text-yellow-500" />
@@ -562,7 +577,7 @@ export default function DashboardPage() {
                         <Button
                           key={mission.id}
                           variant="ghost"
-                          className={`w-full h-12 flex items-center justify-start text-left px-4 bg-white ${
+                          className={`w-full h-12 flex items-center justify-start text-left px-4 bg-white transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md ${
                             isCompleted
                               ? 'bg-green-50 text-green-800'
                               : 'hover:bg-gray-50'

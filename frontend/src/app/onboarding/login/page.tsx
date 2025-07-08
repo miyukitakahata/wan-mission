@@ -18,6 +18,7 @@ import { ArrowLeft, Mail, Lock, Eye, EyeOff, Dog } from 'lucide-react'; // lucid
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config'; // Firebase初期化モジュールを作成しておく
 import { useAuth } from '@/context/AuthContext';
@@ -74,9 +75,40 @@ export default function OnboardingLoginPage() {
         router.push('/onboarding/name');
       } else {
         // ✅ Firebase Auth ログイン処理
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
 
-        // ✅ ログイン後、ダッシュボードへ
+        // IDトークン取得
+        const idToken = await userCredential.user.getIdToken();
+
+        // バックエンドでユーザー存在チェック
+        const userCheckResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users/me`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+
+        if (!userCheckResponse.ok) {
+          if (userCheckResponse.status === 404) {
+            // ユーザーがデータベースに存在しない場合
+            alert('アカウントが見つかりません。新規登録を行ってください。');
+            // Firebase からログアウト
+            await signOut(auth);
+            return;
+          }
+          // その他のエラー
+          throw new Error('ユーザー情報の取得に失敗しました');
+        }
+
+        // ✅ ユーザー存在確認後、ダッシュボードへ
         router.push('/dashboard');
       }
     } catch (error: any) {
@@ -95,35 +127,38 @@ export default function OnboardingLoginPage() {
           <h1 className="text-2xl font-bold text-center">わん🐾みっしょん</h1>
           <Progress value={40} className="w-full" />
           <p className="text-center text-base text-muted-foreground">
-            ステップ 2/5
+            ステップ 1/4
           </p>
         </CardHeader>
         <CardContent className="pt-4">
           {/* ユーザータイプ選択 */}
-          <div className="relative mb-6 bg-gray-100 rounded-lg p-1 overflow-hidden">
+          <div className="relative mb-6 bg-orange-50 rounded-lg p-1 overflow-hidden border border-orange-200">
+            {/* 下部の黒線 */}
             <div
-              className={`absolute bottom-0 left-0 h-1 w-1/2 bg-black rounded transition-transform duration-300 ${
+              className={`absolute bottom-0 left-0 h-1 w-1/2 bg-orange-800 rounded-b-md transition-transform duration-300 ${
                 isNewUser ? 'translate-x-0' : 'translate-x-full'
               }`}
             />
-            <Button
-              variant="ghost"
-              className={`flex-1 text-sm z-10 relative ${
-                isNewUser ? 'text-black font-bold' : 'text-muted-foreground'
-              }`}
-              onClick={() => setIsNewUser(true)}
-            >
-              新規登録
-            </Button>
-            <Button
-              variant="ghost"
-              className={`flex-1 text-sm z-10 relative ${
-                !isNewUser ? 'text-black font-bold' : 'text-muted-foreground'
-              }`}
-              onClick={() => setIsNewUser(false)}
-            >
-              ログイン
-            </Button>
+            <div className="flex">
+              <Button
+                variant="ghost"
+                className={`flex-1 text-sm z-10 relative py-2 px-4 ${
+                  isNewUser ? 'text-black' : 'text-muted-foreground'
+                }`}
+                onClick={() => setIsNewUser(true)}
+              >
+                新規登録
+              </Button>
+              <Button
+                variant="ghost"
+                className={`flex-1 text-sm z-10 relative py-2 px-4 ${
+                  !isNewUser ? 'text-black' : 'text-muted-foreground'
+                }`}
+                onClick={() => setIsNewUser(false)}
+              >
+                ログイン
+              </Button>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
