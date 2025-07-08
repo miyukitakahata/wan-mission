@@ -37,7 +37,7 @@ export default function WelcomeBackPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 overflow-hidden">
-      <div className="w-full max-w-sm flex flex-col items-center text-center relative">
+      <div className="w-full max-w-xs flex flex-col items-center text-center relative">
         {/* キラキラエフェクト */}
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(6)].map((_, i) => (

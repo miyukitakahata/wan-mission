@@ -10,8 +10,8 @@ import Link from 'next/link';
 
 export default function PaymentCancel() {
   return (
-    <div className="min-h-screen p-4">
-      <div className="max-w-sm mx-auto">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-6">
+      <div className="w-full max-w-xs">
         {/* Cancel Card */}
         <Card className="mb-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
           <CardContent className="p-8 text-center">

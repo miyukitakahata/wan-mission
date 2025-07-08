@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft } from 'lucide-react'; // lucide-reactアイコン
+// import { ArrowLeft } from 'lucide-react'; // lucide-reactアイコン
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import createReflectionNote from '@/hooks/reflectionNotesPost';
@@ -74,7 +74,7 @@ export default function ReflectionWritingPage() {
             </p>
           </div>
           {/* 反省文記入フォーム */}
-          <div className="w-full max-w-sm space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
+          <div className="w-full max-w-xs space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
             <div>
               <Label
                 htmlFor="title"
@@ -121,7 +121,7 @@ export default function ReflectionWritingPage() {
               priority
             />
           </div> */}
-          <div className="w-full max-w-sm space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
+          <div className="w-full max-w-xs space-y-4 bg-white p-4 border-gray-500 shadow-sm rounded-2xl border-3">
             {/* <div className="w-60 h-60 flex items-center justify-center"> */}
             <video
               src="/animations/sad.mp4"
