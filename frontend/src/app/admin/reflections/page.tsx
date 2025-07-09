@@ -153,18 +153,34 @@ export default function ReflectionsPage() {
       // Step 3: 日付範囲内のcare_logsをフィルタリング（昨日まで）
       console.log('Step 3: 日付範囲内care_logsフィルタリング中...');
 
-      // 昨日の日付を取得（今日の記錄は更新しない）
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const actualEndDate = yesterday < endDate ? yesterday : endDate;
+      // 昨日の日付を取得（今日の記錄は更新しない）- JST時間で計算
+      const currentday = new Date();
+      // 昨日 = 本日の時間 - 1日（24時間）
+      const yesterdayUtc = new Date(currentday.getTime() - 24 * 60 * 60 * 1000);
+      // JST時間に変換（+9時間）
+      const jstYesterday = new Date(
+        yesterdayUtc.getTime() + 9 * 60 * 60 * 1000
+      );
+
+      // endDateと比較するため、JST時間で昨日の日付を取得
+      const yesterdayJst = new Date(
+        `${jstYesterday.toISOString().split('T')[0]}T00:00:00.000Z`
+      );
+      const actualEndDate = yesterdayJst < endDate ? yesterdayJst : endDate;
 
       console.log(
-        `実際の終了日: ${actualEndDate.toISOString().split('T')[0]} (今日は除外)`
+        `実際の終了日: ${actualEndDate.toISOString().split('T')[0]} (今日は除外、JST基準)`
       );
 
       const targetCareLogs = careLogsData.care_logs.filter((log: any) => {
         const logDate = new Date(log.date);
-        return logDate >= startDate && logDate <= actualEndDate;
+        const isInRange = logDate >= startDate && logDate <= actualEndDate;
+
+        console.log(
+          `ログ日付: ${log.date}, 開始日以降: ${logDate >= startDate}, 終了日以前: ${logDate <= actualEndDate}, 対象: ${isInRange}`
+        );
+
+        return isInRange;
       });
 
       console.log(`対象care_logs数: ${targetCareLogs.length}`);
@@ -321,7 +337,9 @@ export default function ReflectionsPage() {
           // onValueChange={setActiveTab} // カレンダー非表示
         >
           <TabsList className="grid w-full grid-cols-1 mb-4">
-            <TabsTrigger value="all">すべての反省文</TabsTrigger>
+            <TabsTrigger value="all" className="border-orange-200">
+              すべての反省文
+            </TabsTrigger>
             {/* <TabsTrigger value="calendar">カレンダー表示</TabsTrigger> */}
           </TabsList>
           <TabsContent value="all">
@@ -336,7 +354,7 @@ export default function ReflectionsPage() {
               )}
 
               {!isLoading && reflectionData.length === 0 && (
-                <Card className="bg-white">
+                <Card className="bg-white border-orange-200">
                   <CardContent className="p-8 text-center">
                     <p className="text-gray-500">反省文がありません</p>
                   </CardContent>
@@ -346,7 +364,10 @@ export default function ReflectionsPage() {
               {!isLoading &&
                 reflectionData.length > 0 &&
                 reflectionData.map((reflection) => (
-                  <Card key={reflection.id} className="bg-white">
+                  <Card
+                    key={reflection.id}
+                    className="bg-white border-orange-200"
+                  >
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <h2 className="text-base sm:text-lg font-medium">
@@ -440,6 +461,15 @@ export default function ReflectionsPage() {
               お世話再チャレンジ承認
             </>
           )}
+        </Button>
+
+        {/* ホームに戻るボタン */}
+        <Button
+          variant="outline"
+          className="w-full mt-4 border-orange-200 hover:bg-orange-50 text-orange-800"
+          onClick={() => router.push('/admin')}
+        >
+          管理者画面に戻る
         </Button>
       </div>
 

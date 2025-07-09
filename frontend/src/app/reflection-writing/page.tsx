@@ -9,12 +9,20 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import createReflectionNote from '@/hooks/reflectionNotesPost';
 import { useAuth } from '@/context/AuthContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function ReflectionWritingPage() {
   const router = useRouter(); // Next.jsのフックページ遷移などに使う
   const [reflection, setReflection] = useState('');
   const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const user = useAuth(); // 認証情報を取得
 
   console.log('[ReflectionWritingPage] User:', user.currentUser);
@@ -31,9 +39,8 @@ export default function ReflectionWritingPage() {
         localStorage.setItem('lastCareTime', new Date().toISOString());
         localStorage.setItem('dogReturned', 'true');
 
-        setTimeout(() => {
-          router.push('/admin-login');
-        }, 1000);
+        // 成功ダイアログを表示
+        setShowSuccessDialog(true);
       } catch (error) {
         alert('保存に失敗しました。ネットワークを確認してください。');
         console.error(error);
@@ -41,6 +48,12 @@ export default function ReflectionWritingPage() {
         setIsSubmitting(false);
       }
     }
+  };
+
+  // ダイアログを閉じて管理者画面に遷移
+  const handleDialogClose = () => {
+    setShowSuccessDialog(false);
+    router.push('/admin-login');
   };
 
   return (
@@ -154,6 +167,29 @@ export default function ReflectionWritingPage() {
           </Button>
         </div>
       </div>
+
+      {/* 送信成功ダイアログ */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="bg-white rounded-lg max-w-xs mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl">
+              はんせいぶんを おくったよ
+            </DialogTitle>
+            <DialogDescription className="text-center pt-2 text-base whitespace-pre-line">
+              ママ・パパに はんせいぶんを みてもらおうね。{'\n'}
+              かんりしゃがめんから はんせいぶんを みることができるよ。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={handleDialogClose}
+              className="bg-black text-white border border-white px-6 py-2 rounded-lg shadow-none hover:bg-gray-800 active:bg-gray-900"
+            >
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
