@@ -25,6 +25,99 @@ import {
 // API エンドポイントのベース URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// Dashboard Loading コンポーネント
+const DashboardLoading = ({
+  authLoading,
+  currentUser,
+  careSettings,
+  careSettingsLoading,
+}: {
+  authLoading: boolean;
+  currentUser: any;
+  careSettings: any;
+  careSettingsLoading: boolean;
+}) => {
+  const [progress, setProgress] = useState(0);
+
+  // Loading効果
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) return 95; // 最大95%、実際の完了まで待つ
+        return prev + 2;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // ローディングが完了に近づいた時、プログレスバーを100%にする
+  useEffect(() => {
+    if (
+      !authLoading &&
+      currentUser &&
+      careSettings?.id &&
+      !careSettingsLoading
+    ) {
+      setProgress(100);
+    }
+  }, [authLoading, currentUser, careSettings?.id, careSettingsLoading]);
+
+  // 状態に応じて表示メッセージを決定
+  const getLoadingMessage = () => {
+    if (authLoading) return '認証確認中...';
+    if (!currentUser) return '認証が必要です';
+    if (!careSettings?.id || careSettingsLoading)
+      return 'ユーザー情報を取得中...';
+    return '読み込み中...';
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-start pt-20 min-h-screen bg-gradient-to-b from-yellow-50 to-orange-100 px-6 py-8">
+      <div className="w-full max-w-xs text-center">
+        <div className="mb-8 flex flex-col items-center">
+          <div className="relative">
+            <div className="h-32 w-32 rounded-full bg-orange-100 flex items-center justify-center">
+              <Heart className="h-20 w-20 text-orange-500" />
+            </div>
+            <div className="absolute inset-0 rounded-full border-4 border-orange-300 border-t-orange-500 animate-spin" />
+          </div>
+        </div>
+
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          {getLoadingMessage()}
+        </h1>
+
+        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+          <div
+            className="bg-orange-500 h-2.5 rounded-full transition-all duration-300 ease-in-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <p className="text-base text-orange-600 font-medium animate-pulse">
+          LOADING...
+        </p>
+
+        <div className="mt-8 flex justify-center space-x-2">
+          <div
+            className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
+            style={{ animationDelay: '0ms' }}
+          />
+          <div
+            className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
+            style={{ animationDelay: '150ms' }}
+          />
+          <div
+            className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"
+            style={{ animationDelay: '300ms' }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function DashboardPage() {
   const router = useRouter();
   const { currentUser, loading: authLoading } = useAuth(); // useAuthコンテキストのみ使用
@@ -63,6 +156,66 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   // ダイアログ表示用の state
   const [showNoCareDialog, setShowNoCareDialog] = useState(false);
+
+  // デバッグ用：loading状態を監視
+  useEffect(() => {
+    const info = {
+      authLoading,
+      currentUser: !!currentUser,
+      careSettingsId: careSettings?.id,
+      loading,
+      careSettingsLoading,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    console.log('[Dashboard] Loading状態:', info);
+  }, [
+    authLoading,
+    currentUser,
+    careSettings?.id,
+    loading,
+    careSettingsLoading,
+  ]);
+
+  // タイムアウト処理：15秒後に強制的にloading状態を解除
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (
+        authLoading ||
+        !currentUser ||
+        !careSettings?.id ||
+        loading ||
+        careSettingsLoading
+      ) {
+        console.warn(
+          '[Dashboard] Loading timeout - 強制的に次の画面に進みます'
+        );
+        console.warn('[Dashboard] 最終状態:', {
+          authLoading,
+          currentUser: !!currentUser,
+          careSettingsId: careSettings?.id,
+          loading,
+          careSettingsLoading,
+        });
+
+        setLoading(false);
+        setCareSettingsLoading(false);
+
+        // 認証が完了していない場合はログインページへ
+        if (!currentUser) {
+          router.push('/onboarding/login');
+        }
+      }
+    }, 15000); // 15秒
+
+    return () => clearTimeout(timeout);
+  }, [
+    authLoading,
+    currentUser,
+    careSettings?.id,
+    loading,
+    careSettingsLoading,
+    router,
+  ]);
 
   useEffect(() => {
     setMounted(true);
@@ -509,173 +662,220 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-screen bg-yellow-50 [&_*]:text-[18px]">
       {/* 背景色個別指定 */}
       {/* 読み込み中表示 */}
-      {authLoading ||
-      !currentUser ||
-      !careSettings?.id ||
-      loading ||
-      careSettingsLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <p>
-            {(() => {
-              if (authLoading) return '認証確認中...';
-              if (!currentUser) return '認証が必要です';
-              if (!careSettings?.id) return 'ユーザー情報を取得中...';
-              return '読み込み中...';
-            })()}
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* ヘッダーナビゲーション */}
-          {/* <div className="bg-white shadow-sm p-4"> */}
-          {/* 背景色個別指定 */}
-          <div className="relative">
-            {/* ↓雲の背景レイヤー */}
-            <div className="absolute -bottom-4 left-0 w-full flex min-w-max space-x-[-14px]">
-              {Array.from({ length: 40 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`${
-                    i % 2 === 0 ? 'w-16 h-40' : 'w-20 h-40'
-                  } bg-cyan-400 rounded-full`}
-                />
-              ))}
-            </div>
+      {(() => {
+        // loading条件チェック
+        const isLoading =
+          authLoading ||
+          !currentUser ||
+          !careSettings?.id ||
+          loading ||
+          careSettingsLoading;
 
-            {/* ボタンレイヤー */}
-            <div className="relative z-10 p-4">
-              <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-                <Button
-                  variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
-                  onClick={() => router.push('/dashboard')}
-                >
-                  <Heart className="h-5 w-5 mb-1" />
-                  <span className="text-xs !text-white">おせわ</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
-                  onClick={() => router.push('/walk')}
-                >
-                  <Footprints className="h-5 w-5 mb-1" />
-                  <span className="text-xs !text-white">おさんぽ</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
-                  onClick={() => router.push('/admin-login')}
-                >
-                  <Settings className="h-5 w-5 mb-1" />
-                  <span className="text-xs !text-white">かんりしゃ</span>
-                </Button>
+        // 認証失敗、loading失敗
+        if (!authLoading && !currentUser && !careSettingsLoading) {
+          return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+              <div className="text-lg text-red-600 font-bold mb-4">
+                認証が必要です
+              </div>
+              <Button
+                onClick={() => router.push('/onboarding/login')}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                ログインページへ
+              </Button>
+            </div>
+          );
+        }
+
+        // care_settings取得失敗、エラーメッセージ
+        if (
+          !authLoading &&
+          currentUser &&
+          !careSettingsLoading &&
+          !careSettings?.id
+        ) {
+          return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+              <div className="text-lg text-red-600 font-bold mb-4">
+                ユーザー情報の取得に失敗しました
+              </div>
+              <Button
+                onClick={() => window.location.reload()}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                再読み込み
+              </Button>
+            </div>
+          );
+        }
+
+        // loading
+        if (isLoading) {
+          return (
+            <DashboardLoading
+              authLoading={authLoading}
+              currentUser={currentUser}
+              careSettings={careSettings}
+              careSettingsLoading={careSettingsLoading}
+            />
+          );
+        }
+
+        // 通常
+        return (
+          <>
+            {/* ヘッダーナビゲーション */}
+            {/* <div className="bg-white shadow-sm p-4"> */}
+            {/* 背景色個別指定 */}
+            <div className="relative">
+              {/* ↓雲の背景レイヤー */}
+              <div className="absolute -bottom-4 left-0 w-full flex min-w-max space-x-[-14px]">
+                {Array.from({ length: 40 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`${
+                      i % 2 === 0 ? 'w-16 h-40' : 'w-20 h-40'
+                    } bg-cyan-400 rounded-full`}
+                  />
+                ))}
+              </div>
+
+              {/* ボタンレイヤー */}
+              <div className="relative z-10 p-4">
+                <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
+                  <Button
+                    variant="outline"
+                    className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    <Heart className="h-5 w-5 mb-1" />
+                    <span className="text-xs !text-white">おせわ</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
+                    onClick={() => router.push('/walk')}
+                  >
+                    <Footprints className="h-5 w-5 mb-1" />
+                    <span className="text-xs !text-white">おさんぽ</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex flex-col items-center justify-center py-3 px-2 h-16 border-2 bg-cyan-700 hover:bg-cyan-800 !text-white !border-white"
+                    onClick={() => router.push('/admin-login')}
+                  >
+                    <Settings className="h-5 w-5 mb-1" />
+                    <span className="text-xs !text-white">かんりしゃ</span>
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* メインコンテンツ */}
-          <div className="px-4 py-6">
-            <div className="w-full max-w-xs mx-auto space-y-6">
-              {/* 犬のアニメーション・ひとこと */}
-              <Card className="bg-white rounded-2xl border-3 border-gray-500">
-                <CardContent className="p-6">
-                  <div className="flex flex-col items-center space-y-4">
-                    {/* ひとこと吹き出し */}
-                    <div className="relative bg-white border-2 border-gray-300 rounded-full px-8 py-3 shadow-lg max-w-[260px]">
-                      <p className="text-center text-sm font-medium text-gray-800">
-                        {currentMessage}
-                      </p>
-                      {/* 吹き出しの尻尾（下向き） */}
-                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                        <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-white" />
-                        <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-5 border-transparent border-t-gray-300" />
+            {/* メインコンテンツ */}
+            <div className="px-4 py-6">
+              <div className="w-full max-w-xs mx-auto space-y-6">
+                {/* 犬のアニメーション・ひとこと */}
+                <Card className="bg-white rounded-2xl border-3 border-gray-500">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col items-center space-y-4">
+                      {/* ひとこと吹き出し */}
+                      <div className="relative bg-white border-2 border-gray-300 rounded-full px-8 py-3 shadow-lg max-w-[260px]">
+                        <p className="text-center text-sm font-medium text-gray-800">
+                          {currentMessage}
+                        </p>
+                        {/* 吹き出しの尻尾（下向き） */}
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                          <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-transparent border-t-white" />
+                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-5 border-transparent border-t-gray-300" />
+                        </div>
+                      </div>
+
+                      {/* 犬の画像 → 動画 */}
+                      <div className="flex flex-col items-center">
+                        {/* <Button
+                          variant="ghost"
+                          className="relative w-28 h-28 p-0 hover:scale-105 transition-transform duration-200"
+                          onClick={handleDogClick}
+                        > */}
+                        {/* <Image
+                            src="/images/cute-puppy.png"
+                            alt="わんちゃん"
+                            fill
+                            style={{ objectFit: 'contain' }}
+                            priority
+                          />
+                        </Button> */}
+                        <Button
+                          variant="ghost"
+                          className="relative w-60 h-60 max-w-xs max-h-xs p-0 scale-105 transition-transform duration-200 rounded-full overflow-hidden"
+                          onClick={handleDogClick}
+                        >
+                          <video
+                            src="/animations/dog-idle.mp4"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-contain"
+                          />
+                        </Button>
+                        <p className="text-xs text-gray-500 mt-1">
+                          タップしてね！
+                        </p>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
 
-                    {/* 犬の画像 → 動画 */}
-                    <div className="flex flex-col items-center">
-                      {/* <Button
-                        variant="ghost"
-                        className="relative w-28 h-28 p-0 hover:scale-105 transition-transform duration-200"
-                        onClick={handleDogClick}
-                      > */}
-                      {/* <Image
-                          src="/images/cute-puppy.png"
-                          alt="わんちゃん"
-                          fill
-                          style={{ objectFit: 'contain' }}
-                          priority
-                        />
-                      </Button> */}
-                      <Button
-                        variant="ghost"
-                        className="relative w-60 h-60 max-w-xs max-h-xs p-0 scale-105 transition-transform duration-200 rounded-full overflow-hidden"
-                        onClick={handleDogClick}
-                      >
-                        <video
-                          src="/animations/dog-idle.mp4"
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="w-full h-full object-contain"
-                        />
-                      </Button>
-                      <p className="text-xs text-gray-500 mt-1">
-                        タップしてね！
-                      </p>
+                {/* 今日のお世話ミッション */}
+                <Card className="border-3 border-gray-500 rounded-2xl text-gray-800">
+                  <CardHeader className="pb-3">
+                    <h2 className="text-lg font-bold flex items-center">
+                      <Star className="mr-2 h-5 w-5 text-yellow-500" />
+                      きょうのおせわみっしょん
+                    </h2>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {missions.map((mission) => {
+                        const Icon = mission.icon;
+                        const isCompleted = mission.completed;
+
+                        return (
+                          <Button
+                            key={mission.id}
+                            variant="ghost"
+                            className={`w-full h-12 flex items-center justify-start text-left px-4 bg-white transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                              isCompleted
+                                ? 'bg-green-50 text-green-800'
+                                : 'hover:bg-gray-50'
+                            }`}
+                            onClick={() => handleMissionComplete(mission.id)}
+                            disabled={isCompleted}
+                          >
+                            <div className="flex items-center space-x-3">
+                              {isCompleted ? (
+                                <div className="text-green-500 text-lg">✅</div>
+                              ) : (
+                                <div className="w-5 h-5 border-2 border-gray-300 rounded" />
+                              )}
+                              <Icon className="h-5 w-5" />
+                              <span className="text-sm font-medium">
+                                {mission.name}
+                              </span>
+                            </div>
+                          </Button>
+                        );
+                      })}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 今日のお世話ミッション */}
-              <Card className="border-3 border-gray-500 rounded-2xl text-gray-800">
-                <CardHeader className="pb-3">
-                  <h2 className="text-lg font-bold flex items-center">
-                    <Star className="mr-2 h-5 w-5 text-yellow-500" />
-                    きょうのおせわみっしょん
-                  </h2>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {missions.map((mission) => {
-                      const Icon = mission.icon;
-                      const isCompleted = mission.completed;
-
-                      return (
-                        <Button
-                          key={mission.id}
-                          variant="ghost"
-                          className={`w-full h-12 flex items-center justify-start text-left px-4 bg-white transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md ${
-                            isCompleted
-                              ? 'bg-green-50 text-green-800'
-                              : 'hover:bg-gray-50'
-                          }`}
-                          onClick={() => handleMissionComplete(mission.id)}
-                          disabled={isCompleted}
-                        >
-                          <div className="flex items-center space-x-3">
-                            {isCompleted ? (
-                              <div className="text-green-500 text-lg">✅</div>
-                            ) : (
-                              <div className="w-5 h-5 border-2 border-gray-300 rounded" />
-                            )}
-                            <Icon className="h-5 w-5" />
-                            <span className="text-sm font-medium">
-                              {mission.name}
-                            </span>
-                          </div>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        );
+      })()}
       {/* お世話不足ダイアログ */}
       <Dialog open={showNoCareDialog} onOpenChange={setShowNoCareDialog}>
         <DialogContent className="bg-white rounded-lg max-w-sm mx-auto">

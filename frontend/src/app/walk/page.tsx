@@ -407,6 +407,11 @@ export default function WalkPage() {
 
   // 散歩終了後、ダイアログを閉じたらダッシュボードに戻る
   const handleDialogClose = () => {
+    // 保存中の場合は対話框を閉じることを許可しない
+    if (isSaving) {
+      return;
+    }
+
     setShowDialog(false);
     // 散歩終了後、ダイアログを閉じたらダッシュボードに戻る
     if (!isWalking && walkTime > 0) {
@@ -582,7 +587,10 @@ export default function WalkPage() {
       </div>
 
       {/* ダイアログ部分 */}
-      <Dialog open={showDialog} onOpenChange={handleDialogClose}>
+      <Dialog
+        open={showDialog}
+        onOpenChange={isSaving ? undefined : handleDialogClose}
+      >
         <DialogContent className="bg-white max-w-sm mx-auto">
           <DialogHeader>
             <DialogTitle className="text-center text-xl text-cyan-700">
@@ -596,8 +604,9 @@ export default function WalkPage() {
             <Button
               onClick={handleDialogClose}
               className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 shadow-none active:cyan-700"
+              disabled={isSaving}
             >
-              OK
+              {isSaving ? '保存中...' : 'OK'}
             </Button>
           </div>
         </DialogContent>
