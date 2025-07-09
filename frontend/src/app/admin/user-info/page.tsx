@@ -3,7 +3,15 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { User, Heart, Calendar, Loader2, Crown } from 'lucide-react';
+import {
+  User,
+  Heart,
+  Calendar,
+  Loader2,
+  Crown,
+  Users,
+  Baby,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useCareSettings } from '@/hooks/useCareSettings';
 import useCurrentUser from '@/hooks/useCurrentUser';
@@ -87,18 +95,24 @@ export default function UserInfoPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <span className="text-sm font-medium text-orange-800">
-                  ママパパのお名前
-                </span>
+                <div className="flex items-center">
+                  <Users className="mr-2 h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium text-orange-800">
+                    ママパパのお名前
+                  </span>
+                </div>
                 <span className="text-sm text-orange-700">
                   {careSettings?.parent_name || '未設定'}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <span className="text-sm font-medium text-orange-800">
-                  お子さまのお名前
-                </span>
+                <div className="flex items-center">
+                  <Baby className="mr-2 h-4 w-4 text-pink-500" />
+                  <span className="text-sm font-medium text-orange-800">
+                    お子さまのお名前
+                  </span>
+                </div>
                 <span className="text-sm text-orange-700">
                   {careSettings?.child_name || '未設定'}
                 </span>
@@ -119,20 +133,20 @@ export default function UserInfoPage() {
               <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-200">
                 <div className="flex items-center">
                   <Crown className="mr-2 h-4 w-4 text-yellow-500" />
-                  <span className="text-sm font-medium text-orange-800">
+                  <span className="text-sm font-medium text-orange-800 whitespace-nowrap">
                     会員ステータス
                   </span>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center ml-2">
                   {currentUser?.current_plan === 'premium' ? (
-                    <Badge className="bg-yellow-500 text-white">
-                      <Crown className="mr-1 h-3 w-3" />
+                    <Badge className="bg-yellow-500 text-white px-2 py-1 text-xs whitespace-nowrap">
+                      <Crown className="mr-1 h-2 w-3" />
                       プレミアム会員
                     </Badge>
                   ) : (
                     <Badge
                       variant="outline"
-                      className="text-gray-600 border-gray-300"
+                      className="text-gray-600 border-gray-300 px-2 py-1 text-xs"
                     >
                       無料会員
                     </Badge>

@@ -21,7 +21,7 @@ export default function Home() {
     } else {
       // 未ログインの場合はオンボーディングへ
       console.log('[Home] 未ログインユーザー - オンボーディングにリダイレクト');
-      router.push('/onboarding/welcome');
+    router.push('/onboarding/welcome');
     }
   }, [currentUser, loading, router]);
 

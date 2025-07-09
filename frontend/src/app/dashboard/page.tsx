@@ -169,7 +169,7 @@ export default function DashboardPage() {
   }, [careSettings?.id, mounted, getFirebaseToken]); // careSettings.id と mounted に依存
 
   // お世話開始日に初めてプレーするユーザーは、お世話開始日に前日の記録がなくても、dashboardから反省文まで飛ばないようロジック追加
-  // 昨日の散歩状態を確認し、未実施ならば sad-departure ページへリダイレクト
+  // 昨日の散歩状態を確認し、未実施ならば reflection-writing ページへリダイレクト
   useEffect(() => {
     if (!careSettings?.id || !mounted) return; // care_settings がない場合、またはマウント前は実行しない
 
