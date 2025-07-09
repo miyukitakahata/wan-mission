@@ -32,6 +32,7 @@ export default function WalkPage() {
   });
 
   const [careSettingId, setCareSettingId] = useState<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false); // 保存中フラグ
 
   // GPS関連の状態管理
   const [gpsTracker] = useState(() => new GPSTracker());
@@ -45,13 +46,33 @@ export default function WalkPage() {
   };
 
   // Firebase認証トークンを取得するヘルパー関数（リファクタリング）
-  const getFirebaseToken = useCallback(async (): Promise<string> => {
-    if (!currentUser) {
-      throw new Error('認証トークンが取得できませんでした');
-    }
-    const token = await currentUser.getIdToken();
-    return token;
-  }, [currentUser]);
+  const getFirebaseToken = useCallback(
+    async (forceRefresh: boolean = false): Promise<string> => {
+      if (!currentUser) {
+        throw new Error('認証トークンが取得できませんでした');
+      }
+
+      console.log(
+        `[WalkPage] Firebase token取得開始 (forceRefresh: ${forceRefresh})`
+      );
+      const startTime = Date.now();
+
+      try {
+        // 長時間の散歩の場合、tokenを強制的に更新
+        const token = await currentUser.getIdToken(forceRefresh);
+        const endTime = Date.now();
+
+        console.log(
+          `[WalkPage] Firebase token取得完了 (${endTime - startTime}ms)`
+        );
+        return token;
+      } catch (error) {
+        console.error('[WalkPage] Firebase token取得エラー:', error);
+        throw new Error('認証トークンの取得に失敗しました');
+      }
+    },
+    [currentUser]
+  );
 
   // 認証状態をチェックするヘルパー関数
   const isAuthenticated = (): boolean => !loading && currentUser !== null;
@@ -133,7 +154,7 @@ export default function WalkPage() {
       }
 
       try {
-        const token = await getFirebaseToken();
+        const token = await getFirebaseToken(); // 初期設定時は通常の取得
 
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -272,6 +293,9 @@ export default function WalkPage() {
       return;
     }
 
+    // 保存中フラグを設定
+    setIsSaving(true);
+
     // タイマー停止
     if (walkTimer) {
       clearInterval(walkTimer);
@@ -282,6 +306,14 @@ export default function WalkPage() {
     console.log('GPS追跡停止');
     // setGpsStatus('GPS停止');
     setIsWalking(false);
+
+    // 保存中であることを即座に表示
+    setDialogContent({
+      title: 'ほぞんちゅう...',
+      description:
+        'さんぽのきろくを　ほぞんしているわん。\nもうすこしまっててね。',
+    });
+    setShowDialog(true);
 
     // 日本時間の日付を取得する関数
     const getJapanDate = () => {
@@ -307,8 +339,14 @@ export default function WalkPage() {
         throw new Error('careSettingId が取得できませんでした');
       }
 
-      // Firebase認証トークンを取得
-      const token = await getFirebaseToken();
+      // 長時間の散歩（10分以上）の場合、tokenを強制的に更新
+      const shouldForceRefresh = walkTime >= 600; // 10分以上
+      console.log(
+        `[WalkPage] 散歩時間: ${walkTime}秒, tokenを強制更新: ${shouldForceRefresh}`
+      );
+
+      // Firebase認証トークンを取得（必要に応じて強制更新）
+      const token = await getFirebaseToken(shouldForceRefresh);
 
       // バックエンドに散歩データ保存
       const result = await saveWalkRecord(walkData, careSettingId, token);
@@ -339,7 +377,7 @@ export default function WalkPage() {
 
       setDialogContent({
         title: 'おさんぽおつかれさま！',
-        description: `きょり：${Math.round(walkDistance)}m\nじかん：${formatTime(walkTime)}\nきょうもがんばったね！きろくしたよ。`,
+        description: `きょり：${Math.round(walkDistance)}m\nじかん：${formatTime(walkTime)}\nきろくしたよ。\n\n${Math.round(walkDistance) >= 1000 ? '🎉 きょうのさんぽみっしょんたっせい！きょうもがんばったね！' : '🐾 きょうのさんぽみっしょんみたっせい！またがんばってね！'}`,
       });
       setShowDialog(true);
     } catch (error) {
@@ -358,9 +396,12 @@ export default function WalkPage() {
 
       setDialogContent({
         title: 'おさんぽおつかれさま！',
-        description: `きょり：${Math.round(walkDistance)}m\nじかん：${formatTime(walkTime)}\nサーバーへの保存に失敗しましたが、ローカルに保存されました。`,
+        description: `きょり：${Math.round(walkDistance)}m\nじかん：${formatTime(walkTime)}\nサーバーへの保存に失敗しましたが、ローカルに保存されました。\n\n${Math.round(walkDistance) >= 1000 ? '🎉 きょうのさんぽみっしょんたっせい！きょうもがんばったね！' : '🐾 きょうのさんぽみっしょんみたっせい！またがんばってね！'}`,
       });
       setShowDialog(true);
+    } finally {
+      // 保存完了フラグをリセット
+      setIsSaving(false);
     }
   };
 
@@ -529,10 +570,11 @@ export default function WalkPage() {
             {/* 終了ボタン */}
             {isWalking && (
               <Button
-                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-3 text-lg font-medium rounded-xl"
+                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-3 text-lg font-medium rounded-xl disabled:opacity-50"
                 onClick={endWalk}
+                disabled={isSaving}
               >
-                おさんぽおわり
+                {isSaving ? 'ほぞんちゅう...' : 'おさんぽおわり'}
               </Button>
             )}
           </div>

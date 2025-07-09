@@ -54,7 +54,7 @@ export class GPSTracker {
 
   private currentPosition: GPSPosition | null = null;
 
-  private previousPosition: GPSPosition | null = null; // 前回位置を記録（路徑距離計算用）
+  private previousPosition: GPSPosition | null = null; // 前回位置を記録（経路距離計算用）
 
   private startPosition: GPSPosition | null = null; // 開始位置を記録（参考用）
 
@@ -169,7 +169,7 @@ export class GPSTracker {
     return Math.min(baseThreshold, 10); // 最大10m
   }
 
-  // 路徑距離の計算（前回位置からの累積）- cl改善版
+  // 経路距離の計算（前回位置からの累積）- cl改善版
   private calculatePathDistance(): void {
     if (this.previousPosition && this.currentPosition) {
       // 時間間隔計算
@@ -177,7 +177,7 @@ export class GPSTracker {
         this.currentPosition.timestamp - this.previousPosition.timestamp;
       const timeIntervalSeconds = timeInterval / 1000;
 
-      console.log('[GPSTracker] 路徑距離計算開始', {
+      console.log('[GPSTracker] 経路距離計算開始', {
         previous: {
           lat: this.previousPosition.latitude,
           lng: this.previousPosition.longitude,
@@ -218,7 +218,7 @@ export class GPSTracker {
       const speed =
         timeIntervalSeconds > 0 ? (distance / timeIntervalSeconds) * 3.6 : 0; // km/h
 
-      console.log('[GPSTracker] 路徑距離計算結果', {
+      console.log('[GPSTracker] 経路距離計算結果', {
         distance: `${distance.toFixed(2)}m`,
         threshold: `${dynamicThreshold.toFixed(2)}m`,
         accuracy: `${this.currentPosition.accuracy.toFixed(1)}m`,
@@ -348,7 +348,7 @@ export class GPSTracker {
             this.onPositionUpdate(this.currentPosition);
           }
 
-          // 距離計算処理（路徑距離）
+          // 距離計算処理（経路距離）
           this.calculatePathDistance();
         },
         (error) => {
@@ -356,6 +356,20 @@ export class GPSTracker {
             code: error.code,
             message: error.message,
           });
+
+          // 長時間運行でのエラーハンドリング改善
+          if (error.code === error.TIMEOUT) {
+            console.log('[GPSTracker] GPS取得タイムアウト - 継続監視中');
+            // タイムアウトの場合は継続（一時的な問題の可能性）
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            console.log('[GPSTracker] GPS利用不可 - 位置サービス確認推奨');
+            // 利用不可の場合も継続（環境変化の可能性）
+          } else {
+            console.error('[GPSTracker] 予期しないGPSエラー:', error);
+          }
+
+          // エラーがあってもGPS追跡は継続
+          // 散歩中に一時的な問題が発生してもタイマーは止まらない
         },
         options
       );
