@@ -56,6 +56,18 @@ export const determineWalkSuccess = (
 
   const actualTargetDistance = targetDistance || defaultTargetDistance;
 
+  // 詳細なデバッグログを追加
+  console.log('[WalkAPI] 散歩成功判定の詳細チェック:', {
+    受け取った距離: distance,
+    距離の型: typeof distance,
+    距離の値: distance,
+    目標距離: actualTargetDistance,
+    '距離 >= 目標距離': distance >= actualTargetDistance,
+    '距離 < 目標距離': distance < actualTargetDistance,
+    'Math.round(distance)': Math.round(distance),
+    距離が数値か: !Number.isNaN(distance) && Number.isFinite(distance),
+  });
+
   // cl改善版GPS計算による高精度距離データで判定（1000メートル以上で成功）
   const isSuccess = distance >= actualTargetDistance;
 
@@ -65,6 +77,8 @@ export const determineWalkSuccess = (
     isSuccess,
     calculationMethod: 'balanced',
   });
+
+  console.log(`[WalkAPI] 最終判定結果: ${isSuccess ? '成功' : '失敗'}`);
 
   return isSuccess;
 };
@@ -111,6 +125,11 @@ const updateWalkRecord = async (
       walk_total_distance_m: walkData.walk_total_distance_m,
     };
     console.log(`[WalkAPI] PATCH データ:`, patchData);
+    console.log(
+      `[WalkAPI] PATCH walk_resultの型:`,
+      typeof patchData.walk_result
+    );
+    console.log(`[WalkAPI] PATCH walk_resultの値:`, patchData.walk_result);
 
     const response = await fetch(
       `${API_BASE_URL}/api/care_logs/${todayData.care_log_id}`,
@@ -126,7 +145,9 @@ const updateWalkRecord = async (
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[WalkAPI] PATCH エラー詳細:`, errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(
+        `HTTP error! status: ${response.status}, details: ${errorText}`
+      );
     }
 
     const result = await response.json();
@@ -165,6 +186,8 @@ export const saveWalkRecord = async (
       walkData.duration
     );
 
+    console.log(`[WalkAPI] 散歩成功判定結果: ${walkSuccess}`);
+
     // care_logs API用のデータ構造に変換（散歩のみの場合）
     const careLogData = {
       date: walkData.date,
@@ -173,6 +196,8 @@ export const saveWalkRecord = async (
     };
 
     console.log('[WalkAPI] care_logsに散歩データを保存:', careLogData);
+    console.log('[WalkAPI] walk_resultの型:', typeof careLogData.walk_result);
+    console.log('[WalkAPI] walk_resultの値:', careLogData.walk_result);
 
     const response = await fetch(`${API_BASE_URL}/api/care_logs`, {
       method: 'POST',
@@ -192,10 +217,17 @@ export const saveWalkRecord = async (
         console.log('[WalkAPI] 400エラーの詳細:', responseText);
         return await updateWalkRecord(careLogData, careSettingId, token);
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
+
+      // エラーの詳細を確認
+      const errorText = await response.text();
+      console.log('[WalkAPI] POSTエラーの詳細:', errorText);
+      throw new Error(
+        `HTTP error! status: ${response.status}, details: ${errorText}`
+      );
     }
 
     const result = await response.json();
+    console.log('[WalkAPI] POST成功:', result);
     return {
       success: true,
       message: '散歩記録が正常に保存されました（care_logs使用）',
