@@ -83,7 +83,7 @@ export function useCareSettings() {
   // currentUserが利用可能になってから実行
   useEffect(() => {
     if (currentUser) {
-      fetchCareSettings();
+    fetchCareSettings();
     }
   }, [currentUser, fetchCareSettings]);
 
