@@ -105,7 +105,7 @@ export default function ReflectionsPage() {
       // Step 1: care_settingsを取得して日付範囲を確認
       console.log('Step 1: care_settings取得中...');
       const settingsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/care_settings/me`,
+        `${process.env.NEXT_PUBLIC_API_URL}//me`,
         {
           headers,
         }
