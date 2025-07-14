@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import ThemeProvider from '@/components/theme-provider';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'わん🐾みっしょん - ペットおせわアプリ',
@@ -48,6 +49,7 @@ export default function RootLayout({
     <html lang="ja" suppressHydrationWarning>
       <body>
         <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100">
+          <Toaster />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
