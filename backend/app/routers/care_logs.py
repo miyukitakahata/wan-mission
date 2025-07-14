@@ -19,6 +19,55 @@ from app.dependencies import verify_firebase_token
 care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
 
 
+@care_logs_router.patch(
+    "/{care_log_id}",
+    response_model=CareLogResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def update_care_log(
+    care_log_id: int,
+    request: CareLogUpdateRequest,
+    firebase_uid: str = Depends(verify_firebase_token),
+):
+    """
+    お世話記録の更新API（fed_morning / fed_night / walk_result の部分更新）
+    """
+    try:
+        print(f"[care_logs] PATCH受信: care_log_id={care_log_id}, request={request}")
+
+        # care_log_id と firebase_uid が紐づくかチェック（不正なIDで他人のログ更新を防ぐ）
+        existing_log = await prisma_client.care_logs.find_first(
+            where={
+                "id": care_log_id,
+                "care_setting": {"user": {"firebase_uid": firebase_uid}},
+            }
+        )
+
+        if not existing_log:
+            print(f"[care_logs] care_log not found or not authorized: {care_log_id}")
+            raise HTTPException(status_code=404, detail="Care log not found")
+
+        update_data = request.model_dump(exclude_unset=True)
+        print(f"[care_logs] 更新データ: {update_data}")
+
+        updated_log = await prisma_client.care_logs.update(
+            where={"id": care_log_id},
+            data=update_data,
+        )
+
+        print(f"[care_logs] 更新成功: {updated_log.id}")
+        return updated_log
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[care_logs] PATCH エラー詳細: {type(e).__name__}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="お世話記録の更新中にエラーが発生しました",
+        ) from e
+
+
 # POST /api/care_logs のルーター
 @care_logs_router.post(
     "",
