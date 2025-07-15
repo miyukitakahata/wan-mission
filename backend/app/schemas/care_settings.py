@@ -53,21 +53,6 @@ class CareSettingMeResponse(BaseModel):
         from_attributes = True
 
 
-# PATCH /api/care_settings/:idのリクエストモデル
-class CareSettingUpdateRequest(BaseModel):
-    care_start_date: date
-    care_end_date: date
-    care_clear_status: str
-
-
-# PATCH /api/care_settings/:idのレスポンスモデル
-class CareSettingUpdateResponse(BaseModel):
-    care_clear_status: str
-
-    class Config:
-        from_attributes = True
-
-
 # POST /api/care_settings/verify_pinのリクエストモデル
 class VerifyPinRequest(BaseModel):
     input_password: str
@@ -79,13 +64,3 @@ class VerifyPinResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-# PATCH /api/care_settings/:id/clearのリクエストモデル
-class CareSettingClearRequest(BaseModel):
-    care_clear_status: str  # "cleared" か "not_cleared"
-
-
-# PATCH /api/care_settings/:id/clearのレスポンスモデル
-class CareSettingClearResponse(BaseModel):
-    care_clear_status: str

@@ -36,8 +36,3 @@ class UserMeResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-# PATCH /api/users/current_planのリクエストモデル
-class UserPlanUpdateRequest(BaseModel):
-    current_plan: str
