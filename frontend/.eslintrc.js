@@ -19,9 +19,8 @@ module.exports = {
       },
     ],
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    'no-console': 'off',
+    'no-console': 'warn', // 本番確認必須
 
-    // deployment での問題を避けるための設定
     // 現代 React/TypeScript 開発に適さない規則を無効化
     'react/jsx-props-no-spreading': 'off', // prop spreading を許可（UI ライブラリで必要）
     'react/require-default-props': 'off', // TypeScript のデフォルト引数で十分
@@ -36,8 +35,8 @@ module.exports = {
     'react/jsx-no-undef': 'off',
 
     // 一時的に無効化（必要に応じて個別に対処）
-    '@typescript-eslint/no-explicit-any': 'warn', // error から warn に変更
-    'no-param-reassign': 'off', // 状態管理で必要な場合がある
+    '@typescript-eslint/no-explicit-any': 'warn', // 本番確認必須
+    'no-param-reassign': 'warn', // 関数引数を直接書き換えていないか（副作用バグ防止のため）本番確認必須
 
     // UI ライブラリで一般的な問題を解決
     'react/no-array-index-key': 'warn', // 場合によっては必要
@@ -51,10 +50,10 @@ module.exports = {
     'consistent-return': 'off', // TypeScript で型チェックされる
     'default-case': 'off', // exhaustive switch で不要な場合がある
     'react/button-has-type': 'off', // デフォルトで十分な場合
-    'react/no-danger': 'warn', // 危険だが場合によっては必要
-    'no-alert': 'warn', // デバッグ用として警告のみ
+    'react/no-danger': 'warn', // 本番確認必須
+    'no-alert': 'warn', // 本番確認必須
     '@typescript-eslint/naming-convention': 'off', // 命名規則を柔軟に
-    '@typescript-eslint/no-redeclare': 'warn', // 警告のみ
+    '@typescript-eslint/no-redeclare': 'warn', // 同名変数の重複宣言が残っていないか、本番確認必須
     'react-hooks/rules-of-hooks': 'error', // これは重要なので維持
   },
   settings: {
