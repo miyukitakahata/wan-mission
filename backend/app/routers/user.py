@@ -5,7 +5,6 @@ from app.schemas.user import (
     UserCreateRequest,
     UserCreateResponse,
     UserMeResponse,
-    UserPlanUpdateRequest,
 )
 
 
@@ -69,33 +68,4 @@ async def get_my_user(firebase_uid: str = Depends(verify_firebase_token)):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="ユーザー情報取得時にエラーが発生しました"
-        ) from e
-
-
-# PATCH/api/users/current_plan のルーター
-@user_router.patch(
-    "/current_plan",
-    response_model=UserMeResponse,
-)
-async def update_user_plan(
-    request: UserPlanUpdateRequest,
-    firebase_uid: str = Depends(verify_firebase_token),
-):
-    try:
-        # 対象ユーザーを取得
-        user = await prisma_client.users.find_unique(
-            where={"firebase_uid": firebase_uid}
-        )
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # プラン情報を更新
-        updated_user = await prisma_client.users.update(
-            where={"id": user.id}, data={"current_plan": request.current_plan}
-        )
-
-        return updated_user
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail="ユーザープラン更新時にエラーが発生しました"
         ) from e

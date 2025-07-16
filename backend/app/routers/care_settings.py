@@ -15,12 +15,8 @@ from app.schemas.care_settings import (
     CareSettingCreateRequest,
     CareSettingCreateResponse,
     CareSettingMeResponse,
-    CareSettingUpdateRequest,
-    CareSettingUpdateResponse,
     VerifyPinRequest,
     VerifyPinResponse,
-    CareSettingClearRequest,
-    CareSettingClearResponse,
 )
 
 from app.dependencies import verify_firebase_token
@@ -143,56 +139,6 @@ async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)
         ) from e
 
 
-# PATCH /api/care_settings/:idのルーター
-@care_settings_router.patch(
-    "/{care_setting_id}",
-    response_model=CareSettingUpdateResponse,
-    status_code=status.HTTP_200_OK,
-)
-async def update_care_setting(
-    care_setting_id: int,
-    request: CareSettingUpdateRequest,
-    firebase_uid: str = Depends(verify_firebase_token),
-):
-    """
-    お世話設定の更新API
-    """
-    try:
-        # 認証ユーザーを取得
-        user = await prisma_client.users.find_unique(
-            where={"firebase_uid": firebase_uid}
-        )
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # 対象ケア設定を取得し、所有者か確認
-        care_setting = await prisma_client.care_settings.find_unique(
-            where={"id": care_setting_id}
-        )
-        if not care_setting or care_setting.user_id != user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="Care setting not found or unauthorized",
-            )
-
-        # 日付をdatetimeに変換して更新
-        updated = await prisma_client.care_settings.update(
-            where={"id": care_setting_id},
-            data={
-                "care_start_date": datetime.combine(request.care_start_date, time.min),
-                "care_end_date": datetime.combine(request.care_end_date, time.min),
-                "care_clear_status": request.care_clear_status,
-            },
-        )
-
-        return CareSettingUpdateResponse(care_clear_status=updated.care_clear_status)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail="お世話設定の更新中にエラーが発生しました"
-        ) from e
-
-
 # POST /api/care_settings/verify_pinのルーター
 @care_settings_router.post(
     "/verify_pin",
@@ -225,47 +171,4 @@ async def verify_care_setting_pin(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="PIN認証中にエラーが発生しました"
-        ) from e
-
-
-# PATCH /api/care_settings/:id/clearのルーター
-@care_settings_router.patch(
-    "/{care_setting_id}/clear",
-    response_model=CareSettingClearResponse,
-    status_code=status.HTTP_200_OK,
-)
-async def clear_care_setting_status(
-    care_setting_id: int,
-    request: CareSettingClearRequest,
-    firebase_uid: str = Depends(verify_firebase_token),
-):
-    """
-    ミッションクリア状態の更新API
-    """
-    try:
-        # Firebase UID からユーザー取得
-        user = await prisma_client.users.find_unique(
-            where={"firebase_uid": firebase_uid}
-        )
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        # care_setting の取得と所有者チェック
-        care_setting = await prisma_client.care_settings.find_unique(
-            where={"id": care_setting_id}
-        )
-        if not care_setting or care_setting.user_id != user.id:
-            raise HTTPException(status_code=403, detail="Permission denied")
-
-        # クリア状態を更新
-        updated = await prisma_client.care_settings.update(
-            where={"id": care_setting_id},
-            data={"care_clear_status": request.care_clear_status},
-        )
-
-        return CareSettingClearResponse(care_clear_status=updated.care_clear_status)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail="ミッションクリア状態の更新中にエラーが発生しました"
         ) from e

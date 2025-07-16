@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Crown, MessageCircle, Heart } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 export default function SubscriptionPage() {
   const router = useRouter();
@@ -59,6 +60,12 @@ export default function SubscriptionPage() {
         }
       );
       const data = await res.json();
+
+      if (!res.ok) {
+        // サーバーがエラー返したとき
+        toast.error(data.error || data.detail || '決済できませんでした。');
+        return;
+      }
 
       if (data.url) {
         // StripeのCheckoutセッションURLにリダイレクト
