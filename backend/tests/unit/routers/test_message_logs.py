@@ -6,8 +6,7 @@ from unittest.mock import AsyncMock
 from app.main import app
 from app.dependencies import verify_firebase_token
 from types import SimpleNamespace
-import os
-from app.routers.message_logs import get_openai_message, FREE_PLAN_MESSAGES
+from app.routers.message_logs import get_openai_message
 
 # FastAPIアプリをTestClientに渡す
 client = TestClient(app)
@@ -20,7 +19,7 @@ def mock_prisma(monkeypatch):
     """
     mock_client = AsyncMock()
 
-    # user.find_unique デフォルトのモック動作（テスト内で上書きする前提）
+    # user.find_unique デフォルトのモック動作（テスト内で上書き）
     mock_client.users.find_unique.return_value = None
 
     # prisma_clientを実際のappに差し替える
