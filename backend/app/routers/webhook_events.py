@@ -64,6 +64,8 @@ async def stripe_webhook(request: Request):
             status_code=200,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ERROR] Webhook処理失敗: {e}")
         raise HTTPException(status_code=500, detail="Webhook processing failed") from e
@@ -136,6 +138,8 @@ async def process_webhook_event(event):
             where={"id": event.id}, data={"processed": True}
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ERROR] Webhookイベントの処理に失敗しました: {e}")
         # エラー内容をwebhook_eventsテーブルに保存
@@ -236,6 +240,8 @@ async def process_webhook_events():
             status_code=200,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[ERROR] Webhookイベントの処理に失敗しました: {e}")
         raise HTTPException(

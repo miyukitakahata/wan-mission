@@ -192,6 +192,8 @@ async def get_today_care_log(
             walked=care_log.walk_result or False,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[care_logs] GET today エラー詳細: {type(e).__name__}: {e}")
         raise HTTPException(
@@ -250,6 +252,8 @@ async def get_care_log_by_date(
             fed_night=care_log.fed_night or False,
             walked=care_log.walk_result or False,
         )
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[care_logs] GET by_date エラー詳細: {type(e).__name__}: {e}")
         raise HTTPException(
@@ -302,6 +306,8 @@ async def get_care_logs_list(
 
         return {"care_logs": result}
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[care_logs] GET list エラー詳細: {type(e).__name__}: {e}")
         raise HTTPException(
