@@ -45,6 +45,9 @@ def mock_prisma(monkeypatch):
     return mock_client
 
 
+# ======================
+#  TC-WEBHOOK-001
+# ======================
 # POST /api/webhook_eventsのテストコード
 # 正常系（Webhook eventを保存）
 # ① event_type = checkout.session.completed
@@ -89,6 +92,9 @@ def test_webhook_event_checkout_session_completed_triggers_processing(
     process_mock.assert_awaited_once()
 
 
+# ======================
+#  TC-WEBHOOK-002
+# ======================
 # ② event_type = payment_intent.succeeded
 def test_webhook_event_other_type_does_not_trigger_processing(mock_prisma, monkeypatch):
     """
@@ -126,6 +132,9 @@ def test_webhook_event_other_type_does_not_trigger_processing(mock_prisma, monke
     process_mock.assert_not_awaited()
 
 
+# ======================
+#  TC-WEBHOOK-003
+# ======================
 # 異常系（prisma_client.webhook_events.create が例外を投げる）
 def test_webhook_event_db_create_error_returns_500(mock_prisma, monkeypatch):
     """
@@ -157,6 +166,9 @@ def test_webhook_event_db_create_error_returns_500(mock_prisma, monkeypatch):
     assert "Webhook processing failed" in response.text
 
 
+# ======================
+#  TC-WEBHOOK-004
+# ======================
 # 異常系（リクエストボディが不正）
 def test_webhook_event_invalid_json_returns_500(mock_prisma):
     """
@@ -176,6 +188,9 @@ def test_webhook_event_invalid_json_returns_500(mock_prisma):
     assert "Webhook processing failed" in response.text
 
 
+# ======================
+#  TC-WEBHOOK-005
+# ======================
 # POST /api/webhook_events/processのテストコード
 # 正常系（未処理イベントがある → paymentテーブルに書き込む)
 def test_process_webhook_events_with_unprocessed_events(mock_prisma):
@@ -223,6 +238,9 @@ def test_process_webhook_events_with_unprocessed_events(mock_prisma):
     mock_prisma.webhook_events.update.assert_awaited()
 
 
+# ======================
+#  TC-WEBHOOK-006
+# ======================
 # 正常系(未処理イベントが0件の場合)
 def test_process_webhook_events_no_unprocessed_events(mock_prisma):
     """
@@ -246,6 +264,9 @@ def test_process_webhook_events_no_unprocessed_events(mock_prisma):
     mock_prisma.webhook_events.update.assert_not_awaited()
 
 
+# ======================
+#  TC-WEBHOOK-007
+# ======================
 # 異常系（prisma_client.webhook_events.find_manyが例外を投げる）
 def test_process_webhook_events_find_many_raises_500(mock_prisma):
     """
@@ -264,6 +285,9 @@ def test_process_webhook_events_find_many_raises_500(mock_prisma):
     mock_prisma.webhook_events.find_many.assert_awaited_once()
 
 
+# ======================
+#  TC-WEBHOOK-008
+# ======================
 # 異常系（process中のpayment.createやusers.updateが例外→エラーをwebhook_events.updateに保存）
 def test_process_webhook_events_partial_processing_error_returns_500(mock_prisma):
     """
@@ -303,6 +327,9 @@ def test_process_webhook_events_partial_processing_error_returns_500(mock_prisma
 
 
 # process_webhook_event関数の単体テスト
+# ======================
+#  TC-WEBHOOK-009
+# ======================
 # 正常系（payloadが文字列）
 @pytest.mark.asyncio
 async def test_process_event_with_string_payload(mock_prisma):
@@ -334,6 +361,9 @@ async def test_process_event_with_string_payload(mock_prisma):
     )
 
 
+# ======================
+#  TC-WEBHOOK-010
+# ======================
 # 正常系（payloadがdict）
 @pytest.mark.asyncio
 async def test_process_event_with_dict_payload(mock_prisma):
@@ -365,6 +395,9 @@ async def test_process_event_with_dict_payload(mock_prisma):
     )
 
 
+# ======================
+#  TC-WEBHOOK-011
+# ======================
 # 例外系
 @pytest.mark.asyncio
 async def test_process_event_db_error_logs_error_message(mock_prisma):
@@ -395,6 +428,9 @@ async def test_process_event_db_error_logs_error_message(mock_prisma):
     )
 
 
+# ======================
+#  TC-WEBHOOK-012
+# ======================
 # スキップ系
 # ①stripe_session_idがない
 @pytest.mark.asyncio
@@ -412,6 +448,9 @@ async def test_process_event_missing_stripe_session_id_skips(mock_prisma):
     mock_prisma.users.update.assert_not_awaited()
 
 
+# ======================
+#  TC-WEBHOOK-013
+# ======================
 # ②firebase_uidがNone
 @pytest.mark.asyncio
 async def test_process_event_missing_firebase_uid_skips(mock_prisma):
@@ -428,6 +467,9 @@ async def test_process_event_missing_firebase_uid_skips(mock_prisma):
     mock_prisma.users.update.assert_not_awaited()
 
 
+# ======================
+#  TC-WEBHOOK-014
+# ======================
 # ③users.find_uniqueがNone
 @pytest.mark.asyncio
 async def test_process_event_user_not_found_skips(mock_prisma):

@@ -31,6 +31,9 @@ def mock_prisma(monkeypatch):
     return mock_client
 
 
+# ======================
+#  TC-MSG-001
+# ======================
 # POST /api/message_logs/generateのテストコード
 # 正常系（無料プラン→固定メッセージ返却）
 # ランダムメッセージから取ってくるためmonkeypatchも引数にとる
@@ -59,6 +62,9 @@ def test_generate_message_free_plan(mock_prisma, monkeypatch):
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-MSG-002
+# ======================
 # 正常系（プレミアムプラン→get_openai_messageの戻り値を使う）
 def test_generate_message_premium_plan(mock_prisma, monkeypatch):
     """
@@ -89,6 +95,9 @@ def test_generate_message_premium_plan(mock_prisma, monkeypatch):
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-MSG-003
+# ======================
 # 正常系（プレミアムプランだが、get_openai_message側エラー→固定メッセージ返却）
 def test_generate_message_premium_plan_fallback_on_error(mock_prisma, monkeypatch):
     """
@@ -124,6 +133,9 @@ def test_generate_message_premium_plan_fallback_on_error(mock_prisma, monkeypatc
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-MSG-004
+# ======================
 # 異常系（ユーザーが存在しない場合 → 400エラー）
 def test_generate_message_user_not_found(mock_prisma):
     """
@@ -149,6 +161,9 @@ def test_generate_message_user_not_found(mock_prisma):
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-MSG-005
+# ======================
 # 異常系（prisma_client例外発生 → フォールバック固定メッセージを返す）
 def test_generate_message_prisma_client_error_returns_fallback(
     mock_prisma, monkeypatch
@@ -183,6 +198,9 @@ def test_generate_message_prisma_client_error_returns_fallback(
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-MSG-006
+# ======================
 # ---get_openai_messageの単体テスト---
 def test_get_openai_message_empty_response(monkeypatch):
     # 環境変数 OPENAI_API_KEY をダミー値にセット（os.getenvで拾わせるため）

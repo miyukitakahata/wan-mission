@@ -32,6 +32,9 @@ def mock_prisma(monkeypatch):
     return mock_client
 
 
+# ======================
+#  TC-REFLECT-001
+# ======================
 # POST /api/reflection_notesのテストコード
 # 正常系（反省文を新規登録）
 def test_create_reflection_note_success(mock_prisma):
@@ -81,6 +84,9 @@ def test_create_reflection_note_success(mock_prisma):
     mock_prisma.reflection_notes.create.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-002
+# ======================
 # 異常系（ユーザーが存在しない）
 def test_create_reflection_note_user_not_found(mock_prisma):
     """
@@ -104,6 +110,9 @@ def test_create_reflection_note_user_not_found(mock_prisma):
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-003
+# ======================
 # 異常系（お世話設定が存在しない）
 def test_create_reflection_note_care_setting_not_found(mock_prisma):
     """
@@ -130,6 +139,9 @@ def test_create_reflection_note_care_setting_not_found(mock_prisma):
     mock_prisma.care_settings.find_first.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-004
+# ======================
 # 異常系（サーバーエラー）
 def test_create_reflection_note_prisma_exception(mock_prisma):
     """
@@ -158,6 +170,9 @@ def test_create_reflection_note_prisma_exception(mock_prisma):
     mock_prisma.reflection_notes.create.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-005
+# ======================
 # GET /api/reflection_notesのテストコード
 # 正常系（反省文一覧を取得）
 def test_get_reflection_notes_success(mock_prisma):
@@ -207,6 +222,9 @@ def test_get_reflection_notes_success(mock_prisma):
     mock_prisma.reflection_notes.find_many.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-006
+# ======================
 # 正常系（反省文が0件でも空リストを返す）
 def test_get_reflection_notes_empty_list(mock_prisma):
     """
@@ -231,6 +249,9 @@ def test_get_reflection_notes_empty_list(mock_prisma):
     mock_prisma.reflection_notes.find_many.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-007
+# ======================
 # 異常系（ユーザーが存在しない）
 def test_get_reflection_notes_user_not_found(mock_prisma):
     """
@@ -249,6 +270,9 @@ def test_get_reflection_notes_user_not_found(mock_prisma):
     assert "ユーザーが見つかりません" in data["detail"]
 
 
+# ======================
+#  TC-REFLECT-008
+# ======================
 # 異常系（お世話設定が存在しない）
 def test_get_reflection_notes_care_setting_not_found(mock_prisma):
     """
@@ -268,6 +292,9 @@ def test_get_reflection_notes_care_setting_not_found(mock_prisma):
     assert "お世話設定が見つかりません" in data["detail"]
 
 
+# ======================
+#  TC-REFLECT-009
+# ======================
 # 異常系（サーバーエラー）
 def test_get_reflection_notes_prisma_error(mock_prisma):
     """
@@ -286,6 +313,9 @@ def test_get_reflection_notes_prisma_error(mock_prisma):
     assert "DB取得時にエラーが発生しました" in data["detail"]
 
 
+# ======================
+#  TC-REFLECT-010
+# ======================
 # PATCH /api/reflection_notes/{note_id}
 # 正常系（権限OKでapproved_by_parentを更新）
 def test_patch_reflection_note_success(mock_prisma):
@@ -333,6 +363,9 @@ def test_patch_reflection_note_success(mock_prisma):
     mock_prisma.reflection_notes.update.assert_awaited_once()
 
 
+# ======================
+#  TC-REFLECT-011
+# ======================
 # 異常系（ユーザーが存在しない）
 def test_patch_reflection_note_user_not_found(mock_prisma):
     """
@@ -351,6 +384,9 @@ def test_patch_reflection_note_user_not_found(mock_prisma):
     assert "ユーザーが見つかりません" in response.text
 
 
+# ======================
+#  TC-REFLECT-012
+# ======================
 # 異常系（お世話設定が存在しない）
 def test_patch_reflection_note_care_setting_not_found(mock_prisma):
     """
@@ -370,6 +406,9 @@ def test_patch_reflection_note_care_setting_not_found(mock_prisma):
     assert "お世話設定が見つかりません" in response.text
 
 
+# ======================
+#  TC-REFLECT-013
+# ======================
 # 異常系（指定した反省文が存在しない）
 def test_patch_reflection_note_note_not_found(mock_prisma):
     """
@@ -390,6 +429,9 @@ def test_patch_reflection_note_note_not_found(mock_prisma):
     assert "アクセスする権限" in response.text
 
 
+# ======================
+#  TC-REFLECT-014
+# ======================
 # 異常系（care_settingが一致しない）
 def test_patch_reflection_note_forbidden_error(mock_prisma):
     """
@@ -413,6 +455,9 @@ def test_patch_reflection_note_forbidden_error(mock_prisma):
     assert "アクセスする権限" in response.text
 
 
+# ======================
+#  TC-REFLECT-015
+# ======================
 # 異常系（サーバーエラー）
 def test_patch_reflection_note_prisma_error(mock_prisma):
     """

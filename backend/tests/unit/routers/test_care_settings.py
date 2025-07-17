@@ -44,6 +44,9 @@ def mock_prisma(monkeypatch):
 
 
 # ======================
+#  TC-CARE-001
+# ======================
+# ======================
 #  POST /api/care_settings 正常系テスト
 # ======================
 
@@ -118,6 +121,9 @@ def test_create_care_setting_success(mock_prisma):
 
 
 # ======================
+#  TC-CARE-002
+# ======================
+# ======================
 #  POST /api/care_settings 異常系テスト（ユーザーが存在しない）
 # ======================
 
@@ -167,6 +173,9 @@ def test_create_care_setting_user_not_found(mock_prisma):
     mock_prisma.care_settings.create.assert_not_awaited()
 
 
+# ======================
+#  TC-CARE-003
+# ======================
 # ======================
 #  POST /api/care_settings 異常系テスト（Prisma例外やサーバーエラー）
 # ======================
@@ -220,6 +229,9 @@ def test_create_care_setting_prisma_error(mock_prisma):
     mock_prisma.care_settings.create.assert_awaited_once()
 
 
+# ======================
+#  TC-CARE-004
+# ======================
 # ======================
 #  GET /api/care_settings/me 正常系テスト
 # ======================
@@ -278,6 +290,9 @@ def test_get_my_care_setting_success(mock_prisma):
 
 
 # ======================
+#  TC-CARE-005
+# ======================
+# ======================
 #  GET /api/care_settings/me 異常系テスト（ユーザーが存在しない → 404）
 # ======================
 
@@ -314,6 +329,9 @@ def test_get_my_care_setting_user_not_found(mock_prisma):
     mock_prisma.care_settings.find_first.assert_not_awaited()
 
 
+# ======================
+#  TC-CARE-006
+# ======================
 # ======================
 #  GET /api/care_settings/me 異常系テスト（CareSettingが存在しない → 404）
 # ======================
@@ -352,6 +370,9 @@ def test_get_my_care_setting_care_setting_not_found(mock_prisma):
     mock_prisma.care_settings.find_first.assert_awaited_once()
 
 
+# ======================
+#  TC-CARE-007
+# ======================
 # ======================
 #  POST /api/care_settings/verify_pin 正常系テスト
 # ======================
@@ -392,6 +413,9 @@ def test_verify_pin_success(mock_prisma):
 
 
 # ======================
+#  TC-CARE-008
+# ======================
+# ======================
 #  POST /api/care_settings/verify_pin 正常系テスト（PIN不一致 → verified: False）
 # ======================
 
@@ -431,6 +455,9 @@ def test_verify_pin_not_matched(mock_prisma):
 
 
 # ======================
+#  TC-CARE-009
+# ======================
+# ======================
 #  POST /api/care_settings/verify_pin 異常系テスト（ユーザーが存在しない → 404）
 # ======================
 
@@ -464,6 +491,9 @@ def test_verify_pin_user_not_found(mock_prisma):
     mock_prisma.care_settings.find_first.assert_not_awaited()
 
 
+# ======================
+#  TC-CARE-0010
+# ======================
 # ======================
 #  POST /api/care_settings/verify_pin 異常系テスト（Prisma例外 → 500）
 # ======================

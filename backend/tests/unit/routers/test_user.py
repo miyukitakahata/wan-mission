@@ -38,6 +38,9 @@ def mock_prisma(monkeypatch):
     return mock_client
 
 
+# ======================
+#  TC-USER-001
+# ======================
 # POST/api/users のテストコード
 # 正常系（新規登録成功）
 def test_create_user_success(mock_prisma):
@@ -76,6 +79,9 @@ def test_create_user_success(mock_prisma):
     mock_prisma.users.create.assert_awaited_once()
 
 
+# ======================
+#  TC-USER-002
+# ======================
 # 異常系（既に登録済みエラー）
 def test_create_user_conflict_error(mock_prisma):
     """
@@ -102,6 +108,9 @@ def test_create_user_conflict_error(mock_prisma):
     mock_prisma.users.create.assert_not_called()
 
 
+# ======================
+#  TC-USER-003
+# ======================
 # GET/api/users/me のテストコード
 # 正常系（ユーザー情報取得成功）
 def test_get_me_success(mock_prisma):
@@ -134,6 +143,9 @@ def test_get_me_success(mock_prisma):
     mock_prisma.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-USER-004
+# ======================
 # 異常系（ユーザーが存在しない）
 def test_get_me_not_found_error(mock_prisma):
     """

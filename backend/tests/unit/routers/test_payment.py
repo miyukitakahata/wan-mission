@@ -38,6 +38,9 @@ def mock_prisma_and_stripe(monkeypatch):
     return mock_prisma
 
 
+# ======================
+#  TC-PAY-001
+# ======================
 # POST /api/payments/create-checkout-sessionのテストコード
 # 正常系（ユーザーが無料プラン→checkout_session作成が呼ばれる）
 def test_create_checkout_session_free_user_success(mock_prisma_and_stripe):
@@ -65,6 +68,9 @@ def test_create_checkout_session_free_user_success(mock_prisma_and_stripe):
     mock_prisma_and_stripe.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-PAY-002
+# ======================
 # 異常系（ユーザーがすでにpremiumプラン）
 def test_create_checkout_session_already_premium_user(mock_prisma_and_stripe):
     """
@@ -90,6 +96,9 @@ def test_create_checkout_session_already_premium_user(mock_prisma_and_stripe):
     mock_prisma_and_stripe.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-PAY-003
+# ======================
 # 異常系（Stripe Service側が例外を投げる）
 def test_create_checkout_session_stripe_service_error(
     mock_prisma_and_stripe, monkeypatch
@@ -123,6 +132,9 @@ def test_create_checkout_session_stripe_service_error(
     mock_prisma_and_stripe.users.find_unique.assert_awaited_once()
 
 
+# ======================
+#  TC-PAY-004
+# ======================
 # 異常系（prisma_client.users.find_unique でDB例外）
 def test_create_checkout_session_prisma_error(mock_prisma_and_stripe):
     """

@@ -46,6 +46,9 @@ def mock_prisma(monkeypatch):
     return mock_client
 
 
+# ======================
+#  TC-LOG-001
+# ======================
 # POST /api/care_logs のテストコード
 # 正常系
 def test_create_success(mock_prisma):
@@ -83,6 +86,9 @@ def test_create_success(mock_prisma):
     mock_prisma.care_logs.create.assert_awaited_once()
 
 
+# ======================
+#  TC-LOG-002
+# ======================
 # 異常系
 def test_create_conflict_error(mock_prisma):
     """
@@ -111,6 +117,9 @@ def test_create_conflict_error(mock_prisma):
     assert "この日付の記録は既に存在します" in data["detail"]
 
 
+# ======================
+#  TC-LOG-003
+# ======================
 # PATCH /api/care_logs/{care_log_id} のテストコード
 # 正常系
 def test_patch_success(mock_prisma):
@@ -157,6 +166,9 @@ def test_patch_success(mock_prisma):
     mock_prisma.care_logs.update.assert_awaited_once()
 
 
+# ======================
+#  TC-LOG-004
+# ======================
 # 異常系
 def test_patch_not_found_error(mock_prisma):
     """
@@ -178,6 +190,9 @@ def test_patch_not_found_error(mock_prisma):
     assert "Care log not found" in data["detail"]
 
 
+# ======================
+#  TC-LOG-005
+# ======================
 # GET /api/care_logs/today のテストコード
 # 正常系（ログがある場合）
 def test_get_today_success(mock_prisma):
@@ -206,6 +221,9 @@ def test_get_today_success(mock_prisma):
     assert data["walked"] is True
 
 
+# ======================
+#  TC-LOG-006
+# ======================
 # 正常系（ログがない場合→デフォルト値）
 def test_get_today_default_response(mock_prisma):
     """
@@ -231,6 +249,9 @@ def test_get_today_default_response(mock_prisma):
     assert data["walked"] is False
 
 
+# ======================
+#  TC-LOG-007
+# ======================
 # 異常系（権限がない場合）
 def test_get_today_forbidden_error(mock_prisma):
     """
@@ -250,6 +271,9 @@ def test_get_today_forbidden_error(mock_prisma):
     assert "不正な care_setting_id です" in data["detail"]
 
 
+# ======================
+#  TC-LOG-008
+# ======================
 # GET /api/care_logs/by_date のテストコード
 # 正常系（ログがある場合）
 def test_get_by_date_success(mock_prisma):
@@ -278,6 +302,9 @@ def test_get_by_date_success(mock_prisma):
     assert data["walked"] is True
 
 
+# ======================
+#  TC-LOG-009
+# ======================
 # 正常系（ログがない場合→デフォルト値）
 def test_get_by_date_default_response(mock_prisma):
     """
@@ -303,6 +330,9 @@ def test_get_by_date_default_response(mock_prisma):
     assert data["walked"] is False
 
 
+# ======================
+#  TC-LOG-010
+# ======================
 # 異常系（権限がない場合）
 def test_get_by_date_forbidden_error(mock_prisma):
     """
@@ -322,6 +352,9 @@ def test_get_by_date_forbidden_error(mock_prisma):
     assert "不正な care_setting_id です" in data["detail"]
 
 
+# ======================
+#  TC-LOG-011
+# ======================
 # GET /api/care_logs/list のテストコード
 # 正常系（複数件取得）
 def test_get_list_success(mock_prisma):
@@ -354,6 +387,9 @@ def test_get_list_success(mock_prisma):
     assert data["care_logs"][0]["care_setting_id"] == 10
 
 
+# ======================
+#  TC-LOG-012
+# ======================
 # 正常系（空リストの場合）
 def test_get_list_empty_response(mock_prisma):
     """
@@ -377,6 +413,9 @@ def test_get_list_empty_response(mock_prisma):
     assert data["care_logs"] == []
 
 
+# ======================
+#  TC-LOG-013
+# ======================
 # 異常系（他人のcare_setting_idを指定）
 def test_get_list_forbidden_error(mock_prisma):
     """
