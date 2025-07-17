@@ -56,6 +56,9 @@ async def create_reflection_note(
         )
         print("作成結果:", result)
         return result
+
+    except HTTPException:
+        raise
     except Exception as e:
         print("🔥DBエラー詳細:", e)
         raise HTTPException(
@@ -94,6 +97,9 @@ async def get_reflection_notes(firebase_uid: str = Depends(verify_firebase_token
         )
 
         return results
+
+    except HTTPException:
+        raise
     except Exception as e:
         print("DBエラー詳細:", e)
         raise HTTPException(
@@ -139,6 +145,8 @@ async def update_reflection_note(
         )
         return updated
 
+    except HTTPException:
+        raise
     except Exception as e:
         print("DBエラー詳細:", e)
         raise HTTPException(

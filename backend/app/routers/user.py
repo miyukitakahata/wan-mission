@@ -40,6 +40,8 @@ async def create_users(user_data: UserCreateRequest):
         )
         return new_user
 
+    except HTTPException:
+        raise
     except Exception as e:
         # DBエラー時
         raise HTTPException(
@@ -65,6 +67,8 @@ async def get_my_user(firebase_uid: str = Depends(verify_firebase_token)):
             raise HTTPException(status_code=404, detail="User not found")
         return user
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="ユーザー情報取得時にエラーが発生しました"

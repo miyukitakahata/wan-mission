@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime, date, time
+from typing import Optional
 
 
 # POST /api/care_settingsのリクエストモデル
@@ -13,7 +14,7 @@ class CareSettingCreateRequest(BaseModel):
     night_meal_time: time
     walk_time: time
     care_password: str
-    care_clear_status: str
+    care_clear_status: Optional[str] = None
 
 
 # POST /api/care_settingsのレスポンスモデル
@@ -29,9 +30,9 @@ class CareSettingCreateResponse(BaseModel):
     night_meal_time: time
     walk_time: time
     care_password: str
-    care_clear_status: str
+    care_clear_status: Optional[str] = None
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

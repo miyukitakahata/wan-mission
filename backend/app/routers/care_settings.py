@@ -86,6 +86,8 @@ async def create_care_setting(
             updated_at=care_setting.updated_at,
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="お世話設定の登録中にエラーが発生しました"
@@ -133,6 +135,8 @@ async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)
             walk_time=care_setting.walk_time.time(),
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="お世話設定の取得中にエラーが発生しました"
@@ -168,6 +172,8 @@ async def verify_care_setting_pin(
         is_match = request.input_password == care_setting.care_password
         return VerifyPinResponse(verified=is_match)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500, detail="PIN認証中にエラーが発生しました"

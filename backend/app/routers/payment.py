@@ -55,3 +55,6 @@ async def create_checkout_session(
             status_code=500,
             detail="決済セッション生成中にサーバーエラーが発生しました",
         ) from e
+
+
+# 異常系（Stripe Service側が例外を投げる）
