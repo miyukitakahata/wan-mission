@@ -12,7 +12,6 @@ type AuthContextType = {
   logout?: () => Promise<void>;
 };
 
-// AuthContext を export する
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
