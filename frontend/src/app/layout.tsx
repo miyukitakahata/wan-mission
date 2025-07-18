@@ -40,12 +40,6 @@ export const viewport: Viewport = {
 
 // export const colorScheme = 'light';
 
-// ✅ TEST_MODE 時だけモックに差し替え
-const isTest = process.env.NEXT_PUBLIC_TEST_MODE === 'true';
-const DynamicAuthProvider = isTest
-  ? require('@/context/TestUserProvider').TestUserProvider
-  : require('@/context/AuthContext').AuthProvider;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -61,7 +55,7 @@ export default function RootLayout({
             defaultTheme="light"
             enableSystem={false}
           >
-            <DynamicAuthProvider>{children}</DynamicAuthProvider>
+            <AuthProvider>{children}</AuthProvider>
           </ThemeProvider>
         </div>
       </body>
