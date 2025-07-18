@@ -1,5 +1,9 @@
 # わん 🐾 みっしょん
 
+<div align="center">
+  <video controls src="https://github.com/ms-engineer-bc25-04/Section9_TeamC/blob/main/docs/demo/demo.mp4" muted="false"></video>
+</div>
+
 ## プロジェクト概要
 
 犬を迎える前のお世話体験ウェブアプリ「わん 🐾 みっしょん」
@@ -141,10 +145,6 @@ DATABASE_URL=postgresql://user:password@localhost:5432/myapp_db
 ### 保護犬支援
 
 - Stripe 決済後、LLM 機能が解放される現仕様に加え、今後は決済金額の一部を保護犬団体等に寄付できる仕組みを検討。
-
-## デモ動画（修正予定））
-
-（※ここに YouTube 等のリンク・QR コード・gif を挿入）
 
 ## テスト　（テストが完了する際に、修正予定）
 

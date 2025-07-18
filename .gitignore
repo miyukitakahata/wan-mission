@@ -30,9 +30,8 @@
 **/.firebase.json
 **/.adminsdk.json
 
-# typescript
+# TypeScript build cache
 **/*.tsbuildinfo
-**/next-env.d.ts
 
 # IDE
 **/.vscode/
