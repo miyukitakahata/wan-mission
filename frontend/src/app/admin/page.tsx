@@ -217,14 +217,14 @@ export default function AdminPage() {
             <span className="text-orange-800">ユーザー情報</span>
           </Button>
 
-          {/* サブスクリプション */}
+          {/* プレミアムプラン */}
           <Button
             variant="outline"
             className="w-full flex items-center justify-center py-4 border-orange-200 hover:bg-orange-50"
             onClick={() => router.push('/admin/subscription')}
           >
             <CreditCard className="mr-2 h-5 w-5 text-orange-600" />
-            <span className="text-orange-800">サブスクリプション</span>
+            <span className="text-orange-800">プレミアムプラン購入</span>
           </Button>
 
           {/* 反省文を見る */}

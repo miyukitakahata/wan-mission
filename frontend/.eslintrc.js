@@ -70,6 +70,10 @@ module.exports = {
   ignorePatterns: [
     'next.config.js',
     'tailwind.config.js',
+    'jest.integration.config.js',
+    'jest.setup.js',
+    'stripe-js.js',
+    'babel.config.js',
     '.next/',
     'node_modules/',
     'dist/',

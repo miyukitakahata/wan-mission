@@ -46,6 +46,8 @@
 **/coverage/
 **/.coverage
 **/htmlcov/
+**/coverage.lcov
+**/coverage-integration/
 
 # prisma
 **/generated/client

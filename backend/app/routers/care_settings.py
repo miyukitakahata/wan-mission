@@ -4,8 +4,6 @@ Care settings router module.
 このモジュールは、お世話設定に関するAPIエンドポイントを提供します。
 """
 
-# app/routers/care_settings.py
-
 from datetime import time, datetime
 
 from fastapi import APIRouter, HTTPException, Depends, status

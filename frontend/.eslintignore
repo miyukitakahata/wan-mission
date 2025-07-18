@@ -8,3 +8,6 @@ postcss.config.js
 tailwind.config.js
 .eslintrc.js
 *.min.js
+babel.config.js
+jest.integration.config.js
+jest.setup.js

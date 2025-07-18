@@ -7,8 +7,12 @@ import { auth } from '@/lib/firebase/config';
 type AuthContextType = {
   currentUser: User | null;
   loading: boolean;
+  // テスト用に login と logout メソッドを追加
+  login?: (email: string, password: string) => Promise<User>;
+  logout?: () => Promise<void>;
 };
 
+// AuthContext を export する
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
