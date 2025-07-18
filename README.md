@@ -1,8 +1,6 @@
 # わん 🐾 みっしょん
 
-<div align="center">
-  <video controls src="https://github.com/ms-engineer-bc25-04/Section9_TeamC/blob/main/docs/demo/demo.mp4" muted="false"></video>
-</div>
+[https://github.com/ms-engineer-bc25-04/Section9_TeamC/issues/75](https://github.com/user-attachments/assets/4dda2fcb-8ffa-4529-9185-097a2b21f569)
 
 ## プロジェクト概要
 
