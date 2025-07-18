@@ -23,9 +23,10 @@ export default function AdminLoginPage() {
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
-  const user = useAuth(); // 認証情報を取得
+  const user = useAuth(); // NOTE_認証情報を取得
 
-  console.log('[AdminLoginPage] User:', user.currentUser);
+  // TODO: ここでユーザー情報をログ出力してデバッグ
+  // console.log('[AdminLoginPage] User:', user.currentUser);
 
   // フォーム送信時のPIN認証処理
   const handleSubmit = async (e: React.FormEvent) => {

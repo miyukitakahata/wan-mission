@@ -2,15 +2,15 @@
 
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 
-interface User {
+export interface User {
   firebase_uid: string;
   child_name: string;
   current_plan: 'free' | 'premium';
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   currentUser: User | null;
 }
 
@@ -20,17 +20,14 @@ const mockUser: User = {
   current_plan: 'premium',
 };
 
-const AuthContext = createContext<AuthContextType>({ currentUser: mockUser });
+const AuthContext = createContext<AuthContextType>({
+  currentUser: mockUser,
+});
 
-export const TestUserProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => (
+export const TestUserProvider = ({ children }: { children: ReactNode }) => (
   <AuthContext.Provider value={{ currentUser: mockUser }}>
     {children}
   </AuthContext.Provider>
 );
 
-// useAuthのモック用
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => useContext(AuthContext);
