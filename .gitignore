@@ -56,6 +56,8 @@
 # Firebase Admin SDK
 **/wan-mission-firebase-adminsdk-fbsvc-b24aa18832.json
 
+# monitoring
+**/alertmanager.yml
 
 
 

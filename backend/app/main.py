@@ -24,6 +24,10 @@ from app.routers.webhook_events import webhook_events_router
 from app.db import prisma_client
 
 
+# FastAPI Exporterを使ってメトリクス収集のためimport
+from prometheus_fastapi_instrumentator import Instrumentator
+
+
 # Prisma Client の lifespan context manager（FastAPI v0.95以降の推奨）
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -61,3 +65,18 @@ app.include_router(webhook_events_router)
 async def read_root():
     """ルートパスのテスト用エンドポイント"""
     return {"message": "Hello from FastAPI!"}
+
+
+# メトリクス収集器の初期化と有効化
+Instrumentator().instrument(app).expose(app)
+
+
+# レスポンスタイム遅延テスト用エンドポイント
+# import time
+#
+#
+# @app.get("/slow")
+# async def slow_endpoint():
+#     """わざと5.0秒待つ遅いレスポンス（Prometheusのalertテスト用）"""
+#     time.sleep(5.0)
+#     return {"message": "This is a slow response"}
