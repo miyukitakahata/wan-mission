@@ -60,4 +60,4 @@ jobs:
           pytest tests/unit --cov=app --cov-report=term-missing
 
       - name: Output job status
-        run: echo "🐍 This job's status is ${{ job.status }}."
+        run: echo "This job's status is ${{ job.status }}."
