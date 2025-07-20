@@ -3,45 +3,52 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useAuth } from '@/context/AuthContext';
 
 // AuthContextのモック
-jest.mock('@/context/AuthContext', () => ({
+vi.mock('@/context/AuthContext', () => ({
   // AuthProviderコンポーネントをモックします。
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
-  // useAuthを直接jest.fn()として定義
-  useAuth: jest.fn(),
+  // useAuthを直接vi.fn()として定義
+  useAuth: vi.fn(),
   __esModule: true,
 }));
 
 // Stripe のモック
-jest.mock('@stripe/stripe-js', () => ({
-  loadStripe: jest.fn(() =>
+vi.mock('@stripe/stripe-js', () => ({
+  loadStripe: vi.fn(() =>
     Promise.resolve({
-      redirectToCheckout: jest.fn(() => Promise.resolve({ error: null })),
+      redirectToCheckout: vi.fn(() => Promise.resolve({ error: null })),
     })
   ),
 }));
 
+vi.mock('next/image', () => ({
+  default: (props) => (
+    // Next.jsのImageコンポーネントをモック
+    <img {...props} />
+  ),
+}));
+
 // Next.js router のモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
   useSearchParams: () => ({
-    get: jest.fn(),
+    get: vi.fn(),
   }),
   usePathname: () => '/admin/payment',
 }));
 
 // モックされたuseAuthフックを取得
-const mockUseAuth = jest.mocked(useAuth);
+const mockUseAuth = vi.mocked(useAuth);
 
 describe('決済フロー統合テスト', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Fetch のモックセットアップ
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       // 決済API
       if (url.includes('/api/payment')) {
         return Promise.resolve({
@@ -72,19 +79,19 @@ describe('決済フロー統合テスト', () => {
     });
 
     // コンソールエラーを抑制
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('プレミアムプラン購入フロー', async () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -96,18 +103,18 @@ describe('決済フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -172,7 +179,7 @@ describe('決済フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -184,18 +191,18 @@ describe('決済フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockPremiumAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -256,7 +263,7 @@ describe('決済フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -268,18 +275,18 @@ describe('決済フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -287,7 +294,7 @@ describe('決済フロー統合テスト', () => {
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // API エラーをシミュレート
-    global.fetch = jest.fn().mockRejectedValue(new Error('Payment API Error'));
+    global.fetch = vi.fn().mockRejectedValue(new Error('Payment API Error'));
 
     // キャンセルページのコンポーネントを動的にインポート
     let CancelPage: any;
@@ -326,7 +333,7 @@ describe('決済フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -338,18 +345,18 @@ describe('決済フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -401,8 +408,8 @@ describe('決済フロー統合テスト', () => {
   test('認証が必要な決済ページのアクセス制御', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 

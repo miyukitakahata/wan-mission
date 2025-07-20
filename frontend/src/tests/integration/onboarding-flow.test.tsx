@@ -5,59 +5,66 @@ import { useAuth } from '@/context/AuthContext';
 import { Label } from '@/components/ui/label';
 
 // AuthContextのモック
-jest.mock('@/context/AuthContext', () => ({
+vi.mock('@/context/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
-  useAuth: jest.fn(),
+  useAuth: vi.fn(),
   __esModule: true,
 }));
 
 // Firebase Auth のモック
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(() => ({})),
-  signInWithEmailAndPassword: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  sendPasswordResetEmail: jest.fn(),
-  getIdToken: jest.fn(),
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  signInWithEmailAndPassword: vi.fn(),
+  createUserWithEmailAndPassword: vi.fn(),
+  sendPasswordResetEmail: vi.fn(),
+  getIdToken: vi.fn(),
 }));
 
-jest.mock('firebase/app', () => ({
-  getApps: jest.fn(() => []),
-  initializeApp: jest.fn(() => ({})),
+vi.mock('firebase/app', () => ({
+  getApps: vi.fn(() => []),
+  initializeApp: vi.fn(() => ({})),
+}));
+
+vi.mock('next/image', () => ({
+  default: (props) => (
+    // Next.jsのImageコンポーネントをモック
+    <img {...props} />
+  ),
 }));
 
 // Next.js router のモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
   useSearchParams: () => ({
-    get: jest.fn(),
+    get: vi.fn(),
   }),
   usePathname: () => '/onboarding',
-  redirect: jest.fn(),
+  redirect: vi.fn(),
 }));
 
 // カスタムフックのモック
-jest.mock('@/hooks/useCareSettings', () => ({
-  useCareSettings: jest.fn(() => ({
+vi.mock('@/hooks/useCareSettings', () => ({
+  useCareSettings: vi.fn(() => ({
     careSettings: null,
-    createCareSettings: jest.fn().mockResolvedValue({ success: true }),
+    createCareSettings: vi.fn().mockResolvedValue({ success: true }),
     loading: false,
     error: null,
   })),
 }));
 
 // モックされたuseAuthフックを取得
-const mockUseAuth = jest.mocked(useAuth);
+const mockUseAuth = vi.mocked(useAuth);
 
 describe('オンボーディングフロー統合テスト', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Fetch のモックセットアップ
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       if (url.includes('/api/care_settings')) {
         return Promise.resolve({
           ok: true,
@@ -79,20 +86,20 @@ describe('オンボーディングフロー統合テスト', () => {
     });
 
     // コンソールエラーを抑制
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('オンボーディングメインページの表示', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -134,8 +141,8 @@ describe('オンボーディングフロー統合テスト', () => {
   test('ログイン・サインアップページの機能テスト', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn().mockResolvedValue({ success: true }),
-      logout: jest.fn(),
+      login: vi.fn().mockResolvedValue({ success: true }),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -213,7 +220,7 @@ describe('オンボーディングフロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -225,18 +232,18 @@ describe('オンボーディングフロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -316,7 +323,7 @@ describe('オンボーディングフロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -328,18 +335,18 @@ describe('オンボーディングフロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -422,7 +429,7 @@ describe('オンボーディングフロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -434,18 +441,18 @@ describe('オンボーディングフロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -538,7 +545,7 @@ describe('オンボーディングフロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -550,18 +557,18 @@ describe('オンボーディングフロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -611,8 +618,8 @@ describe('オンボーディングフロー統合テスト', () => {
   test('パスワードリセット機能のテスト', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -688,8 +695,8 @@ describe('オンボーディングフロー統合テスト', () => {
     // 未認証状態
     const unauthenticatedAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -742,7 +749,7 @@ describe('オンボーディングフロー統合テスト', () => {
     const authenticatedUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -754,18 +761,18 @@ describe('オンボーディングフロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const authenticatedAuthValue = {
       currentUser: authenticatedUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 

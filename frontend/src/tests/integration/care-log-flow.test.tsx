@@ -4,23 +4,23 @@ import DashboardPage from '../../app/dashboard/page';
 import { useAuth } from '../../context/AuthContext';
 
 // API呼び出しのモック（useCareLogs）
-jest.mock('../../hooks/useCareLogs', () => ({
-  useCareLogs: jest.fn(() => ({
+vi.mock('../../hooks/useCareLogs', () => ({
+  useCareLogs: vi.fn(() => ({
     careLog: {
       care_log_id: 1,
       fed_morning: false,
       fed_night: false,
       walked: false,
     },
-    updateCareLog: jest.fn(),
+    updateCareLog: vi.fn(),
     loading: false,
     error: null,
   })),
 }));
 
 // API呼び出しのモック（useCareSettings）
-jest.mock('../../hooks/useCareSettings', () => ({
-  useCareSettings: jest.fn(() => ({
+vi.mock('../../hooks/useCareSettings', () => ({
+  useCareSettings: vi.fn(() => ({
     careSettings: {
       id: 1,
       child_name: '太郎',
@@ -35,29 +35,29 @@ jest.mock('../../hooks/useCareSettings', () => ({
 }));
 
 // AuthContextのモック
-jest.mock('../../context/AuthContext', () => ({
+vi.mock('../../context/AuthContext', () => ({
   // AuthProviderコンポーネントをモックします。
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
-  // useAuthを直接jest.fn()として定義
-  useAuth: jest.fn(),
+  // useAuthを直接vi.fn()として定義
+  useAuth: vi.fn(),
   __esModule: true,
 }));
 
 // Next.js Routerのモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
   useSearchParams: () => ({
-    get: jest.fn(),
+    get: vi.fn(),
   }),
   usePathname: () => '/dashboard',
 }));
 
 // モックされたuseAuthフックを取得
-const mockUseAuth = jest.mocked(useAuth);
+const mockUseAuth = vi.mocked(useAuth);
 
 describe('お世話ログフロー統合テスト', () => {
   // 認証情報のモック値
@@ -65,7 +65,7 @@ describe('お世話ログフロー統合テスト', () => {
     currentUser: {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -77,26 +77,26 @@ describe('お世話ログフロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     },
-    login: jest.fn(),
-    logout: jest.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
     loading: false,
   };
 
   // 各テストの前に、モックをリセットし、デフォルトの戻り値を設定します。
   beforeEach(() => {
-    jest.clearAllMocks(); // すべてのモック（useAuth, useCareLogs, useCareSettingsなど）をクリア
+    vi.clearAllMocks(); // すべてのモック（useAuth, useCareLogs, useCareSettingsなど）をクリア
     // useAuthモックの戻り値を設定
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // fetchのモックレスポンスを設定
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       // care_settings API
       if (url.includes('/api/care_settings')) {
         return Promise.resolve({
@@ -216,7 +216,7 @@ describe('お世話ログフロー統合テスト', () => {
 
   test('エラー状態のテスト', async () => {
     // エラーレスポンスを返すモック
-    global.fetch = jest.fn().mockRejectedValue(new Error('API Error'));
+    global.fetch = vi.fn().mockRejectedValue(new Error('API Error'));
 
     const { AuthProvider } = await import('../../context/AuthContext');
 
@@ -262,7 +262,7 @@ describe('散歩フロー統合テスト', () => {
   test('散歩ページの基本的な読み込みテスト', async () => {
     // Geolocation APIのモック
     const mockGeolocation = {
-      getCurrentPosition: jest.fn((success) => {
+      getCurrentPosition: vi.fn((success) => {
         // 成功コールバックを呼び出してモック位置を返す
         setTimeout(() => {
           success({
@@ -275,13 +275,13 @@ describe('散歩フロー統合テスト', () => {
           });
         }, 100);
       }),
-      watchPosition: jest.fn(() => 1), // watchPositionがIDを返すようにモック
-      clearWatch: jest.fn(),
+      watchPosition: vi.fn(() => 1), // watchPositionがIDを返すようにモック
+      clearWatch: vi.fn(),
     };
 
     // Permission APIのモック
     const mockPermissions = {
-      query: jest.fn().mockResolvedValue({
+      query: vi.fn().mockResolvedValue({
         state: 'granted',
         onchange: null,
       }),
@@ -305,7 +305,7 @@ describe('散歩フロー統合テスト', () => {
       currentUser: {
         uid: 'test_uid',
         email: 'test@example.com',
-        getIdToken: jest.fn().mockResolvedValue('mock_token'),
+        getIdToken: vi.fn().mockResolvedValue('mock_token'),
         emailVerified: true,
         isAnonymous: false,
         metadata: {
@@ -317,15 +317,15 @@ describe('散歩フロー統合テスト', () => {
         photoURL: null,
         phoneNumber: null,
         tenantId: null,
-        delete: jest.fn(),
-        getIdTokenResult: jest.fn(),
-        reload: jest.fn(),
-        toJSON: jest.fn(),
+        delete: vi.fn(),
+        getIdTokenResult: vi.fn(),
+        reload: vi.fn(),
+        toJSON: vi.fn(),
         refreshToken: 'mock_refresh_token',
         providerId: 'firebase',
       },
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -333,7 +333,7 @@ describe('散歩フロー統合テスト', () => {
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // fetchのモックレスポンスを設定
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       // care_settings API
       if (url.includes('/api/care_settings')) {
         return Promise.resolve({

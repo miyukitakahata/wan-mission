@@ -4,10 +4,10 @@ dist/
 build/
 coverage/
 public/
-postcss.config.js
-tailwind.config.js
+tailwind.config.ts
 .eslintrc.js
 *.min.js
-babel.config.js
-jest.integration.config.js
-jest.setup.js
+playwright.config.ts
+postcss.config.mjs
+vitest.config.ts
+vitest.setup.ts
