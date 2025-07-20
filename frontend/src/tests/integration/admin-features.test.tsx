@@ -3,40 +3,40 @@ import '@testing-library/jest-dom';
 import { useAuth } from '@/context/AuthContext';
 
 // AuthContextのモック
-jest.mock('@/context/AuthContext', () => ({
+vi.mock('@/context/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
-  useAuth: jest.fn(),
+  useAuth: vi.fn(),
   __esModule: true,
 }));
 
 // Next.js router のモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
   useSearchParams: () => ({
-    get: jest.fn().mockReturnValue('test_admin_pin'),
+    get: vi.fn().mockReturnValue('test_admin_pin'),
   }),
   usePathname: () => '/admin',
 }));
 
 // Firebase のモック
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(() => ({})),
-  signInWithEmailAndPassword: jest.fn(),
-  signOut: jest.fn(),
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  signInWithEmailAndPassword: vi.fn(),
+  signOut: vi.fn(),
 }));
 
 // モックされたuseAuthフックを取得
-const mockUseAuth = jest.mocked(useAuth);
+const mockUseAuth = vi.mocked(useAuth);
 
 describe('管理者機能統合テスト', () => {
   const mockAdmin = {
     uid: 'admin_uid',
     email: 'admin@example.com',
-    getIdToken: jest.fn().mockResolvedValue('admin_token'),
+    getIdToken: vi.fn().mockResolvedValue('admin_token'),
     emailVerified: true,
     isAnonymous: false,
     metadata: {
@@ -48,19 +48,19 @@ describe('管理者機能統合テスト', () => {
     photoURL: null,
     phoneNumber: null,
     tenantId: null,
-    delete: jest.fn(),
-    getIdTokenResult: jest.fn(),
-    reload: jest.fn(),
-    toJSON: jest.fn(),
+    delete: vi.fn(),
+    getIdTokenResult: vi.fn(),
+    reload: vi.fn(),
+    toJSON: vi.fn(),
     refreshToken: 'admin_refresh_token',
     providerId: 'firebase',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Fetch のモックセットアップ
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       // ユーザー情報API
       if (url.includes('/api/user')) {
         return Promise.resolve({
@@ -112,19 +112,19 @@ describe('管理者機能統合テスト', () => {
     });
 
     // コンソールエラーを抑制
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('管理者ダッシュボードページの表示', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -179,8 +179,8 @@ describe('管理者機能統合テスト', () => {
   test('管理者ログインページの表示と認証', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn().mockResolvedValue(mockAdmin),
-      logout: jest.fn(),
+      login: vi.fn().mockResolvedValue(mockAdmin),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -232,8 +232,8 @@ describe('管理者機能統合テスト', () => {
   test('ユーザー情報管理ページの表示', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -295,8 +295,8 @@ describe('管理者機能統合テスト', () => {
   test('振り返りノート管理ページの表示', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -357,8 +357,8 @@ describe('管理者機能統合テスト', () => {
   test('目標クリア管理ページの表示', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -414,8 +414,8 @@ describe('管理者機能統合テスト', () => {
   test('管理者コンポーネントのテスト（EmptyCard）', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -455,8 +455,8 @@ describe('管理者機能統合テスト', () => {
   test('管理者コンポーネントのテスト（ErrorCard）', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -497,8 +497,8 @@ describe('管理者機能統合テスト', () => {
   test('管理者コンポーネントのテスト（LoadingCard）', async () => {
     const mockAuthValue = {
       currentUser: mockAdmin,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -540,7 +540,7 @@ describe('管理者機能統合テスト', () => {
     const normalUser = {
       uid: 'normal_user_uid',
       email: 'user@example.com',
-      getIdToken: jest.fn().mockResolvedValue('user_token'),
+      getIdToken: vi.fn().mockResolvedValue('user_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -552,18 +552,18 @@ describe('管理者機能統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'user_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: normalUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 

@@ -1,6 +1,5 @@
-'use client';
-
 import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 
 // window.matchMedia のモック（ThemeProvider用）
 if (typeof window !== 'undefined' && !window.matchMedia) {
