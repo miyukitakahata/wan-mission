@@ -1,0 +1,14 @@
+global:
+  smtp_smarthost: "smtp.gmail.com:587"
+  smtp_from: q.27ksh@gmail.com
+  smtp_auth_username: q.27ksh@gmail.com
+  smtp_auth_password: dtifgdfisqiycxhs # アプリパスワード
+
+route:
+  receiver: "gmail-notify"
+
+receivers:
+  - name: "gmail-notify"
+    email_configs:
+      - to: q.27ksh@gmail.com
+        send_resolved: true
