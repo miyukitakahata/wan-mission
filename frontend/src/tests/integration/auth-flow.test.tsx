@@ -3,32 +3,30 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 // useAuth フックをモック
-jest.mock('../../context/AuthContext', () => ({
-  useAuth: jest.fn(),
+vi.mock('../../context/AuthContext', () => ({
+  useAuth: vi.fn(),
 }));
 
 // Firebase関連のモック
-jest.mock('../../lib/firebase/config', () => ({
+vi.mock('../../lib/firebase/config', () => ({
   auth: {},
 }));
 
-jest.mock('firebase/auth', () => ({
-  onAuthStateChanged: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(),
+vi.mock('firebase/auth', () => ({
+  onAuthStateChanged: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
 }));
 
 // Next.js navigation のモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
 }));
 
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
-// const typedUseAuth: jest.MockedFunction<typeof useAuth> = useAuth as any; // Temporarily use 'as any'
-// const mockUseAuth = typedUseAuth;
+const mockUseAuth = useAuth as vi.MockedFunction<typeof useAuth>;
 
 // テスト用のモック LoginPage コンポーネント
 const MockLoginPage: React.FC = () => {
@@ -108,17 +106,17 @@ describe('認証フロー統合テスト', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('ログイン → ダッシュボード遷移（6桁パスワード）', async () => {
-    const mockLogin = jest.fn().mockResolvedValue(mockUser);
+    const mockLogin = vi.fn().mockResolvedValue(mockUser);
 
     mockUseAuth.mockReturnValue({
       currentUser: null,
       loading: false,
       login: mockLogin,
-      logout: jest.fn(),
+      logout: vi.fn(),
     });
 
     render(<MockLoginPage />);
@@ -142,7 +140,7 @@ describe('認証フロー統合テスト', () => {
   });
 
   test('ログイン失敗時のエラー処理', async () => {
-    const mockLogin = jest
+    const mockLogin = vi
       .fn()
       .mockRejectedValue(new Error('ログインに失敗しました'));
 
@@ -150,7 +148,7 @@ describe('認証フロー統合テスト', () => {
       currentUser: null,
       loading: false,
       login: mockLogin,
-      logout: jest.fn(),
+      logout: vi.fn(),
     });
 
     render(<MockLoginPage />);
@@ -178,13 +176,13 @@ describe('認証フロー統合テスト', () => {
   });
 
   test('パスワード長制限のテスト（6桁未満）', async () => {
-    const mockLogin = jest.fn();
+    const mockLogin = vi.fn();
 
     mockUseAuth.mockReturnValue({
       currentUser: null,
       loading: false,
       login: mockLogin,
-      logout: jest.fn(),
+      logout: vi.fn(),
     });
 
     render(<MockLoginPage />);
@@ -215,8 +213,8 @@ describe('認証フロー統合テスト', () => {
     mockUseAuth.mockReturnValue({
       currentUser: null,
       loading: false,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
     });
 
     render(<MockLoginPage />);

@@ -1,3 +1,23 @@
+// GPS Tracker のモック - 直接的なアプローチ
+vi.mock('@/app/api/geo/geoLocation', () => {
+  const mockInstance = {
+    startTracking: vi.fn().mockResolvedValue(true),
+    stopTracking: vi.fn(),
+    isTracking: vi.fn().mockReturnValue(false),
+    setDistanceCallback: vi.fn(),
+    setErrorCallback: vi.fn(),
+    setPositionCallback: vi.fn(),
+    getCurrentPosition: vi.fn(),
+    getTotalDistance: vi.fn().mockReturnValue(0),
+  };
+  
+  return {
+    __esModule: true,
+    GPSTracker: vi.fn(() => mockInstance),
+    calculateDistance: vi.fn().mockReturnValue(0),
+  };
+});
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -8,76 +28,65 @@ import {
 } from '@/app/api/walk_api/walkApi';
 
 // AuthContextのモック
-jest.mock('@/context/AuthContext', () => ({
+vi.mock('@/context/AuthContext', () => ({
   // AuthProviderコンポーネントをモックします。
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
-  // useAuthを直接jest.fn()として定義
-  useAuth: jest.fn(),
+  // useAuthを直接vi.fn()として定義
+  useAuth: vi.fn(),
   __esModule: true,
 }));
 
 // Firebase Auth のモック
-jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(() => ({})),
-  signInWithEmailAndPassword: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  getIdToken: jest.fn(),
+vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
+  signInWithEmailAndPassword: vi.fn(),
+  createUserWithEmailAndPassword: vi.fn(),
+  getIdToken: vi.fn(),
 }));
 
-jest.mock('firebase/app', () => ({
-  getApps: jest.fn(() => []),
-  initializeApp: jest.fn(() => ({})),
+vi.mock('firebase/app', () => ({
+  getApps: vi.fn(() => []),
+  initializeApp: vi.fn(() => ({})),
 }));
 
 // Next.js router のモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
 }));
 
+// Walk API のモック
+vi.mock('@/app/api/walk_api/walkApi', () => ({
+  saveWalkRecord: vi.fn(),
+  determineWalkSuccess: vi.fn(),
+}));
+
+
 // Geolocation API のモック
 const mockGeolocation = {
-  getCurrentPosition: jest.fn(),
-  watchPosition: jest.fn(() => 1),
-  clearWatch: jest.fn(),
+  getCurrentPosition: vi.fn(),
+  watchPosition: vi.fn(() => 1),
+  clearWatch: vi.fn(),
 };
-
-// GPS Tracker のモック
-jest.mock('@/app/api/geo/geoLocation', () => ({
-  GPSTracker: jest.fn().mockImplementation(() => ({
-    startTracking: jest.fn().mockResolvedValue(true),
-    stopTracking: jest.fn(),
-    isTracking: jest.fn().mockReturnValue(false),
-    setDistanceCallback: jest.fn(),
-    setErrorCallback: jest.fn(),
-    setPositionCallback: jest.fn(),
-  })),
-}));
-
-// モックされたuseAuthフックを取得
-const mockUseAuth = jest.mocked(useAuth);
-
-// Walk API のモック
-jest.mock('@/app/api/walk_api/walkApi', () => ({
-  saveWalkRecord: jest.fn(),
-  determineWalkSuccess: jest.fn(),
-}));
 
 // Permission API のモック
 const mockPermissions = {
-  query: jest.fn().mockResolvedValue({
+  query: vi.fn().mockResolvedValue({
     state: 'granted',
     onchange: null,
   }),
 };
 
+// モックされたuseAuthフックを取得
+const mockUseAuth = vi.mocked(useAuth);
+
 describe('散歩フロー統合テスト', () => {
   // 基本的なモック設定
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Geolocation API のセットアップ
     Object.defineProperty(global.navigator, 'geolocation', {
@@ -94,7 +103,7 @@ describe('散歩フロー統合テスト', () => {
     });
 
     // Fetch のモックセットアップ
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       if (url.includes('/api/care_settings')) {
         return Promise.resolve({
           ok: true,
@@ -119,49 +128,52 @@ describe('散歩フロー統合テスト', () => {
     localStorage.clear();
 
     // コンソールエラーを抑制
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // GPSモックの初期化を確実に行う
     mockGeolocation.getCurrentPosition.mockClear();
     mockPermissions.query.mockClear();
   });
 
+  // 各テスト後のクリーンアップ
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllTimers();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
-  test('認証済みユーザーの散歩開始から完了までの流れ', async () => {
-    const mockUser = {
-      uid: 'test_uid',
-      email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
-      emailVerified: true,
-      isAnonymous: false,
-      metadata: {
-        creationTime: 'mock_creation_time',
-        lastSignInTime: 'mock_last_sign_in_time',
-      },
-      providerData: [],
-      displayName: null,
-      photoURL: null,
-      phoneNumber: null,
-      tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
-      refreshToken: 'mock_refresh_token',
-      providerId: 'firebase',
-    };
+  const createMockUser = () => ({
+    uid: 'test_uid',
+    email: 'test@example.com',
+    getIdToken: vi.fn().mockResolvedValue('mock_token'),
+    emailVerified: true,
+    isAnonymous: false,
+    metadata: {
+      creationTime: 'mock_creation_time',
+      lastSignInTime: 'mock_last_sign_in_time',
+    },
+    providerData: [],
+    displayName: null,
+    photoURL: null,
+    phoneNumber: null,
+    tenantId: null,
+    delete: vi.fn(),
+    getIdTokenResult: vi.fn(),
+    reload: vi.fn(),
+    toJSON: vi.fn(),
+    refreshToken: 'mock_refresh_token',
+    providerId: 'firebase',
+  });
 
-    // AuthContext のモック値
+  // AuthContext のモック値
+  test('認証済みユーザーの散歩開始から完了までの流れ', async () => {
+    const mockUser = createMockUser();
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -238,8 +250,8 @@ describe('散歩フロー統合テスト', () => {
   test('認証されていないユーザーの場合、適切なメッセージを表示', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -266,8 +278,8 @@ describe('散歩フロー統合テスト', () => {
   test('読み込み中の状態を正しく表示', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: true,
     };
 
@@ -295,7 +307,7 @@ describe('散歩フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -307,18 +319,18 @@ describe('散歩フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -376,7 +388,7 @@ describe('散歩フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -388,18 +400,18 @@ describe('散歩フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -407,7 +419,7 @@ describe('散歩フロー統合テスト', () => {
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // API エラーをシミュレート
-    global.fetch = jest.fn().mockRejectedValue(new Error('API Error'));
+    global.fetch = vi.fn().mockRejectedValue(new Error('API Error'));
 
     const { AuthProvider } = await import('@/context/AuthContext');
 
@@ -430,7 +442,7 @@ describe('散歩フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -442,18 +454,18 @@ describe('散歩フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -461,8 +473,8 @@ describe('散歩フロー統合テスト', () => {
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // saveWalkRecordのモック成功レスポンス
-    (saveWalkRecord as jest.Mock).mockResolvedValue({ success: true });
-    (determineWalkSuccess as jest.Mock).mockReturnValue(true);
+    (saveWalkRecord as vi.Mock).mockResolvedValue({ success: true });
+    (determineWalkSuccess as vi.Mock).mockReturnValue(true);
 
     const { AuthProvider } = await import('@/context/AuthContext');
 
@@ -487,7 +499,7 @@ describe('散歩フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -499,18 +511,18 @@ describe('散歩フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -518,7 +530,7 @@ describe('散歩フロー統合テスト', () => {
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // localStorage のスパイ
-    const localStorageSetSpy = jest.spyOn(Storage.prototype, 'setItem');
+    const localStorageSetSpy = vi.spyOn(Storage.prototype, 'setItem');
 
     const { AuthProvider } = await import('@/context/AuthContext');
 
@@ -547,7 +559,7 @@ describe('散歩フロー統合テスト', () => {
     const mockUser = {
       uid: 'test_uid',
       email: 'test@example.com',
-      getIdToken: jest.fn().mockResolvedValue('mock_token'),
+      getIdToken: vi.fn().mockResolvedValue('mock_token'),
       emailVerified: true,
       isAnonymous: false,
       metadata: {
@@ -559,18 +571,18 @@ describe('散歩フロー統合テスト', () => {
       photoURL: null,
       phoneNumber: null,
       tenantId: null,
-      delete: jest.fn(),
-      getIdTokenResult: jest.fn(),
-      reload: jest.fn(),
-      toJSON: jest.fn(),
+      delete: vi.fn(),
+      getIdTokenResult: vi.fn(),
+      reload: vi.fn(),
+      toJSON: vi.fn(),
       refreshToken: 'mock_refresh_token',
       providerId: 'firebase',
     };
 
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 

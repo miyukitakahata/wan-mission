@@ -5,28 +5,28 @@ import { useAuth } from '@/context/AuthContext';
 import { Label } from '@/components/ui/label';
 
 // AuthContextのモック
-jest.mock('@/context/AuthContext', () => ({
+vi.mock('@/context/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => children,
-  useAuth: jest.fn(),
+  useAuth: vi.fn(),
   __esModule: true,
 }));
 
 // Next.js router のモック
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   }),
   useSearchParams: () => ({
-    get: jest.fn(),
+    get: vi.fn(),
   }),
   usePathname: () => '/reflection-writing',
 }));
 
 // カスタムフックのモック
-jest.mock('@/hooks/reflectionNotesGet', () => ({
-  useReflectionNotesGet: jest.fn(() => ({
+vi.mock('@/hooks/reflectionNotesGet', () => ({
+  useReflectionNotesGet: vi.fn(() => ({
     notes: [
       {
         id: 1,
@@ -39,30 +39,30 @@ jest.mock('@/hooks/reflectionNotesGet', () => ({
   })),
 }));
 
-jest.mock('@/hooks/reflectionNotesPost', () => ({
-  useReflectionNotesPost: jest.fn(() => ({
-    postNote: jest.fn().mockResolvedValue({ success: true }),
+vi.mock('@/hooks/reflectionNotesPost', () => ({
+  useReflectionNotesPost: vi.fn(() => ({
+    postNote: vi.fn().mockResolvedValue({ success: true }),
     loading: false,
     error: null,
   })),
 }));
 
-jest.mock('@/hooks/useCareLogs', () => ({
-  useCareLogs: jest.fn(() => ({
+vi.mock('@/hooks/useCareLogs', () => ({
+  useCareLogs: vi.fn(() => ({
     careLog: {
       care_log_id: 1,
       fed_morning: true,
       fed_night: true,
       walked: true,
     },
-    updateCareLog: jest.fn(),
+    updateCareLog: vi.fn(),
     loading: false,
     error: null,
   })),
 }));
 
-jest.mock('@/hooks/useCareSettings', () => ({
-  useCareSettings: jest.fn(() => ({
+vi.mock('@/hooks/useCareSettings', () => ({
+  useCareSettings: vi.fn(() => ({
     careSettings: {
       id: 1,
       child_name: '太郎',
@@ -77,13 +77,13 @@ jest.mock('@/hooks/useCareSettings', () => ({
 }));
 
 // モックされたuseAuthフックを取得
-const mockUseAuth = jest.mocked(useAuth);
+const mockUseAuth = vi.mocked(useAuth);
 
 describe('振り返り機能とその他ページテスト', () => {
   const mockUser = {
     uid: 'test_uid',
     email: 'test@example.com',
-    getIdToken: jest.fn().mockResolvedValue('mock_token'),
+    getIdToken: vi.fn().mockResolvedValue('mock_token'),
     emailVerified: true,
     isAnonymous: false,
     metadata: {
@@ -95,19 +95,19 @@ describe('振り返り機能とその他ページテスト', () => {
     photoURL: null,
     phoneNumber: null,
     tenantId: null,
-    delete: jest.fn(),
-    getIdTokenResult: jest.fn(),
-    reload: jest.fn(),
-    toJSON: jest.fn(),
+    delete: vi.fn(),
+    getIdTokenResult: vi.fn(),
+    reload: vi.fn(),
+    toJSON: vi.fn(),
     refreshToken: 'mock_refresh_token',
     providerId: 'firebase',
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Fetch のモックセットアップ
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       // 振り返りノートAPI
       if (url.includes('/api/reflection')) {
         return Promise.resolve({
@@ -130,19 +130,19 @@ describe('振り返り機能とその他ページテスト', () => {
     });
 
     // コンソールエラーを抑制
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('振り返り記入ページの表示とフォーム操作', async () => {
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -214,8 +214,8 @@ describe('振り返り機能とその他ページテスト', () => {
   test('ウェルカムバックページの表示', async () => {
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -272,8 +272,8 @@ describe('振り返り機能とその他ページテスト', () => {
   test('ローディング画面の表示', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: true,
     };
 
@@ -336,8 +336,8 @@ describe('振り返り機能とその他ページテスト', () => {
   test('メインページ（ルート）の表示', async () => {
     const mockAuthValue = {
       currentUser: null,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -385,8 +385,8 @@ describe('振り返り機能とその他ページテスト', () => {
   test('散歩GPS テストページの表示', async () => {
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -394,7 +394,7 @@ describe('振り返り機能とその他ページテスト', () => {
 
     // Geolocation APIのモック
     const mockGeolocation = {
-      getCurrentPosition: jest.fn((success) => {
+      getCurrentPosition: vi.fn((success) => {
         setTimeout(() => {
           success({
             coords: {
@@ -406,8 +406,8 @@ describe('振り返り機能とその他ページテスト', () => {
           });
         }, 100);
       }),
-      watchPosition: jest.fn(() => 1),
-      clearWatch: jest.fn(),
+      watchPosition: vi.fn(() => 1),
+      clearWatch: vi.fn(),
     };
 
     Object.defineProperty(global.navigator, 'geolocation', {
@@ -457,8 +457,8 @@ describe('振り返り機能とその他ページテスト', () => {
   test('UIコンポーネントの複合テスト', async () => {
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
@@ -568,15 +568,15 @@ describe('振り返り機能とその他ページテスト', () => {
   test('エラー状態の処理テスト', async () => {
     const mockAuthValue = {
       currentUser: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     };
 
     mockUseAuth.mockReturnValue(mockAuthValue);
 
     // API エラーをシミュレート
-    global.fetch = jest.fn().mockRejectedValue(new Error('Network Error'));
+    global.fetch = vi.fn().mockRejectedValue(new Error('Network Error'));
 
     // エラー処理テスト用コンポーネント
     const ErrorTestComponent = () => {
