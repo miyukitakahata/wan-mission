@@ -853,6 +853,7 @@ export default function DashboardPage() {
                             }`}
                             onClick={() => handleMissionComplete(mission.id)}
                             disabled={isCompleted}
+                            aria-label={mission.name}
                           >
                             <div className="flex items-center space-x-3">
                               {isCompleted ? (

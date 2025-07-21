@@ -388,6 +388,11 @@ describe('ダッシュボード完全統合テスト', () => {
         expect(screen.getByText('あさごはん')).toBeInTheDocument();
       }, { timeout: 10000 });
 
+      // Wait for the morning food button to be available
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /あさごはん/ })).toBeInTheDocument();
+      }, { timeout: 5000 });
+
       // Click morning food mission
       const morningFoodButton = screen.getByRole('button', { name: /あさごはん/ });
       fireEvent.click(morningFoodButton);
