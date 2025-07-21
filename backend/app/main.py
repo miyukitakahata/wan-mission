@@ -38,6 +38,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 async def lifespan(_: FastAPI):
     """起動時と終了時の処理をまとめて管理"""
     # Redis接続
+    # NOTE: Redisはローカル環境（localhost:6379）を想定しているため、Docker環境では別途設定が必要
     redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
 
     # FastAPICacheを先に初期化
@@ -84,6 +85,8 @@ Instrumentator().instrument(app).expose(app)
 
 
 # レスポンスタイム遅延テスト用エンドポイント
+# NOTE: Prometheusのアラート発火を意図的に検証するために使用する
+# TODO: 本番環境ではコメントアウト or 削除しておくこと
 # import time
 #
 #
@@ -94,6 +97,8 @@ Instrumentator().instrument(app).expose(app)
 #     return {"message": "This is a slow response"}
 
 # Redisキャッシュテスト用エンドポイント
+# TODO: キャッシュ機能の検証が完了したら削除または専用ルーターに移動する
+# FIXME: 現状ではキャッシュの有効性テストのみに使われており、仕様上の制約に注意
 # from fastapi_cache.decorator import cache#
 #
 
