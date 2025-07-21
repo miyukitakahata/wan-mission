@@ -16,6 +16,10 @@ from app.schemas.care_logs import (
 )
 from app.dependencies import verify_firebase_token
 
+# キャッシュ導入によるデコレーターをインポート
+from fastapi_cache.decorator import cache
+from fastapi_cache.key_builder import default_key_builder
+
 care_logs_router = APIRouter(prefix="/api/care_logs", tags=["care_logs"])
 
 
@@ -208,6 +212,7 @@ async def get_today_care_log(
     response_model=CareLogTodayResponse,
     status_code=status.HTTP_200_OK,
 )
+@cache(expire=600, key_builder=default_key_builder)  # キャッシュ追加
 async def get_care_log_by_date(
     care_setting_id: int = Query(...),
     date: str = Query(...),
@@ -216,6 +221,8 @@ async def get_care_log_by_date(
     """
     指定日付文字列（例: "2025-07-01"）のお世話記録を取得するAPI
     """
+    print("🔥 /by_date：キャッシュ未使用時だけ表示される！")
+
     try:
         print(
             f"[care_logs] GET by_date受信: "
@@ -267,6 +274,7 @@ async def get_care_log_by_date(
     "/list",
     status_code=status.HTTP_200_OK,
 )
+@cache(expire=60, key_builder=default_key_builder)  # 60秒（1分）キャッシュ
 async def get_care_logs_list(
     care_setting_id: int = Query(...),
     firebase_uid: str = Depends(verify_firebase_token),
@@ -274,6 +282,8 @@ async def get_care_logs_list(
     """
     特定care_setting_idの全care_logsを取得するAPI
     """
+    print("🔥 /list：キャッシュ未使用時だけ表示される！")
+
     try:
         print(f"[care_logs] GET list受信: care_setting_id={care_setting_id}")
 
