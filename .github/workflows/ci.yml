@@ -5,6 +5,10 @@ on:
     paths:
       - "frontend/**"
       - "backend/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "backend/**"
 
 jobs:
   frontend:
