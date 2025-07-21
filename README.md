@@ -149,12 +149,14 @@ DATABASE_URL=postgresql://user:password@localhost:5432/myapp_db
 ### 単体テスト
 
 **フロントエンド**
+
 - React コンポーネントの単体テスト（Vitest + Testing Library）
 - ユーティリティ関数のテスト
 - カスタムフックのテスト
 - 正常系・異常系両方のケースをカバー
 
 **バックエンド**
+
 - FastAPI エンドポイントの単体テスト（pytest）
 - 正常系・異常系両方のケースをカバー
 - モックを使用したルーターレベルのテスト
@@ -162,11 +164,13 @@ DATABASE_URL=postgresql://user:password@localhost:5432/myapp_db
 ### 統合テスト
 
 **フロントエンド**
+
 - E2E テスト（Playwright）
 - 認証フローの統合テスト
 - ユーザージャーニー全体のテスト
 
 **バックエンド**
+
 - データベース統合テスト
 - API エンドポイント間の連携テスト
 - 外部サービス（Firebase、Stripe）との統合テスト
@@ -174,10 +178,12 @@ DATABASE_URL=postgresql://user:password@localhost:5432/myapp_db
 ### テストカバレッジ
 
 **実績**
-- バックエンド：93%（目標80%以上を達成）
+
+- バックエンド：93%（目標 80%以上を達成）
 - フロントエンド：継続的に改善中
 
 **実行方法**
+
 ```bash
 # バックエンドテスト
 cd backend
@@ -200,16 +206,35 @@ npm run test
 
 本プロジェクトでは、サービスの安定運用を目的として、監視・アラート設計を導入しています。
 
-- サーバーのCPU使用率が高い場合、メールで自動アラート通知
+- サーバーの CPU 使用率が高い場合、メールで自動アラート通知
 - アプリのレスポンスタイムが遅延した場合、自動で異常検知し通知
-- Prometheus UIで各Exporterの状態やメトリクスをグラフ表示・確認
-- アラート通知の動作確認はPostman等のツールで手軽にテスト可能
+- Prometheus UI で各 Exporter の状態やメトリクスをグラフ表示・確認
+- アラート通知の動作確認は Postman 等のツールで手軽にテスト可能
 
 監視設計の詳細や運用フローについては、下記ドキュメントをご参照ください。
+
 - [監視・アラート設計書](docs/monitoring_design.md)
 
 - 監視構成図
   ![監視構成図](docs/monitoring_diagram.png)
+
+### キャッシュ・リソース管理
+
+本プロジェクトでは、レスポンス性能の向上と DB 負荷の軽減を目的に、FastAPI に Redis キャッシュを導入しています。
+
+- 頻繁に読み込まれるが、更新頻度が低い API（例：/api/care_logs/list）に対してキャッシュ適用
+- クエリパラメータやユーザー ID ごとに 一意のキャッシュキーを設計
+- Redis の TTL 設定で 一定時間後に自動削除 → メモリ使用量を適切に管理
+- キャッシュ有効時は、DB クエリ数が大幅に減少し、レスポンスタイムが最大 10 分の 1 以下に短縮
+- FastAPI Exporter、Redis Exporter、PostgreSQL Exporter を通じて Prometheus にて メトリクス収集 & Grafana で可視化
+- Grafana では、CPU 使用率やメモリ負荷、Redis ヒット率などをリアルタイムで監視可能
+
+詳細な設計内容は以下をご参照ください。
+
+- [キャッシュ・リソース管理設計書](docs\redis-cache-resource-design.md)
+
+- システム構成図
+  ![システム構成図](docs\redis-cache-architecture.png)
 
 ## ライセンス
 

@@ -32,7 +32,7 @@
 - FastAPI は Redis を確認し、キャッシュヒット時は即レスポンス（①）
 - キャッシュが無い場合は PostgreSQL に問い合わせ、結果を Redis にキャッシュ(②)
 - FastAPI のメトリクスは FastAPI Exporter を通じて Prometheus が監視
-- Prometheus + Grafana を使用し、CPU やメモリ、I/O の使用状況を確認
+- Prometheus は各 Exporter からメトリクスを収集し、Grafana がそれを可視化 → CPU やメモリ、I/O の使用状況を確認
 
 ---
 
@@ -137,11 +137,14 @@ Redis キャッシュの導入にあたり、GET エンドポイントに対し�
 
 - 開発中のボトルネックの特定や、キャッシュ導入後の効果測定に活用
 
-![Prometheusのターゲット確認](./prometheus-target.png)
+- Prometheus のターゲット確認
+  ![Prometheusのターゲット確認](./prometheus-target.png)
 
-![Node Exporterのダッシュボード画面でCPUやメモリ監視](./grafana-node-exporter.png)
+- Node Exporter のダッシュボード画面で CPU やメモリ監視
+  ![Node Exporterのダッシュボード画面でCPUやメモリ監視](./grafana-node-exporter.png)
 
-![Redisのダッシュボード画面（∞％メモリ使用など）](./grafana-redis.png)
+- Redis のダッシュボード画面（∞％メモリ使用など）
+  ![Redisのダッシュボード画面（∞％メモリ使用など）](./grafana-redis.png)
 
 ---
 
