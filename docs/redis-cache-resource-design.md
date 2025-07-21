@@ -138,7 +138,9 @@ Redis キャッシュの導入にあたり、GET エンドポイントに対し�
 - 開発中のボトルネックの特定や、キャッシュ導入後の効果測定に活用
 
 ![Prometheusのターゲット確認](./prometheus-target.png)
+
 ![Node Exporterのダッシュボード画面でCPUやメモリ監視](./grafana-node-exporter.png)
+
 ![Redisのダッシュボード画面（∞％メモリ使用など）](./grafana-redis.png)
 
 ---
