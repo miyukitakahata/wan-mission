@@ -1,10 +1,6 @@
 name: Fullstack CI
 
 on:
-  push:
-    paths:
-      - "frontend/**"
-      - "backend/**"
   pull_request:
     paths:
       - "frontend/**"
@@ -61,6 +57,11 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Run Prisma generate
+        run: |
+          source venv/bin/activate
+          prisma generate
 
       - name: Run Black (code formatting check)
         run: |
