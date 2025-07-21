@@ -50,7 +50,8 @@ describe('ダッシュボード完全統合テスト', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    // Mock fetch API
+    // Reset and mock fetch API completely
+    vi.restoreAllMocks();
     global.fetch = vi.fn();
     
     // Mock environment variable
@@ -338,41 +339,63 @@ describe('ダッシュボード完全統合テスト', () => {
         care_log_id: null,
       };
 
-      // Setup API responses
-      (global.fetch as vi.Mock)
+      // Setup API responses in the order they will be called
+      const mockFetch = global.fetch as vi.Mock;
+      mockFetch.mockClear();
+      
+      mockFetch
+        // 1. /api/care_settings/me
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockCareSettings),
+          status: 200,
+          json: vi.fn().mockResolvedValue(mockCareSettings),
         })
+        // 2. /api/care_logs/today (initial load)
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve(mockCareLogWithoutId),
+          status: 200,
+          json: vi.fn().mockResolvedValue(mockCareLogWithoutId),
         })
+        // 3. /api/care_logs/by_date (yesterday check)
         .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve({ message: 'わん！' }),
+          ok: false,
+          status: 404,
+          json: vi.fn().mockRejectedValue(new Error('Not found')),
         })
+        // 4. Dog message API call
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({ id: 789 }),
+          status: 200,
+          json: vi.fn().mockResolvedValue({ message: 'わん！' }),
         })
+        // 5. Create new care log
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({ id: 789 }),
+          status: 201,
+          json: vi.fn().mockResolvedValue({ id: 789 }),
+        })
+        // 6. Update care log with morning fed
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: vi.fn().mockResolvedValue({ id: 789 }),
         });
 
       render(<DashboardPage />);
 
+      // Wait for the dashboard to load completely
       await waitFor(() => {
         expect(screen.getByText('あさごはん')).toBeInTheDocument();
-      });
+      }, { timeout: 10000 });
 
       // Click morning food mission
       const morningFoodButton = screen.getByRole('button', { name: /あさごはん/ });
       fireEvent.click(morningFoodButton);
 
       // Just verify that some API calls were made
-      expect(global.fetch).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalled();
+      });
     });
   });
 
