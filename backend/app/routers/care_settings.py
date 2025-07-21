@@ -19,6 +19,8 @@ from app.schemas.care_settings import (
 
 from app.dependencies import verify_firebase_token
 
+from fastapi_cache.decorator import cache
+from fastapi_cache.key_builder import default_key_builder
 
 care_settings_router = APIRouter(prefix="/api/care_settings", tags=["care_settings"])
 
@@ -98,10 +100,13 @@ async def create_care_setting(
     response_model=CareSettingMeResponse,
     status_code=status.HTTP_200_OK,
 )
+@cache(expire=60, key_builder=default_key_builder)  # キャッシュ追加
 async def get_my_care_setting(firebase_uid: str = Depends(verify_firebase_token)):
     """
     ログインユーザーのケア設定取得API
     """
+    print("🔥 /me：キャッシュ未使用時だけ表示される！")
+
     try:
         print("✅ firebase_uid:", firebase_uid)
         # Firebase UID からユーザー取得

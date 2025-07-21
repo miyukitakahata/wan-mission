@@ -7,6 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
+# fastapi-cache2 + Redis をimport
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+import redis.asyncio as redis
+
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
@@ -32,6 +37,13 @@ from prometheus_fastapi_instrumentator import Instrumentator
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """起動時と終了時の処理をまとめて管理"""
+    # Redis接続
+    redis_client = redis.Redis(host="localhost", port=6379, decode_responses=True)
+
+    # FastAPICacheを先に初期化
+    FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
+
+    # Prisma起動
     await prisma_client.connect()  # 起動時の処理
     yield
     await prisma_client.disconnect()  # 終了時の処理
@@ -80,3 +92,13 @@ Instrumentator().instrument(app).expose(app)
 #     """わざと5.0秒待つ遅いレスポンス（Prometheusのalertテスト用）"""
 #     time.sleep(5.0)
 #     return {"message": "This is a slow response"}
+
+# Redisキャッシュテスト用エンドポイント
+# from fastapi_cache.decorator import cache#
+#
+
+# @app.get("/cache-test")
+# @cache(expire=60)
+# async def cache_test():
+#     print("🔥 この関数が実行された！（キャッシュなし時）")
+#     return {"message": "キャッシュされるはず！"}

@@ -70,5 +70,44 @@ services:
       - "--path.sysfs=/host/sys"
       - "--path.rootfs=/rootfs"
 
+  # Redis
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121" # Prometheusがアクセスするポート
+    command:
+      - "--redis.addr=redis://redis:6379"
+    depends_on:
+      - redis
+
+  # Grafana
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000" # ホスト:3001 → Grafana:3000（FastAPIと被らないよう注意）
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+
 volumes:
   pgdata:
+  redis-data:
+  grafana-data:
