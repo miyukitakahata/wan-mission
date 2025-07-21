@@ -1,6 +1,10 @@
 name: Fullstack CI
 
 on:
+  push:
+    paths:
+      - "frontend/**"
+      - "backend/**"
   pull_request:
     paths:
       - "frontend/**"
@@ -62,6 +66,8 @@ jobs:
         run: |
           source venv/bin/activate
           prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@dummy:5432/dummy
 
       - name: Run Black (code formatting check)
         run: |
