@@ -160,6 +160,12 @@ frontend/
 │   │   ├── firebase/         # Firebase設定
 │   │   ├── dateUtils.ts      # 日付処理
 │   │   └── utils.ts          # 汎用ユーティリティ
+│   ├── tests/                # テストコード本体
+│   │   ├── mocks/            # テスト用モックデータやモジュール
+│   │   ├── e2e/              # エンドツーエンドテスト
+│   │   ├── evidence/         # テスト証跡
+│   │   ├── integration/      # 統合テスト
+│   │   └── unit/             # 単体テスト
 │   └── ...
 ├── public/                   # 静的ファイル
 │   ├── animations/           # アニメーション動画
@@ -170,6 +176,8 @@ frontend/
 ├── tailwind.config.ts       # Tailwind設定
 ├── next.config.js           # Next.js設定
 ├── tsconfig.json            # TypeScript設定
+├── vitest.config.ts         # Vitest 設定ファイル
+├── vitest.setup.ts          # Vitest 初期セットアップ
 ├── package.json             # 依存関係
 └── Dockerfile               # Docker設定
 ```
