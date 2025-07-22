@@ -61,9 +61,11 @@ _システム全体の構成と各コンポーネントの関係を示したア�
 
 ```bash
 .
+├── .github/    # GitHub Actionsなどの設定
 ├── backend/    # FastAPI バックエンド
 ├── frontend/   # Next.js フロントエンド
 ├── docs/       # ドキュメンテーション関連
+├── monitoring　# Prometheus・Grafana等の監視設定
 ├── docker-compose.yml
 ├── README.md
 └── ...
