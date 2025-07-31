@@ -140,12 +140,6 @@ Redis キャッシュの導入にあたり、GET エンドポイントに対し�
 - Prometheus のターゲット確認
   ![Prometheusのターゲット確認](./prometheus-target.png)
 
-- Node Exporter のダッシュボード画面で CPU やメモリ監視
-  ![Node Exporterのダッシュボード画面でCPUやメモリ監視](./grafana-node-exporter.png)
-
-- Redis のダッシュボード画面（∞％メモリ使用など）
-  ![Redisのダッシュボード画面（∞％メモリ使用など）](./grafana-redis.png)
-
 ---
 
 ## 9. まとめ
