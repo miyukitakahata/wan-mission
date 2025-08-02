@@ -2,7 +2,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 必要ファイルだけ先にコピーして pip install
-COPY requirements.txt ./
+COPY requirements.txt .env ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # アプリのコードをコピー
