@@ -2,11 +2,14 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # 必要ファイルだけ先にコピーして pip install
-COPY requirements.txt .env ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # アプリのコードをコピー
 COPY . .
+
+# Prisma Clientの生成時に使う仮のDATABASE_URL（Render実行時には上書きされる）
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/db"
 
 # Prisma Python クライアント自動生成
 RUN prisma generate
