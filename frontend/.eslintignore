@@ -11,3 +11,4 @@ playwright.config.ts
 postcss.config.mjs
 vitest.config.ts
 vitest.setup.ts
+src/tests/e2e/
