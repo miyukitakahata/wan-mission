@@ -5,7 +5,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'my-teamc-app-animations.s3.ap-northeast-1.amazonaws.com',
+        hostname: 'wan-mission-dev.s3.ap-northeast-1.amazonaws.com',
       },
     ],
   },
