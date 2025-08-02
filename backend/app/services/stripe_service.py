@@ -21,8 +21,8 @@ def create_checkout_session(firebase_uid: str):
             },
         ],
         mode="payment",
-        success_url=YOUR_DOMAIN + "/admin/subscription/success",
-        cancel_url=YOUR_DOMAIN + "/admin/subscription/cancel",
+        success_url=YOUR_DOMAIN + "/admin/payment/success",
+        cancel_url=YOUR_DOMAIN + "/admin/payment/cancel",
         metadata={
             "firebase_uid": firebase_uid,  # Firebase UIDをメタデータに保存
         },
