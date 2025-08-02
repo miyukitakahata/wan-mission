@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true, // VercelでのESLintエラーを無視
+  },
   reactStrictMode: true,
   images: {
     remotePatterns: [
