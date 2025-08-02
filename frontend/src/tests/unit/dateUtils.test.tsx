@@ -33,6 +33,6 @@ describe('dateUtils.ts のユーティリティ関数', () => {
   it('dateStringToJstDate: 不正な日付文字列も Date型にはなる（NaN）', () => {
     const result = dateStringToJstDate('invalid-date');
     expect(result instanceof Date).toBe(true);
-    expect(isNaN(result.getTime())).toBe(true); // Invalid date
+    expect(Number.isNaN(result.getTime())).toBe(true); // Invalid date
   });
 });
