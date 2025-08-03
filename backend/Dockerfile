@@ -12,4 +12,6 @@ COPY . .
 RUN prisma generate
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# マイグレーションしてからサーバー起動！
+CMD ["sh", "-c", "npx prisma migrate deploy && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
