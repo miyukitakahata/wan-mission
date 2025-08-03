@@ -14,12 +14,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリのコードをコピー
 COPY . .
 
-# Prisma Python クライアント自動生成&DBマイグレ
+# Prisma Python クライアント自動生成
 RUN prisma generate
-RUN npx prisma migrate deploy
 
 EXPOSE 8000
 
 # マイグレーションしてからサーバー起動！
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "npx prisma migrate deploy && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
 
